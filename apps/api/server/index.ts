@@ -13,6 +13,8 @@ import socialApp from "./routes/social";
 import foodApp from "./routes/food";
 import accommodationApp from "./routes/accommodation";
 import dashboardApp from "./routes/dashboard";
+import roleRequestsApp from "./routes/roleRequests";
+import studyApp from "./routes/study";
 
 const app = new Hono<Env>();
 
@@ -37,8 +39,10 @@ app.route("/api/marketplace", marketplaceApp);
 app.route("/api/lostfound", lostFoundApp);
 app.route("/api/social", socialApp);
 app.route("/api/food", foodApp); // Read-only
-app.route("/api/accommodation", accommodationApp); // Read-only
-app.route("/api/dashboard", dashboardApp); // Summary
+app.route("/api/accommodation", accommodationApp);
+app.route("/api/dashboard", dashboardApp);
+app.route("/api/role-requests", roleRequestsApp);
+app.route("/api/study", studyApp);
 
 const port = Number(process.env.PORT) || 3000;
 console.log(`Server is running on port ${port}`);

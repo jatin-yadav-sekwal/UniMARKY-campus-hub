@@ -10,9 +10,9 @@ import {
     Newspaper,
     Utensils,
     Home,
+    GraduationCap,
     ArrowRight,
     TrendingUp,
-    Users,
     Sparkles
 } from 'lucide-react';
 
@@ -32,20 +32,28 @@ const quickAccessItems = [
         shadowColor: "shadow-orange-500/20"
     },
     {
+        title: "Lost & Found",
+        href: "/lost-found",
+        desc: "Find missing items",
+        icon: Search,
+        gradient: "from-teal-500 to-emerald-600",
+        shadowColor: "shadow-emerald-500/20"
+    },
+    {
         title: "Unimedia",
-        href: "/social",
+        href: "/unimedia",
         desc: "Campus social feed",
         icon: Newspaper,
         gradient: "from-pink-500 to-rose-600",
         shadowColor: "shadow-rose-500/20"
     },
     {
-        title: "Lost & Found",
-        href: "/lostfound",
-        desc: "Find missing items",
-        icon: Search,
-        gradient: "from-teal-500 to-emerald-600",
-        shadowColor: "shadow-emerald-500/20"
+        title: "Study",
+        href: "/study",
+        desc: "Academic resources",
+        icon: GraduationCap,
+        gradient: "from-indigo-500 to-violet-600",
+        shadowColor: "shadow-indigo-500/20"
     },
     {
         title: "Food",
@@ -148,7 +156,7 @@ export function DashboardPage() {
                 <motion.div variants={item}>
                     <SummaryCard
                         title="Lost & Found"
-                        href="/lostfound"
+                        href="/lost-found"
                         data={data?.lostFound}
                         icon={Search}
                         color="text-teal-500"
@@ -158,7 +166,7 @@ export function DashboardPage() {
                 <motion.div variants={item}>
                     <SummaryCard
                         title="Campus Buzz"
-                        href="/social"
+                        href="/unimedia"
                         data={data?.social}
                         icon={Newspaper}
                         color="text-pink-500"
@@ -178,17 +186,17 @@ export function DashboardPage() {
                     variants={container}
                     initial="hidden"
                     animate="show"
-                    className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
+                    className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6"
                 >
-                    {quickAccessItems.map((item, index) => (
+                    {quickAccessItems.map((qItem) => (
                         <motion.div
-                            key={item.href}
+                            key={qItem.href}
                             variants={{
                                 hidden: { opacity: 0, scale: 0.9 },
                                 show: { opacity: 1, scale: 1 }
                             }}
                         >
-                            <QuickAccessCard {...item} />
+                            <QuickAccessCard {...qItem} />
                         </motion.div>
                     ))}
                 </motion.div>
@@ -274,4 +282,3 @@ function QuickAccessCard({ title, href, desc, icon: Icon, gradient, shadowColor 
         </Link>
     );
 }
-

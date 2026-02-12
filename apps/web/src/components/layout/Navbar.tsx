@@ -1,10 +1,14 @@
 import { motion, AnimatePresence } from "motion/react";
-import { Menu, X, Search, ChevronDown, User, LogOut, LayoutDashboard, UserCircle, Sparkles } from "lucide-react";
+import {
+    Menu, X, Search, ChevronDown, User, LogOut, LayoutDashboard, UserCircle, Sparkles,
+    ShoppingBag, MapPin, Newspaper, BookOpen, Coffee, Home, Crown, ShieldCheck, Shield, GraduationCap
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { api } from "@/lib/api";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -21,12 +25,26 @@ const navLinks = [
 ];
 
 const appRoutes = [
-    { name: "Dashboard", href: "/dashboard" },
-    { name: "Marketplace", href: "/marketplace" },
-    { name: "Lost & Found", href: "/lost-found" },
-    { name: "Unimedia", href: "/unimedia" },
-    { name: "Food", href: "/food" },
-    { name: "Housing", href: "/housing" },
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
+    { name: "Lost & Found", href: "/lost-found", icon: MapPin },
+    { name: "Unimedia", href: "/unimedia", icon: Newspaper },
+    { name: "Study", href: "/study", icon: GraduationCap },
+    { name: "Food", href: "/food", icon: Coffee },
+    { name: "Housing", href: "/housing", icon: Home },
+];
+
+interface RoleRoute {
+    name: string;
+    href: string;
+    icon: React.ComponentType<{ className?: string }>;
+    roles: string[];
+}
+
+const roleRoutes: RoleRoute[] = [
+    { name: "My Listings", href: "/superuser/dashboard", icon: Crown, roles: ["superuser", "userX"] },
+    { name: "Become Superuser", href: "/request-role", icon: ShieldCheck, roles: ["normal"] },
+    { name: "Admin Panel", href: "/admin/dashboard", icon: Shield, roles: ["userX"] },
 ];
 
 interface NavbarProps {
@@ -37,8 +55,19 @@ export function Navbar({ showScrollLinks = false }: NavbarProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [activeLink, setActiveLink] = useState<string | null>(null);
+    const [userRole, setUserRole] = useState<string>("normal");
     const { session, user, signOut } = useAuth();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (session) {
+            api.get("/profiles/me")
+                .then((profile) => setUserRole(profile.role || "normal"))
+                .catch(() => setUserRole("normal"));
+        }
+    }, [session]);
+
+    const visibleRoleRoutes = roleRoutes.filter((r) => r.roles.includes(userRole));
 
     const handleLogout = async () => {
         await signOut();
@@ -330,24 +359,27 @@ export function Navbar({ showScrollLinks = false }: NavbarProps) {
                             <div className="flex flex-col h-full">
                                 {session ? (
                                     <>
-                                        {/* User Profile Section */}
-                                        <motion.div
-                                            variants={itemVariants}
-                                            className="flex items-center gap-4 p-4 mb-6 rounded-2xl bg-gradient-to-br from-muted/50 to-muted/30 border border-border/50"
-                                        >
-                                            <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-brand-yellow/30 to-brand-orange/20 flex items-center justify-center border-2 border-brand-yellow/50">
-                                                <User className="h-7 w-7 text-brand-navy" />
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-lg text-brand-navy">
-                                                    {user?.user_metadata?.first_name || "Student"}
-                                                </p>
-                                                <p className="text-sm text-muted-foreground">View Profile</p>
-                                            </div>
+                                        {/* User Profile Section — Clickable */}
+                                        <motion.div variants={itemVariants}>
+                                            <Link
+                                                to="/profile"
+                                                onClick={() => setIsOpen(false)}
+                                                className="flex items-center gap-4 p-4 mb-6 rounded-2xl bg-gradient-to-br from-muted/50 to-muted/30 border border-border/50 hover:border-border transition-colors"
+                                            >
+                                                <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-brand-yellow/30 to-brand-orange/20 flex items-center justify-center border-2 border-brand-yellow/50">
+                                                    <User className="h-7 w-7 text-brand-navy" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-lg text-brand-navy">
+                                                        {user?.user_metadata?.first_name || "Student"}
+                                                    </p>
+                                                    <p className="text-sm text-muted-foreground">View Profile →</p>
+                                                </div>
+                                            </Link>
                                         </motion.div>
 
                                         {/* Navigation Links */}
-                                        <div className="flex-1 space-y-2">
+                                        <div className="flex-1 space-y-1 overflow-y-auto">
                                             {appRoutes.map((link, index) => (
                                                 <motion.div
                                                     key={link.name}
@@ -357,12 +389,52 @@ export function Navbar({ showScrollLinks = false }: NavbarProps) {
                                                     <Link
                                                         to={link.href}
                                                         onClick={() => setIsOpen(false)}
-                                                        className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-lg font-semibold text-brand-navy hover:bg-muted/50 transition-colors"
+                                                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold text-brand-navy hover:bg-muted/50 transition-colors"
                                                     >
+                                                        <link.icon className="h-5 w-5 text-muted-foreground" />
                                                         {link.name}
                                                     </Link>
                                                 </motion.div>
                                             ))}
+
+                                            {/* Role-based links */}
+                                            {visibleRoleRoutes.length > 0 && (
+                                                <>
+                                                    <div className="my-3 border-t border-border/50" />
+                                                    <p className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                                                        Management
+                                                    </p>
+                                                    {visibleRoleRoutes.map((link, index) => (
+                                                        <motion.div
+                                                            key={link.name}
+                                                            variants={itemVariants}
+                                                            custom={appRoutes.length + index}
+                                                        >
+                                                            <Link
+                                                                to={link.href}
+                                                                onClick={() => setIsOpen(false)}
+                                                                className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold text-brand-navy hover:bg-muted/50 transition-colors"
+                                                            >
+                                                                <link.icon className="h-5 w-5 text-muted-foreground" />
+                                                                {link.name}
+                                                            </Link>
+                                                        </motion.div>
+                                                    ))}
+                                                </>
+                                            )}
+
+                                            {/* Profile link */}
+                                            <div className="my-3 border-t border-border/50" />
+                                            <motion.div variants={itemVariants}>
+                                                <Link
+                                                    to="/profile"
+                                                    onClick={() => setIsOpen(false)}
+                                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold text-brand-navy hover:bg-muted/50 transition-colors"
+                                                >
+                                                    <UserCircle className="h-5 w-5 text-muted-foreground" />
+                                                    Profile
+                                                </Link>
+                                            </motion.div>
                                         </div>
 
                                         {/* Logout Button */}
