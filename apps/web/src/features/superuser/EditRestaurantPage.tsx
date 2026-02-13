@@ -9,15 +9,17 @@ import {
     DollarSign,
     FileText,
     Tag,
-    Image,
+    ImagePlus,
     ArrowLeft,
     Loader2,
     Save,
+    X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
+import { uploadImage } from "@/lib/uploadImage";
 
 export function EditRestaurantPage() {
     const { id } = useParams<{ id: string }>();
@@ -26,6 +28,8 @@ export function EditRestaurantPage() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     const [form, setForm] = useState({
         name: "",
@@ -36,7 +40,6 @@ export function EditRestaurantPage() {
         phone: "",
         timing: "",
         priceRange: "",
-        imageUrl: "",
         location: "",
     });
 
@@ -57,9 +60,9 @@ export function EditRestaurantPage() {
                 phone: data.phone || "",
                 timing: data.timing || "",
                 priceRange: data.priceRange || "",
-                imageUrl: data.imageUrl || "",
                 location: data.location || "",
             });
+            if (data.imageUrl) setImagePreview(data.imageUrl);
         } catch (err) {
             setError("Failed to load restaurant");
         } finally {
@@ -81,7 +84,11 @@ export function EditRestaurantPage() {
         try {
             setSaving(true);
             setError(null);
-            await api.patch(`/food/${id}`, form);
+            let imageUrl: string | undefined;
+            if (imageFile) {
+                imageUrl = await uploadImage(imageFile, "restaurant-images");
+            }
+            await api.patch(`/food/${id}`, { ...form, ...(imageUrl ? { imageUrl } : {}) });
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);
         } catch (err: any) {
@@ -170,8 +177,43 @@ export function EditRestaurantPage() {
                         <Input id="priceRange" value={form.priceRange} onChange={(e) => updateField("priceRange", e.target.value)} />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="imageUrl">Image URL</Label>
-                        <Input id="imageUrl" value={form.imageUrl} onChange={(e) => updateField("imageUrl", e.target.value)} />
+                        <Label>Restaurant Photo</Label>
+                        <label className="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-brand-orange/50 hover:bg-brand-orange/5 transition-all overflow-hidden">
+                            {imagePreview ? (
+                                <>
+                                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setImagePreview(null);
+                                            setImageFile(null);
+                                        }}
+                                        className="absolute top-2 right-2 p-1.5 bg-background/90 rounded-full hover:bg-red-50"
+                                    >
+                                        <X className="w-4 h-4 text-red-500" />
+                                    </button>
+                                </>
+                            ) : (
+                                <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                                    <ImagePlus className="w-8 h-8 text-brand-orange" />
+                                    <p className="text-sm">Click to upload a photo</p>
+                                </div>
+                            )}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        if (file.size > 5 * 1024 * 1024) { alert("Max 5MB"); return; }
+                                        setImageFile(file);
+                                        setImagePreview(URL.createObjectURL(file));
+                                    }
+                                }}
+                                className="hidden"
+                            />
+                        </label>
                     </div>
                 </div>
 

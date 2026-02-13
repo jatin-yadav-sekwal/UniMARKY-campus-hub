@@ -9,11 +9,14 @@ import {
     Loader2,
     Save,
     Wifi,
+    ImagePlus,
+    X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
+import { uploadImages } from "@/lib/uploadImage";
 
 const ACCOMMODATION_TYPES = ["PG", "Hostel", "Apartment"] as const;
 
@@ -24,6 +27,9 @@ export function EditAccommodationPage() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+    const [imageFiles, setImageFiles] = useState<File[]>([]);
+    const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+    const [existingImages, setExistingImages] = useState<string[]>([]);
 
     const [form, setForm] = useState({
         name: "",
@@ -60,6 +66,9 @@ export function EditAccommodationPage() {
                 location: data.location || "",
                 contact: data.contact || "",
             });
+            if (data.images && Array.isArray(data.images)) {
+                setExistingImages(data.images);
+            }
         } catch (err) {
             setError("Failed to load accommodation");
         } finally {
@@ -76,7 +85,12 @@ export function EditAccommodationPage() {
         try {
             setSaving(true);
             setError(null);
-            await api.patch(`/accommodation/${id}`, form);
+            let newImageUrls: string[] = [];
+            if (imageFiles.length > 0) {
+                newImageUrls = await uploadImages(imageFiles, "accommodation-images");
+            }
+            const allImages = [...existingImages, ...newImageUrls];
+            await api.patch(`/accommodation/${id}`, { ...form, images: allImages });
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);
         } catch (err: any) {
@@ -186,6 +200,60 @@ export function EditAccommodationPage() {
                             <Wifi className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input id="amenities" value={form.amenities} onChange={(e) => updateField("amenities", e.target.value)} className="pl-10" />
                         </div>
+                    </div>
+                </div>
+
+                {/* Image Upload */}
+                <div className="space-y-2">
+                    <Label>Photos</Label>
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                        {existingImages.map((url, i) => (
+                            <div key={`existing-${i}`} className="relative aspect-square rounded-xl overflow-hidden border border-border">
+                                <img src={url} alt="" className="w-full h-full object-cover" />
+                                <button
+                                    type="button"
+                                    onClick={() => setExistingImages(prev => prev.filter((_, idx) => idx !== i))}
+                                    className="absolute top-1 right-1 p-1 bg-background/90 rounded-full hover:bg-red-50"
+                                >
+                                    <X className="w-3 h-3 text-red-500" />
+                                </button>
+                            </div>
+                        ))}
+                        {imagePreviews.map((preview, i) => (
+                            <div key={`new-${i}`} className="relative aspect-square rounded-xl overflow-hidden border border-blue-300">
+                                <img src={preview} alt="" className="w-full h-full object-cover" />
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setImageFiles(prev => prev.filter((_, idx) => idx !== i));
+                                        setImagePreviews(prev => prev.filter((_, idx) => idx !== i));
+                                    }}
+                                    className="absolute top-1 right-1 p-1 bg-background/90 rounded-full hover:bg-red-50"
+                                >
+                                    <X className="w-3 h-3 text-red-500" />
+                                </button>
+                            </div>
+                        ))}
+                        {(existingImages.length + imagePreviews.length) < 5 && (
+                            <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-blue-500/50 hover:bg-blue-500/5 transition-all">
+                                <ImagePlus className="w-6 h-6 text-blue-500" />
+                                <p className="text-[10px] text-muted-foreground mt-1">Add</p>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={(e) => {
+                                        const files = Array.from(e.target.files || []);
+                                        const remaining = 5 - existingImages.length - imageFiles.length;
+                                        const newFiles = files.slice(0, remaining).filter(f => f.size <= 5 * 1024 * 1024);
+                                        setImageFiles(prev => [...prev, ...newFiles]);
+                                        setImagePreviews(prev => [...prev, ...newFiles.map(f => URL.createObjectURL(f))]);
+                                        e.target.value = "";
+                                    }}
+                                    className="hidden"
+                                />
+                            </label>
+                        )}
                     </div>
                 </div>
 

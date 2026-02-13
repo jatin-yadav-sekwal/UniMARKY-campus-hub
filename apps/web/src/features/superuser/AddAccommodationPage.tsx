@@ -7,16 +7,18 @@ import {
     Phone,
     DollarSign,
     FileText,
-    Image,
+    ImagePlus,
     ArrowLeft,
     Loader2,
     CheckCircle2,
     Wifi,
+    X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
+import { uploadImages } from "@/lib/uploadImage";
 
 const ACCOMMODATION_TYPES = ["PG", "Hostel", "Apartment"] as const;
 
@@ -24,6 +26,8 @@ export function AddAccommodationPage() {
     const navigate = useNavigate();
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [imageFiles, setImageFiles] = useState<File[]>([]);
+    const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
     const [form, setForm] = useState({
         name: "",
@@ -53,7 +57,11 @@ export function AddAccommodationPage() {
         try {
             setSaving(true);
             setError(null);
-            await api.post("/accommodation", form);
+            let images: string[] = [];
+            if (imageFiles.length > 0) {
+                images = await uploadImages(imageFiles, "accommodation-images");
+            }
+            await api.post("/accommodation", { ...form, images });
             navigate("/superuser/dashboard");
         } catch (err: any) {
             setError(err.message || "Failed to create accommodation");
@@ -103,8 +111,8 @@ export function AddAccommodationPage() {
                                 type="button"
                                 onClick={() => updateField("type", t)}
                                 className={`px-4 py-2 rounded-xl border font-medium text-sm transition-all ${form.type === t
-                                        ? "bg-brand-navy text-white border-brand-navy"
-                                        : "bg-background text-muted-foreground border-border hover:border-brand-navy/30"
+                                    ? "bg-brand-navy text-white border-brand-navy"
+                                    : "bg-background text-muted-foreground border-border hover:border-brand-navy/30"
                                     }`}
                             >
                                 {t}
@@ -165,6 +173,48 @@ export function AddAccommodationPage() {
                             <Wifi className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input id="amenities" value={form.amenities} onChange={(e) => updateField("amenities", e.target.value)} placeholder="WiFi, AC, Laundry, Gym, Parking" className="pl-10" />
                         </div>
+                    </div>
+                </div>
+
+                {/* Image Upload */}
+                <div className="space-y-2">
+                    <Label>Photos (up to 5)</Label>
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                        {imagePreviews.map((preview, i) => (
+                            <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-border">
+                                <img src={preview} alt="" className="w-full h-full object-cover" />
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setImageFiles(prev => prev.filter((_, idx) => idx !== i));
+                                        setImagePreviews(prev => prev.filter((_, idx) => idx !== i));
+                                    }}
+                                    className="absolute top-1 right-1 p-1 bg-background/90 rounded-full hover:bg-red-50"
+                                >
+                                    <X className="w-3 h-3 text-red-500" />
+                                </button>
+                            </div>
+                        ))}
+                        {imagePreviews.length < 5 && (
+                            <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-blue-500/50 hover:bg-blue-500/5 transition-all">
+                                <ImagePlus className="w-6 h-6 text-blue-500" />
+                                <p className="text-[10px] text-muted-foreground mt-1">Add</p>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={(e) => {
+                                        const files = Array.from(e.target.files || []);
+                                        const remaining = 5 - imageFiles.length;
+                                        const newFiles = files.slice(0, remaining).filter(f => f.size <= 5 * 1024 * 1024);
+                                        setImageFiles(prev => [...prev, ...newFiles]);
+                                        setImagePreviews(prev => [...prev, ...newFiles.map(f => URL.createObjectURL(f))]);
+                                        e.target.value = "";
+                                    }}
+                                    className="hidden"
+                                />
+                            </label>
+                        )}
                     </div>
                 </div>
 

@@ -10,15 +10,17 @@ import {
     DollarSign,
     Tag,
     FileText,
-    Image,
+    ImagePlus,
     Leaf,
     Trash2,
     Edit,
+    X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
+import { uploadImage } from "@/lib/uploadImage";
 
 interface MenuItem {
     id: string;
@@ -40,13 +42,14 @@ export function AddMenuItemPage() {
     const [loadingMenu, setLoadingMenu] = useState(true);
     const [restaurantName, setRestaurantName] = useState("");
     const [deleting, setDeleting] = useState<string | null>(null);
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     const [form, setForm] = useState({
         name: "",
         description: "",
         price: "",
         category: "",
-        imageUrl: "",
         isVeg: true,
     });
 
@@ -81,9 +84,15 @@ export function AddMenuItemPage() {
         try {
             setSaving(true);
             setError(null);
-            const newItem = await api.post(`/food/${restaurantId}/menu`, form);
+            let imageUrl: string | undefined;
+            if (imageFile) {
+                imageUrl = await uploadImage(imageFile, "menu-images");
+            }
+            const newItem = await api.post(`/food/${restaurantId}/menu`, { ...form, imageUrl });
             setMenuItems((prev) => [...prev, newItem]);
-            setForm({ name: "", description: "", price: "", category: "", imageUrl: "", isVeg: true });
+            setForm({ name: "", description: "", price: "", category: "", isVeg: true });
+            setImageFile(null);
+            setImagePreview(null);
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);
         } catch (err: any) {
@@ -174,8 +183,43 @@ export function AddMenuItemPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="imageUrl">Image URL</Label>
-                        <Input id="imageUrl" value={form.imageUrl} onChange={(e) => updateField("imageUrl", e.target.value)} placeholder="https://..." />
+                        <Label>Item Photo</Label>
+                        <label className="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-brand-orange/50 hover:bg-brand-orange/5 transition-all overflow-hidden">
+                            {imagePreview ? (
+                                <>
+                                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setImagePreview(null);
+                                            setImageFile(null);
+                                        }}
+                                        className="absolute top-2 right-2 p-1.5 bg-background/90 rounded-full hover:bg-red-50"
+                                    >
+                                        <X className="w-4 h-4 text-red-500" />
+                                    </button>
+                                </>
+                            ) : (
+                                <div className="flex flex-col items-center gap-1 text-muted-foreground">
+                                    <ImagePlus className="w-6 h-6 text-brand-orange" />
+                                    <p className="text-xs">Upload photo</p>
+                                </div>
+                            )}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        if (file.size > 5 * 1024 * 1024) { alert("Max 5MB"); return; }
+                                        setImageFile(file);
+                                        setImagePreview(URL.createObjectURL(file));
+                                    }
+                                }}
+                                className="hidden"
+                            />
+                        </label>
                     </div>
 
                     <div className="flex items-center gap-3">

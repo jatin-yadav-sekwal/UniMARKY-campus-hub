@@ -9,20 +9,24 @@ import {
     DollarSign,
     FileText,
     Tag,
-    Image,
+    ImagePlus,
     ArrowLeft,
     Loader2,
     CheckCircle2,
+    X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
+import { uploadImage } from "@/lib/uploadImage";
 
 export function AddRestaurantPage() {
     const navigate = useNavigate();
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     const [form, setForm] = useState({
         name: "",
@@ -33,7 +37,6 @@ export function AddRestaurantPage() {
         phone: "",
         timing: "",
         priceRange: "",
-        imageUrl: "",
         location: "",
     });
 
@@ -51,7 +54,11 @@ export function AddRestaurantPage() {
         try {
             setSaving(true);
             setError(null);
-            await api.post("/food", form);
+            let imageUrl: string | undefined;
+            if (imageFile) {
+                imageUrl = await uploadImage(imageFile, "restaurant-images");
+            }
+            await api.post("/food", { ...form, imageUrl });
             navigate("/superuser/dashboard");
         } catch (err: any) {
             setError(err.message || "Failed to create restaurant");
@@ -227,19 +234,45 @@ export function AddRestaurantPage() {
                         </div>
                     </div>
 
-                    {/* Image URL */}
+                    {/* Image Upload */}
                     <div className="space-y-2">
-                        <Label htmlFor="imageUrl">Image URL</Label>
-                        <div className="relative">
-                            <Image className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                id="imageUrl"
-                                value={form.imageUrl}
-                                onChange={(e) => updateField("imageUrl", e.target.value)}
-                                placeholder="https://example.com/photo.jpg"
-                                className="pl-10"
+                        <Label>Restaurant Photo</Label>
+                        <label className="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-brand-orange/50 hover:bg-brand-orange/5 transition-all overflow-hidden">
+                            {imagePreview ? (
+                                <>
+                                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setImagePreview(null);
+                                            setImageFile(null);
+                                        }}
+                                        className="absolute top-2 right-2 p-1.5 bg-background/90 rounded-full hover:bg-red-50"
+                                    >
+                                        <X className="w-4 h-4 text-red-500" />
+                                    </button>
+                                </>
+                            ) : (
+                                <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                                    <ImagePlus className="w-8 h-8 text-brand-orange" />
+                                    <p className="text-sm">Click to upload a photo</p>
+                                </div>
+                            )}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        if (file.size > 5 * 1024 * 1024) { alert("Max 5MB"); return; }
+                                        setImageFile(file);
+                                        setImagePreview(URL.createObjectURL(file));
+                                    }
+                                }}
+                                className="hidden"
                             />
-                        </div>
+                        </label>
                     </div>
                 </div>
 

@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { Upload, Tag, DollarSign, Calendar, FileText, Rocket, ArrowLeft, ImagePlus, X } from "lucide-react";
+import { Upload, Tag, DollarSign, Calendar, FileText, Rocket, ArrowLeft, ImagePlus, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
+import { uploadImage } from "@/lib/uploadImage";
 
 const categories = [
     { value: "textbooks", label: "Textbooks" },
@@ -28,6 +29,7 @@ const conditions = [
 export function ListItemPage() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
@@ -38,19 +40,14 @@ export function ListItemPage() {
         manufacturedYear: "",
         price: "",
         isNegotiable: false,
-        imageUrl: "",
     });
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-                // In a real app, you'd upload to storage and get URL
-                setFormData(prev => ({ ...prev, imageUrl: reader.result as string }));
-            };
-            reader.readAsDataURL(file);
+            if (file.size > 5 * 1024 * 1024) { alert("Max file size is 5MB"); return; }
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
         }
     };
 
@@ -59,7 +56,11 @@ export function ListItemPage() {
         setLoading(true);
 
         try {
-            await api.post("/marketplace", formData);
+            let imageUrl: string | undefined;
+            if (imageFile) {
+                imageUrl = await uploadImage(imageFile, "marketplace-images");
+            }
+            await api.post("/marketplace", { ...formData, imageUrl });
             navigate("/marketplace");
         } catch (error) {
             console.error("Failed to list item:", error);
@@ -126,7 +127,7 @@ export function ListItemPage() {
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 setImagePreview(null);
-                                                setFormData(prev => ({ ...prev, imageUrl: "" }));
+                                                setImageFile(null);
                                             }}
                                             className="absolute top-2 right-2 p-1.5 bg-background/90 rounded-full hover:bg-red-50"
                                         >

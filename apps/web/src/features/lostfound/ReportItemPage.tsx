@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowLeft, MapPin, ImagePlus, X, Search, Eye, Rocket } from "lucide-react";
+import { ArrowLeft, MapPin, ImagePlus, X, Search, Eye, Rocket, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
+import { uploadImage } from "@/lib/uploadImage";
 
 export function ReportItemPage() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
@@ -17,18 +19,14 @@ export function ReportItemPage() {
         description: "",
         type: "lost" as "lost" | "found",
         location: "",
-        imageUrl: "",
     });
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-                setFormData(prev => ({ ...prev, imageUrl: reader.result as string }));
-            };
-            reader.readAsDataURL(file);
+            if (file.size > 5 * 1024 * 1024) { alert("Max file size is 5MB"); return; }
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
         }
     };
 
@@ -37,7 +35,11 @@ export function ReportItemPage() {
         setLoading(true);
 
         try {
-            await api.post("/lostfound", formData);
+            let imageUrl: string | undefined;
+            if (imageFile) {
+                imageUrl = await uploadImage(imageFile, "lostfound-images");
+            }
+            await api.post("/lostfound", { ...formData, imageUrl });
             navigate("/lost-found");
         } catch (error) {
             console.error("Failed to report item:", error);
@@ -91,8 +93,8 @@ export function ReportItemPage() {
                                     type="button"
                                     onClick={() => setFormData(prev => ({ ...prev, type: "lost" }))}
                                     className={`relative p-6 rounded-2xl border-2 transition-all duration-300 ${formData.type === "lost"
-                                            ? "border-red-500 bg-red-50 dark:bg-red-500/10"
-                                            : "border-border hover:border-muted-foreground"
+                                        ? "border-red-500 bg-red-50 dark:bg-red-500/10"
+                                        : "border-border hover:border-muted-foreground"
                                         }`}
                                 >
                                     <div className="flex flex-col items-center gap-3">
@@ -112,8 +114,8 @@ export function ReportItemPage() {
                                     type="button"
                                     onClick={() => setFormData(prev => ({ ...prev, type: "found" }))}
                                     className={`relative p-6 rounded-2xl border-2 transition-all duration-300 ${formData.type === "found"
-                                            ? "border-green-500 bg-green-50 dark:bg-green-500/10"
-                                            : "border-border hover:border-muted-foreground"
+                                        ? "border-green-500 bg-green-50 dark:bg-green-500/10"
+                                        : "border-border hover:border-muted-foreground"
                                         }`}
                                 >
                                     <div className="flex flex-col items-center gap-3">
@@ -145,7 +147,7 @@ export function ReportItemPage() {
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 setImagePreview(null);
-                                                setFormData(prev => ({ ...prev, imageUrl: "" }));
+                                                setImageFile(null);
                                             }}
                                             className="absolute top-2 right-2 p-1.5 bg-background/90 rounded-full hover:bg-red-50"
                                         >
@@ -222,8 +224,8 @@ export function ReportItemPage() {
                                 type="submit"
                                 disabled={loading}
                                 className={`px-8 py-6 rounded-full font-bold text-lg shadow-lg transition-all gap-2 ${formData.type === "lost"
-                                        ? "bg-gradient-to-r from-red-500 to-red-600 hover:shadow-red-500/25"
-                                        : "bg-gradient-to-r from-green-500 to-emerald-500 hover:shadow-green-500/25"
+                                    ? "bg-gradient-to-r from-red-500 to-red-600 hover:shadow-red-500/25"
+                                    : "bg-gradient-to-r from-green-500 to-emerald-500 hover:shadow-green-500/25"
                                     }`}
                             >
                                 {loading ? "Submitting..." : `REPORT AS ${formData.type.toUpperCase()}`}
