@@ -13,7 +13,7 @@ export function SocialAuth() {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: `http://localhost:5173/dashboard`
+                    redirectTo: import.meta.env.VITE_API_URL
                     // redirectTo: `${window.location.origin}/dashboard`
                 }
             });
