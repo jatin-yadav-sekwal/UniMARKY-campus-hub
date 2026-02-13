@@ -22,8 +22,7 @@ const app = new Hono<Env>();
 app.use("*", logger());
 app.use("*", cors({
   origin: (origin) => {
-    const allowedOrigins = [
-      'http://localhost:5173', 
+    const allowedOrigins = [ 
       process.env.VITE_DEV_SERVER_URL,
       process.env.CORS_ORIGIN
     ].filter(Boolean);

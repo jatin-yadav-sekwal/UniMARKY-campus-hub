@@ -13,7 +13,7 @@
  * - https://docs.google.com/spreadsheets/d/FILE_ID/...
  * - https://docs.google.com/presentation/d/FILE_ID/...
  */
-export function extractDriveFileId(url: string): string | null {
+export function extractDriveFileId(url: string): string | null | undefined {
   if (!url) return null;
 
   try {
