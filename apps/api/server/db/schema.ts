@@ -71,11 +71,33 @@ export const announcements = pgTable("announcements", {
 export const socialPosts = pgTable("social_posts", {
   id: uuid("id").defaultRandom().primaryKey(),
   authorId: uuid("author_id").notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  type: text("type", { enum: ["post", "event", "announcement"] }).default("post").notNull(),
+  title: text("title"),
   content: text("content").notNull(),
+  imageUrl: text("image_url"),
+  eventDate: timestamp("event_date", { withTimezone: true }),
+  hostedBy: text("hosted_by"),
   likesCount: integer("likes_count").default(0),
+  commentsCount: integer("comments_count").default(0),
+  sharesCount: integer("shares_count").default(0),
   universityName: text("university_name").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const postLikes = pgTable("post_likes", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  postId: uuid("post_id").notNull().references(() => socialPosts.id, { onDelete: 'cascade' }),
+  userId: uuid("user_id").notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const comments = pgTable("comments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  postId: uuid("post_id").notNull().references(() => socialPosts.id, { onDelete: 'cascade' }),
+  userId: uuid("user_id").notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
 // --- Food & Restaurants ---
@@ -161,6 +183,8 @@ export const profilesRelations = relations(profiles, ({ many }) => ({
   marketplaceItems: many(marketplaceItems),
   lostFoundItems: many(lostFound),
   socialPosts: many(socialPosts),
+  postLikes: many(postLikes),
+  comments: many(comments),
   roleRequests: many(roleRequests),
   foodListings: many(foodListings),
   accommodationListings: many(accommodationListings),
@@ -188,9 +212,33 @@ export const lostFoundRelations = relations(lostFound, ({ one }) => ({
   }),
 }));
 
-export const socialPostsRelations = relations(socialPosts, ({ one }) => ({
+export const socialPostsRelations = relations(socialPosts, ({ one, many }) => ({
   author: one(profiles, {
     fields: [socialPosts.authorId],
+    references: [profiles.id],
+  }),
+  likes: many(postLikes),
+  comments: many(comments),
+}));
+
+export const postLikesRelations = relations(postLikes, ({ one }) => ({
+  post: one(socialPosts, {
+    fields: [postLikes.postId],
+    references: [socialPosts.id],
+  }),
+  user: one(profiles, {
+    fields: [postLikes.userId],
+    references: [profiles.id],
+  }),
+}));
+
+export const commentsRelations = relations(comments, ({ one }) => ({
+  post: one(socialPosts, {
+    fields: [comments.postId],
+    references: [socialPosts.id],
+  }),
+  user: one(profiles, {
+    fields: [comments.userId],
     references: [profiles.id],
   }),
 }));

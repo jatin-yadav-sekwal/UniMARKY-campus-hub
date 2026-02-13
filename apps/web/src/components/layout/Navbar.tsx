@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "motion/react";
 import {
     Menu, X, Search, ChevronDown, User, LogOut, LayoutDashboard, UserCircle, Sparkles,
-    ShoppingBag, MapPin, Newspaper, BookOpen, Coffee, Home, Crown, ShieldCheck, Shield, GraduationCap
+    ShoppingBag, MapPin, Newspaper, BookOpen, Coffee, Home, Crown, ShieldCheck, Shield, GraduationCap, LayoutGrid
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -289,6 +289,15 @@ export function Navbar({ showScrollLinks = false }: NavbarProps) {
                                         </div>
                                         <span className="font-medium">Profile</span>
                                     </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={() => navigate('/unimedia/my-content')}
+                                        className="cursor-pointer rounded-lg gap-3 py-2.5"
+                                    >
+                                        <div className="p-1.5 rounded-lg bg-rose-500/10">
+                                            <LayoutGrid className="h-4 w-4 text-rose-500" />
+                                        </div>
+                                        <span className="font-medium">My Content</span>
+                                    </DropdownMenuItem>
                                     <DropdownMenuSeparator className="bg-border/50" />
                                     <DropdownMenuItem
                                         onClick={handleLogout}
@@ -433,6 +442,16 @@ export function Navbar({ showScrollLinks = false }: NavbarProps) {
                                                 >
                                                     <UserCircle className="h-5 w-5 text-muted-foreground" />
                                                     Profile
+                                                </Link>
+                                            </motion.div>
+                                            <motion.div variants={itemVariants}>
+                                                <Link
+                                                    to="/unimedia/my-content"
+                                                    onClick={() => setIsOpen(false)}
+                                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold text-brand-navy hover:bg-muted/50 transition-colors"
+                                                >
+                                                    <LayoutGrid className="h-5 w-5 text-muted-foreground" />
+                                                    My Content
                                                 </Link>
                                             </motion.div>
                                         </div>

@@ -1,10 +1,11 @@
-import { Navigate, Outlet, useNavigate } from 'react-router-dom';
+import { Navigate, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export function ProtectedRoute({ requireOnboarding = true }: { requireOnboarding?: boolean }) {
     const { user, loading } = useAuth();
+    const location = useLocation();
     const [isChecking, setIsChecking] = useState(true);
     const [onboardingComplete, setOnboardingComplete] = useState(false);
     const navigate = useNavigate();
@@ -55,5 +56,5 @@ export function ProtectedRoute({ requireOnboarding = true }: { requireOnboarding
         );
     }
 
-    return user ? <Outlet /> : <Navigate to="/auth" replace />;
+    return user ? <Outlet /> : <Navigate to="/auth" state={{ returnTo: location.pathname }} replace />;
 }
