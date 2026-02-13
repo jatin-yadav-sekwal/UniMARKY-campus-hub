@@ -21,13 +21,24 @@ const app = new Hono<Env>();
 // Global Middleware
 app.use("*", logger());
 app.use("*", cors({
-  origin: process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173', // Your Vite dev server URL
+  origin: (origin) => {
+    const allowedOrigins = [
+      'http://localhost:5173', 
+      process.env.VITE_DEV_SERVER_URL,
+      process.env.CORS_ORIGIN
+    ].filter(Boolean);
+    
+    if (!origin || allowedOrigins.includes(origin)) {
+      return origin;
+    }
+    return allowedOrigins[0]; // Fallback or strict check depending on requirements
+  },
   allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
   exposeHeaders: ['Content-Length'],
   maxAge: 600,
   credentials: true,
-})); // Ideally restrict origin in prod
+}));
 app.use("/api/*", authMiddleware);
 
 // Health Check

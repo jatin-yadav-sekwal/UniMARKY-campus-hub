@@ -31,14 +31,20 @@ export function ProtectedRoute({ requireOnboarding = true }: { requireOnboarding
                             navigate('/onboarding');
                         }
                     })
-                    .catch(() => {
-                        // API error (maybe network or 403 ONBOARDING_REQUIRED triggered by middleware?)
-                        // If middleware blocks /me, we have a problem. 
-                        // Check auth.ts: /me is usually safe? 
-                        // auth.ts blocks if !onboardingCompleted AND !isOnboardingRoute.
-                        // Path for /me is /api/profiles/me.
-                        // We need to EXEMPT /api/profiles/me from the middleware block too!
-                        navigate('/onboarding');
+                    .catch((err) => {
+                        console.error("Failed to check onboarding status:", err);
+                        // Only redirect if explicitly not found or another logical condition 
+                        // If it's a network error (CORS), do NOT redirect to /onboarding as that causes loop
+                        // Maybe show an error state instead?
+                        if (err.message && (err.message.includes("Network Error") || err.message.includes("Failed to fetch"))) {
+                            // Let it render children or show a specific error component?
+                            // For now, let's stop checking and NOT redirect. 
+                            // The dashboard might fail to load data, but at least no loop.
+                        } else {
+                            // If it's a 404 on profile, maybe we do need onboarding?
+                            // But let's be careful.
+                            navigate('/onboarding');
+                        }
                     })
                     .finally(() => setIsChecking(false));
             });
