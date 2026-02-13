@@ -7,6 +7,7 @@ export function ProtectedRoute({ requireOnboarding = true }: { requireOnboarding
     const { user, loading } = useAuth();
     const location = useLocation();
     const [isChecking, setIsChecking] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [onboardingComplete, setOnboardingComplete] = useState(false);
     const navigate = useNavigate();
 
@@ -33,16 +34,12 @@ export function ProtectedRoute({ requireOnboarding = true }: { requireOnboarding
                     })
                     .catch((err) => {
                         console.error("Failed to check onboarding status:", err);
-                        // Only redirect if explicitly not found or another logical condition 
-                        // If it's a network error (CORS), do NOT redirect to /onboarding as that causes loop
-                        // Maybe show an error state instead?
+
+                        // If it's a network error/CORS, show an error state instead of redirecting or silently failing
                         if (err.message && (err.message.includes("Network Error") || err.message.includes("Failed to fetch"))) {
-                            // Let it render children or show a specific error component?
-                            // For now, let's stop checking and NOT redirect. 
-                            // The dashboard might fail to load data, but at least no loop.
+                            setError("Connection Error: Unable to reach the server. Please check your connection or try again later.");
                         } else {
-                            // If it's a 404 on profile, maybe we do need onboarding?
-                            // But let's be careful.
+                            // 404/401 -> Redirect to onboarding
                             navigate('/onboarding');
                         }
                     })
@@ -58,6 +55,21 @@ export function ProtectedRoute({ requireOnboarding = true }: { requireOnboarding
         return (
             <div className="flex items-center justify-center h-screen">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center h-screen gap-4 p-4 text-center">
+                <div className="text-red-500 font-bold text-xl">Connection Error</div>
+                <p className="text-muted-foreground">{error}</p>
+                <div
+                    onClick={() => window.location.reload()}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
+                >
+                    Retry
+                </div>
             </div>
         );
     }

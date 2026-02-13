@@ -14,25 +14,48 @@ profilesApp.get("/me", async (c) => {
   if (!userId) return c.json({ error: "Unauthorized" }, 401);
 
   const result = await db.select().from(profiles).where(eq(profiles.id, userId));
-  if (result.length === 0) return c.json({ error: "Profile not found" }, 404);
+  
+  // If no profile found, return a default "new user" state instead of 404
+  if (result.length === 0) {
+      return c.json({
+          id: userId,
+          onboardingCompleted: false,
+          universityName: null,
+          role: "normal",
+          isVerified: false
+      });
+  }
+  
   return c.json(result[0]);
 });
 
 // Onboarding Completion
 profilesApp.patch("/onboarding", async (c) => {
     const userId = c.get("userId");
-    const { universityName } = await c.req.json();
+    const { universityName, fullName } = await c.req.json();
 
     if (!universityName) {
         return c.json({ error: "University Name is required" }, 400);
     }
 
-    const updated = await db.update(profiles)
-        .set({ 
-            universityName: universityName,
-            onboardingCompleted: true 
+    // Upsert: Try to insert, if exists (conflict on id), update
+    const updated = await db.insert(profiles)
+        .values({
+            id: userId,
+            universityName,
+            fullName: fullName || undefined, // Optional update if provided
+            onboardingCompleted: true,
+            updatedAt: new Date(),
         })
-        .where(eq(profiles.id, userId))
+        .onConflictDoUpdate({
+            target: profiles.id,
+            set: {
+                universityName,
+                fullName: fullName || undefined,
+                onboardingCompleted: true,
+                updatedAt: new Date(),
+            }
+        })
         .returning();
 
     return c.json(updated[0]);

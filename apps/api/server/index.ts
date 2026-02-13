@@ -23,14 +23,23 @@ app.use("*", logger());
 app.use("*", cors({
   origin: (origin) => {
     const allowedOrigins = [ 
+      "https://unimarky-campus-hub-web.vercel.app", // Hardcoded prod URL as fallback
       process.env.VITE_DEV_SERVER_URL,
+      process.env.VITE_WEB_URL,
       process.env.CORS_ORIGIN
-    ].filter(Boolean);
+    ].filter((url): url is string => !!url); // Type guard to filter null/undefined
     
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Allow requests with no origin (e.g. mobile apps, curl)
+    if (!origin) return allowedOrigins[0] || "*";
+
+    if (allowedOrigins.includes(origin)) {
       return origin;
     }
-    return allowedOrigins[0]; // Fallback or strict check depending on requirements
+    
+    // Optional: Log blocked origins for debugging (remove in strict production if needed)
+    console.log(`[CORS] Blocked origin: ${origin}. Allowed: ${allowedOrigins.join(', ')}`);
+    
+    return allowedOrigins[0]; 
   },
   allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
