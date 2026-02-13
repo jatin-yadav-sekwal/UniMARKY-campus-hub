@@ -21,7 +21,7 @@ const app = new Hono<Env>();
 // Global Middleware
 app.use("*", logger());
 app.use("*", cors({
-  origin: 'http://localhost:5173', // Your Vite dev server URL
+  origin: process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173', // Your Vite dev server URL
   allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
   exposeHeaders: ['Content-Length'],
