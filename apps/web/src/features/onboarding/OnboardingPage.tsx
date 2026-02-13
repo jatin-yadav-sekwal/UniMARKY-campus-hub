@@ -15,7 +15,7 @@ export function OnboardingPage() {
         if (!university) return;
         setLoading(true);
         try {
-            await api.patch('/onboarding', { universityName: university });
+            await api.patch('/profiles/onboarding', { universityName: university });
             // Hard reload or state update might be needed if useAuth heavily caches profile
             // For now, redirect to dashboard
             navigate('/dashboard');

@@ -87,7 +87,7 @@ roleRequestsApp.patch("/:id", requireRole("userX"), async (c) => {
   }
   
   // Get the request
-  const request = await db.select().from(roleRequests).where(eq(roleRequests.id, requestId));
+  const request : any = await db.select().from(roleRequests).where(eq(roleRequests.id, requestId));
   if (request.length === 0) return c.json({ error: "Request not found" }, 404);
   if (request[0].status !== "pending") {
     return c.json({ error: "This request has already been reviewed" }, 400);

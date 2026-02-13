@@ -80,7 +80,7 @@ marketplaceApp.get("/:id", async (c) => {
   const id = c.req.param("id");
   
   // Get item with seller details
-  const result = await db.select({
+  const result : any = await db.select({
     item: marketplaceItems,
     seller: {
       id: profiles.id,
