@@ -12,7 +12,6 @@ export const profiles = pgTable("profiles", {
   mobileNumber: text("mobile_number"),
   idCardUrl: text("id_card_url"),
   role: text("role", { enum: ["normal", "superuser", "userX"] }).default("normal"),
-  password: text("password"), // Added for custom auth
   isVerified: boolean("is_verified").default(false),
   onboardingCompleted: boolean("onboarding_completed").default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),

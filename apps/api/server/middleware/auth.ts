@@ -41,7 +41,7 @@ export const authMiddleware = createMiddleware<Env>(async (c, next) => {
       // Check against our profiles table to get context
       const profile = await db.query.profiles.findFirst({
         where: eq(profiles.id, userId)
-      });
+      }).catch(() => null);
 
       if (profile) {
           c.set("userId", profile.id);
@@ -67,6 +67,11 @@ export const authMiddleware = createMiddleware<Env>(async (c, next) => {
       
   } catch (err) {
       console.error("JWT Verification Failed:", err);
-      return c.json({ error: "Invalid Token" }, 401);
+      // Differentiate between auth errors and other errors (like DB)
+      if (err instanceof Error && err.message.includes("Invalid Token")) {
+        return c.json({ error: "Invalid Token" }, 401);
+      }
+      // For other errors (like DB), return 500 or just generic 401 but log it
+      return c.json({ error: "Internal Server Error during Auth" }, 500);
   }
 });

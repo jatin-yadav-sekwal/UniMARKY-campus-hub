@@ -43,6 +43,13 @@
       "when": 1771040224405,
       "tag": "0005_lowly_monster_badoon",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1771047725419,
+      "tag": "0006_living_snowbird",
+      "breakpoints": true
     }
   ]
 }
