@@ -98,7 +98,11 @@ export function UniversitySelector({ value, onChange }: UniversitySelectorProps)
                                     key={uni.value}
                                     value={uni.label}
                                     onSelect={(currentValue) => {
-                                        onChange(currentValue)
+                                        // cmdk returns lowercase values; find the original label
+                                        const originalEntry = universities.find(
+                                            (u) => u.label.toLowerCase() === currentValue.toLowerCase()
+                                        );
+                                        onChange(originalEntry ? originalEntry.label : currentValue);
                                         setOpen(false)
                                     }}
                                 >

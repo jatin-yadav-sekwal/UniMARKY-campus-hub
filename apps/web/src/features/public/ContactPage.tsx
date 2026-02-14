@@ -18,7 +18,7 @@ const contactInfo = [
     {
         icon: Mail,
         title: "Email Us",
-        detail: "support@unimarky.com",
+        detail: "jatinyadavsekwal88@gmail.com",
         sub: "We reply within 24 hours",
         gradient: "from-brand-orange to-amber-500",
     },
@@ -99,7 +99,7 @@ export function ContactPage() {
             </section>
 
             {/* Contact Form */}
-            <section className="py-16">
+            {/* <section className="py-16">
                 <div className="container px-4 mx-auto">
                     <div className="max-w-xl mx-auto bg-background rounded-2xl border border-border/40 p-6 sm:p-8">
                         {submitted ? (
@@ -177,7 +177,7 @@ export function ContactPage() {
                         )}
                     </div>
                 </div>
-            </section>
+            </section> */}
 
             <Footer />
         </div>

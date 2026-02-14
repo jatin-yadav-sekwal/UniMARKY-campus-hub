@@ -19,20 +19,37 @@ profilesApp.get("/me", async (c) => {
 });
 
 // Onboarding Completion
+// Onboarding Completion
 profilesApp.patch("/onboarding", async (c) => {
     const userId = c.get("userId");
-    const { universityName } = await c.req.json();
+    const { universityName, password, mobileNumber, fullName } = await c.req.json();
 
     if (!universityName) {
         return c.json({ error: "University Name is required" }, 400);
     }
+    
+    // Validate required fields
+    if (!mobileNumber || mobileNumber.length !== 10) {
+         return c.json({ error: "Mobile number must be 10 digits" }, 400);
+    }
 
-    const updated = await db.update(profiles)
-        .set({ 
-            universityName: universityName,
-            onboardingCompleted: true 
+    const valuesToUpdate: any = {
+        universityName,
+        fullName: fullName || undefined,
+        mobileNumber,
+        onboardingCompleted: true,
+        updatedAt: new Date(),
+    };
+
+    const updated = await db.insert(profiles)
+        .values({
+            id: userId,
+            ...valuesToUpdate
         })
-        .where(eq(profiles.id, userId))
+        .onConflictDoUpdate({
+            target: profiles.id,
+            set: valuesToUpdate
+        })
         .returning();
 
     return c.json(updated[0]);

@@ -1,1 +1,7 @@
-{ "name": "unmarky-monorepo", "workspaces": ["apps/*"] }
+{
+  "name": "unmarky-monorepo",
+  "workspaces": ["apps/*"],
+  "dependencies": {
+    "@supabase-js/source": "supabase/supabase-js"
+  }
+}

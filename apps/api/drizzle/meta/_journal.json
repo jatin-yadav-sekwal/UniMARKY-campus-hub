@@ -36,6 +36,13 @@
       "when": 1770954767938,
       "tag": "0004_lazy_ghost_rider",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1771040224405,
+      "tag": "0005_lowly_monster_badoon",
+      "breakpoints": true
     }
   ]
 }

@@ -7,6 +7,7 @@ import './index.css'
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 import { ErrorPage } from '@/components/layout/ErrorPage';
+import ScrollToTop from '@/components/layout/ScrollToTop';
 
 // Lazy-loaded pages — each gets its own chunk
 const LandingPage = lazy(() => import('@/features/landing/LandingPage').then(m => ({ default: m.LandingPage })));
@@ -61,6 +62,7 @@ function PageLoader() {
 export default function App() {
     return (
         <Suspense fallback={<PageLoader />}>
+            <ScrollToTop />
             <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/auth" element={<AuthPage />} />

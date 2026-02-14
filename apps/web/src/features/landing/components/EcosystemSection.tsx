@@ -243,12 +243,12 @@ export function EcosystemSection() {
                     transition={{ duration: 0.6, delay: 0.7 }}
                     className="mt-12 text-center"
                 >
-                    <p className="text-muted-foreground text-sm">
+                    {/* <p className="text-muted-foreground text-sm">
                         More modules coming soon.{" "}
                         <Link to="/auth" className="font-semibold text-brand-orange hover:underline underline-offset-4">
                             Join the waitlist →
                         </Link>
-                    </p>
+                    </p> */}
                 </motion.div>
             </div>
         </section>
