@@ -17,6 +17,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import file from "@/components/layout/file.svg";
 
 const navLinks = [
     { name: "ECOSYSTEM", href: "#ecosystem", isScroll: true },
@@ -186,7 +187,7 @@ export function Navbar({ showScrollLinks = false }: NavbarProps) {
                             </motion.div> */}
                             <div className="flex flex-col">
                                 <span className="text-2xl tracking-tighter text-brand-navy leading-none">
-                                    UniMARKY
+                                    <img src={file} alt="App Logo" width={200} height={65} />
                                 </span>
                                 {/* <span className="text-[10px] font-medium tracking-widest text-muted-foreground/70 uppercase">
                                     Campus Hub

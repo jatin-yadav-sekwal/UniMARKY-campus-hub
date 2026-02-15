@@ -84,7 +84,7 @@ export function PrivacyPage() {
                         </Section>
 
                         <Section title="10. Contact Us">
-                            <p>If you have any questions about this Privacy Policy, please reach out to us at <a href="mailto:support@unimarky.com" className="text-brand-orange hover:underline">support@unimarky.com</a>.</p>
+                            <p>If you have any questions about this Privacy Policy, please reach out to us at <a href="mailto:jatinyadavsekwal88@gmail.com" className="text-brand-orange hover:underline">jatinyadavsekwal88@gmail.com</a>.</p>
                         </Section>
                     </motion.div>
                 </div>

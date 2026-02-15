@@ -17,9 +17,9 @@ export function Footer() {
                             The platform designed for the next generation of campus life. Safe, fast, and completely yours.
                         </p>
                         <div className="flex gap-4 pt-4">
-                            <SocialIcon icon={Twitter} />
+                            {/* <SocialIcon icon={Twitter}  /> */}
                             <SocialIcon icon={Instagram} />
-                            <SocialIcon icon={Linkedin} />
+                            {/* <SocialIcon icon={Linkedin} /> */}
                         </div>
                     </div>
 
@@ -71,7 +71,7 @@ export function Footer() {
 
 function SocialIcon({ icon: Icon }: { icon: React.ComponentType<{ className?: string }> }) {
     return (
-        <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+        <a href="https://www.instagram.com/unimarky/" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
             <Icon className="w-5 h-5 text-white" />
         </a>
     )
