@@ -1,21 +1,10 @@
-import { useState } from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
-
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "@/components/ui/command"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 const universities = [
     // Featured
@@ -70,55 +59,18 @@ interface UniversitySelectorProps {
 }
 
 export function UniversitySelector({ value, onChange }: UniversitySelectorProps) {
-    const [open, setOpen] = useState(false)
-
     return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="w-full justify-between"
-                >
-                    {value
-                        ? universities.find((framework) => framework.label === value)?.label || value
-                        : "Select university..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[300px] p-0">
-                <Command>
-                    <CommandInput placeholder="Search university..." />
-                    <CommandList>
-                        <CommandEmpty>No university found.</CommandEmpty>
-                        <CommandGroup heading="Featured Universities">
-                            {universities.map((uni) => (
-                                <CommandItem
-                                    key={uni.value}
-                                    value={uni.label}
-                                    onSelect={(currentValue) => {
-                                        // cmdk returns lowercase values; find the original label
-                                        const originalEntry = universities.find(
-                                            (u) => u.label.toLowerCase() === currentValue.toLowerCase()
-                                        );
-                                        onChange(originalEntry ? originalEntry.label : currentValue);
-                                        setOpen(false)
-                                    }}
-                                >
-                                    <Check
-                                        className={cn(
-                                            "mr-2 h-4 w-4",
-                                            value === uni.label ? "opacity-100" : "opacity-0"
-                                        )}
-                                    />
-                                    {uni.label}
-                                </CommandItem>
-                            ))}
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
-            </PopoverContent>
-        </Popover>
+        <Select value={value} onValueChange={onChange}>
+            <SelectTrigger className="w-full h-11 rounded-xl">
+                <SelectValue placeholder="Select university..." />
+            </SelectTrigger>
+            <SelectContent className="max-h-72">
+                {universities.map((uni) => (
+                    <SelectItem key={uni.value} value={uni.label}>
+                        {uni.label}
+                    </SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
     )
 }

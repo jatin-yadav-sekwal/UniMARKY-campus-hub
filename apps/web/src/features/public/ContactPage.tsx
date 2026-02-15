@@ -18,7 +18,7 @@ const contactInfo = [
     {
         icon: Mail,
         title: "Email Us",
-        detail: "jatinyadavsekwal88@gmail.com",
+        detail: <a href="mailto:jatinyadavsekwal88@gmail.com">jatinyadavsekwal88@gmail.com</a>,
         sub: "We reply within 24 hours",
         gradient: "from-brand-orange to-amber-500",
     },

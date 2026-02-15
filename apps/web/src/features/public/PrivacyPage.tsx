@@ -68,7 +68,7 @@ export function PrivacyPage() {
                                 <li>Delete your account and associated data</li>
                                 <li>Opt out of non-essential notifications</li>
                             </ul>
-                            <p className="mt-2">To exercise these rights, contact us at <a href="mailto:support@unimarky.com" className="text-brand-orange hover:underline">support@unimarky.com</a>.</p>
+                            <p className="mt-2">To exercise these rights, contact us at <a href="mailto:jatinyadavsekwal88@gmail.com" className="text-brand-orange hover:underline">jatinyadavsekwal88@gmail.com</a>.</p>
                         </Section>
 
                         <Section title="7. Data Retention">

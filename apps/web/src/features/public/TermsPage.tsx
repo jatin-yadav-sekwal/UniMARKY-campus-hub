@@ -71,7 +71,7 @@ export function TermsPage() {
                         </Section>
 
                         <Section title="10. Contact">
-                            <p>For questions about these Terms, please contact us at <a href="mailto:support@unimarky.com" className="text-brand-orange hover:underline">support@unimarky.com</a>.</p>
+                            <p>For questions about these Terms, please contact us at <a href="mailto:jatinyadavsekwal88@gmail.com" className="text-brand-orange hover:underline">jatinyadavsekwal88@gmail.com</a>.</p>
                         </Section>
                     </motion.div>
                 </div>
