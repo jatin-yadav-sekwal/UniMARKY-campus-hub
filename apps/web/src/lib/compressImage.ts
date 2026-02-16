@@ -1,80 +1,71 @@
+export interface CompressOptions {
+    maxWidth?: number;
+    maxHeight?: number;
+    quality?: number;
+}
+
+// Balanced defaults: ~1600px max side, quality 0.8
+const DEFAULT_OPTIONS: Required<CompressOptions> = {
+    maxWidth: 1600,
+    maxHeight: 1600,
+    quality: 0.8
+};
+
 /**
- * WhatsApp-style client-side image compression.
- * Resizes the image to a maximum dimension while maintaining aspect ratio,
- * and encodes it as WebP (if supported) or JPEG at a specified quality.
+ * Compress an image on the client using canvas.
+ * Returns the original file if compression fails or is not beneficial.
  */
-export async function compressImage(file: File): Promise<File | Blob> {
-    // Skip compression for non-raster or animated images if needed
-    // But for simplicity, we'll try to compress any image/ entry
-    if (!file.type.startsWith('image/') || file.type === 'image/gif' || file.type === 'image/svg+xml') {
+export async function compressImage(file: File, options?: CompressOptions): Promise<File> {
+    const opts = { ...DEFAULT_OPTIONS, ...(options || {}) };
+
+    // Only handle common raster images; skip gifs/svg
+    if (!file.type.startsWith("image/") || file.type === "image/gif" || file.type === "image/svg+xml") {
         return file;
     }
 
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (event) => {
-            const img = new Image();
-            img.src = event.target?.result as string;
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                let width = img.width;
-                let height = img.height;
+    try {
+        const bitmap = await createImageBitmap(file);
+        const { width, height } = bitmap;
 
-                const MAX_DIMENSION = 1600;
+        let targetWidth = width;
+        let targetHeight = height;
 
-                if (width > height) {
-                    if (width > MAX_DIMENSION) {
-                        height = Math.round((height * MAX_DIMENSION) / width);
-                        width = MAX_DIMENSION;
-                    }
-                } else {
-                    if (height > MAX_DIMENSION) {
-                        width = Math.round((width * MAX_DIMENSION) / height);
-                        height = MAX_DIMENSION;
-                    }
-                }
+        if (width > opts.maxWidth || height > opts.maxHeight) {
+            const ratio = Math.min(opts.maxWidth / width, opts.maxHeight / height);
+            targetWidth = Math.round(width * ratio);
+            targetHeight = Math.round(height * ratio);
+        }
 
-                canvas.width = width;
-                canvas.height = height;
+        const canvas = document.createElement("canvas");
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return file;
 
-                const ctx = canvas.getContext('2d');
-                if (!ctx) {
-                    return resolve(file);
-                }
+        ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
 
-                ctx.drawImage(img, 0, 0, width, height);
+        const mimeType = "image/webp";
 
-                // Try WebP first, then fallback to JPEG
-                const targetType = 'image/webp';
-                const quality = 0.8;
+        const blob: Blob | null = await new Promise((resolve) => {
+            canvas.toBlob(
+                (b) => resolve(b),
+                mimeType,
+                opts.quality
+            );
+        });
 
-                canvas.toBlob(
-                    (blob) => {
-                        if (!blob) {
-                            return resolve(file);
-                        }
+        if (!blob) return file;
 
-                        // If compressed blob is larger than original, return original
-                        if (blob.size > file.size) {
-                            return resolve(file);
-                        }
+        // If compression is not beneficial, keep original
+        if (blob.size >= file.size) {
+            return file;
+        }
 
-                        // Create a new File object from the blob to preserve name (but change extension if needed)
-                        const newFileName = file.name.replace(/\.[^/.]+$/, "") + (blob.type === 'image/webp' ? '.webp' : '.jpg');
-                        const compressedFile = new File([blob], newFileName, {
-                            type: blob.type,
-                            lastModified: Date.now(),
-                        });
-
-                        resolve(compressedFile);
-                    },
-                    targetType,
-                    quality
-                );
-            };
-            img.onerror = () => resolve(file);
-        };
-        reader.onerror = () => resolve(file);
-    });
+        const newName = file.name.replace(/\.[^.]+$/, ".webp");
+        return new File([blob], newName, { type: mimeType });
+    } catch {
+        // On any error, fall back to original
+        return file;
+    }
 }
+

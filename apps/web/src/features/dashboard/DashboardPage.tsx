@@ -3,7 +3,6 @@ import { motion } from 'motion/react';
 import { api } from '@/lib/api';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import {
     Loader2,
     ShoppingBag,
@@ -14,8 +13,7 @@ import {
     ArrowRight,
     TrendingUp,
     Sparkles,
-    Newspaper,
-    Plus
+    Newspaper
 } from 'lucide-react';
 
 interface DashboardData {
@@ -142,26 +140,32 @@ export function DashboardPage() {
                 variants={container}
                 initial="hidden"
                 animate="show"
-                className="grid gap-4 grid-cols-1 sm:grid-cols-2"
+                className="grid gap-4 grid-cols-1 lg:grid-cols-2"
             >
                 <motion.div variants={item}>
                     <SummaryCard
                         title="Marketplace"
                         href="/marketplace/my-listings"
+                        secondaryHref="/marketplace/list"
+                        secondaryLabel="List new"
                         data={data?.marketplace}
                         icon={ShoppingBag}
                         color="text-orange-500"
                         bgColor="bg-orange-500/10"
+                        gradient="from-amber-50 via-white to-orange-50 dark:from-amber-950/40 dark:via-background dark:to-orange-950/30"
                     />
                 </motion.div>
                 <motion.div variants={item}>
                     <SummaryCard
                         title="Lost & Found"
                         href="/lost-found/my-listings"
+                        secondaryHref="/lost-found/report"
+                        secondaryLabel="Report item"
                         data={data?.lostFound}
                         icon={Search}
                         color="text-teal-500"
                         bgColor="bg-teal-500/10"
+                        gradient="from-teal-50 via-white to-emerald-50 dark:from-teal-950/40 dark:via-background dark:to-emerald-950/30"
                     />
                 </motion.div>
             </motion.div>
@@ -203,69 +207,81 @@ interface SummaryCardProps {
     icon: React.ElementType;
     color: string;
     bgColor: string;
+    gradient: string;
+    secondaryHref?: string;
+    secondaryLabel?: string;
 }
 
-function SummaryCard({ title, href, data, icon: Icon, color, bgColor }: SummaryCardProps) {
-    const itemCount = data?.length || 0;
-    const actionHref = title === "Marketplace" ? "/marketplace/create" : "/lost-found/create";
-    const actionLabel = title === "Marketplace" ? "Sell Item" : "Report Lost";
+function SummaryCard({
+    title,
+    href,
+    data,
+    icon: Icon,
+    color,
+    bgColor,
+    gradient,
+    secondaryHref,
+    secondaryLabel
+}: SummaryCardProps) {
+    const count = data?.length ?? 0;
 
     return (
-        <Card className="h-full border-border/50 hover:border-border hover:shadow-xl transition-all duration-300 overflow-hidden group">
-            <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className={`p-2.5 rounded-xl ${bgColor} group-hover:scale-110 transition-transform`}>
-                            <Icon className={`w-5 h-5 ${color}`} />
-                        </div>
-                        <div>
-                            <CardTitle className="text-base sm:text-lg font-bold group-hover:text-brand-navy transition-colors">
+        <Link to={href} className="group block">
+            <Card className={`h-full border border-border/60 hover:border-border hover:shadow-xl transition-all duration-300 overflow-hidden bg-gradient-to-br ${gradient}`}>
+                <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                            <div className={`p-2.5 rounded-xl bg-background/70 ${bgColor}`}>
+                                <Icon className={`w-5 h-5 ${color}`} />
+                            </div>
+                            <CardTitle className="text-base sm:text-lg font-bold text-brand-navy dark:text-white group-hover:text-brand-navy transition-colors">
                                 {title}
                             </CardTitle>
-                            <p className="text-xs text-muted-foreground">{itemCount} active listings</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Active</p>
+                            <p className="text-2xl font-extrabold text-brand-navy/90 dark:text-white">
+                                {count}
+                            </p>
                         </div>
                     </div>
-                    <Link to={actionHref}>
-                        <Button size="icon" variant="ghost" className={`h-8 w-8 rounded-full ${bgColor} ${color} hover:scale-110`}>
-                            <Plus className="w-4 h-4" />
-                        </Button>
-                    </Link>
-                </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-                <Link to={href} className="block">
-                    <div className={`rounded-xl p-3 ${bgColor} border border-border/20 mb-3 group-hover:border-border/40 transition-colors`}>
-                        {data && data.length > 0 ? (
-                            <ul className="space-y-1.5">
-                                {data.slice(0, 2).map((i) => (
-                                    <li key={i.id} className="text-xs truncate text-muted-foreground flex items-center gap-2">
-                                        <div className={`w-1 h-1 rounded-full ${color.replace('text-', 'bg-')}`} />
-                                        {i.title || i.content || i.itemName}
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p className="text-xs text-muted-foreground italic flex items-center gap-2">
-                                <TrendingUp className="w-3.5 h-3.5" />
-                                Start exploring now
-                            </p>
+                </CardHeader>
+                <CardContent className="pt-0 space-y-3">
+                    {data && data.length > 0 ? (
+                        <ul className="space-y-1.5">
+                            {data.slice(0, 3).map((i) => (
+                                <li
+                                    key={i.id}
+                                    className="text-sm truncate text-muted-foreground/90 group-hover:text-foreground transition-colors flex items-center gap-2"
+                                >
+                                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand-navy/40" />
+                                    {i.title || i.content || i.itemName}
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="text-sm text-muted-foreground italic flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4" />
+                            No recent activity yet – start by creating one.
+                        </p>
+                    )}
+                    <div className="flex items-center justify-between pt-1 border-t border-border/40 mt-1">
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-brand-navy transition-colors">
+                            View all <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                        {secondaryHref && secondaryLabel && (
+                            <Link
+                                to={secondaryHref}
+                                className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-background/80 text-brand-navy hover:bg-brand-navy hover:text-white transition-colors"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                {secondaryLabel}
+                            </Link>
                         )}
                     </div>
-                    <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-muted-foreground group-hover:text-brand-navy flex items-center gap-1">
-                            Go to {title.toLowerCase()} <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-                        </span>
-                        <div className="flex -space-x-2">
-                            {[1, 2, 3].map((_, i) => (
-                                <div key={i} className={`w-6 h-6 rounded-full border-2 border-background ${bgColor} flex items-center justify-center`}>
-                                    <Icon className={`w-3 h-3 ${color} opacity-40`} />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </Link>
-            </CardContent>
-        </Card>
+                </CardContent>
+            </Card>
+        </Link>
     );
 }
 

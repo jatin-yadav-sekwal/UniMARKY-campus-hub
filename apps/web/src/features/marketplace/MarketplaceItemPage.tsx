@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { api } from '@/lib/api';
-import { ArrowLeft, Phone, User, BadgeCheck, Tag, Calendar, MapPin, MessageCircle, Share2, Heart, Loader2 } from 'lucide-react';
+import { ArrowLeft, Phone, User, BadgeCheck, Tag, Calendar, MapPin, MessageCircle, Share2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface SellerInfo {

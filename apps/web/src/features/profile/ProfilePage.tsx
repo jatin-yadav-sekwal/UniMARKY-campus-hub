@@ -21,7 +21,6 @@ import { api } from "@/lib/api";
 import { uploadImage } from "@/lib/uploadImage";
 import { supabase } from "@/lib/supabase";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { toast } from "sonner";
 
 interface Profile {
     id: string;
@@ -36,7 +35,7 @@ interface Profile {
 }
 
 export function ProfilePage() {
-    const { user, signOut, refresh } = useAuth();
+    const { user } = useAuth();
     const [profile, setProfile] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -47,10 +46,27 @@ export function ProfilePage() {
     const [department, setDepartment] = useState("");
     const [studentClass, setStudentClass] = useState("");
     const [mobileNumber, setMobileNumber] = useState("");
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+    const initialAvatar =
+        (user?.user_metadata as any)?.custom_avatar_url ||
+        (user?.user_metadata as any)?.avatar_url ||
+        (user?.user_metadata as any)?.picture ||
+        null;
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatar);
 
     useEffect(() => {
         fetchProfile();
     }, []);
+
+    useEffect(() => {
+        const next =
+            (user?.user_metadata as any)?.custom_avatar_url ||
+            (user?.user_metadata as any)?.avatar_url ||
+            (user?.user_metadata as any)?.picture ||
+            null;
+        setAvatarUrl(next);
+    }, [user]);
 
     const fetchProfile = async () => {
         try {
@@ -97,25 +113,22 @@ export function ProfilePage() {
         }
     };
 
-    const [uploadingAvatar, setUploadingAvatar] = useState(false);
-
     const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
         try {
             setUploadingAvatar(true);
-            const imageUrl = await uploadImage(file, { bucket: "avatars" });
+            const imageUrl = await uploadImage(file, "profile-avatars");
 
             const { error } = await supabase.auth.updateUser({
-                data: { avatar_url: imageUrl }
+                data: { custom_avatar_url: imageUrl }
             });
 
             if (error) throw error;
 
-            // Refresh auth state to get updated user metadata
-            await refresh();
-            toast.success("Avatar updated successfully!");
+            // Update local state so avatar changes immediately
+            setAvatarUrl(imageUrl);
         } catch (err) {
             console.error("Avatar upload failed:", err);
             setError("Failed to upload avatar");
@@ -132,8 +145,11 @@ export function ProfilePage() {
         );
     }
 
-    const userAvatar = user?.user_metadata?.avatar_url;
-    const userFullName = profile?.fullName || user?.user_metadata?.full_name || "Student";
+    const userFullName =
+        profile?.fullName ||
+        (user?.user_metadata as any)?.full_name ||
+        user?.email?.split("@")[0] ||
+        "Student";
 
     return (
         <div className="max-w-4xl mx-auto pb-12">
@@ -170,7 +186,9 @@ export function ProfilePage() {
                         {/* Avatar */}
                         <div className="relative group">
                             <Avatar className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl border-4 border-white/20 shadow-xl overflow-hidden">
-                                <AvatarImage src={userAvatar} className="object-cover" />
+                                {avatarUrl && (
+                                    <AvatarImage src={avatarUrl} alt={userFullName} className="object-cover" />
+                                )}
                                 <AvatarFallback className="bg-gradient-to-br from-brand-orange to-brand-yellow text-white text-3xl font-black">
                                     {userFullName[0]}
                                 </AvatarFallback>
@@ -182,7 +200,13 @@ export function ProfilePage() {
                                 ) : (
                                     <Camera className="w-6 h-6 text-white" />
                                 )}
-                                <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" disabled={uploadingAvatar} />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleAvatarUpload}
+                                    className="hidden"
+                                    disabled={uploadingAvatar}
+                                />
                             </label>
                         </div>
 
