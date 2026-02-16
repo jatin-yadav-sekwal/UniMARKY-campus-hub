@@ -61,9 +61,12 @@ function PageLoader() {
     );
 }
 
+import { Toaster } from 'sonner';
+
 export default function App() {
     return (
         <Suspense fallback={<PageLoader />}>
+            <Toaster position="top-center" richColors />
             <ScrollToTop />
             <Routes>
                 <Route path="/" element={<LandingPage />} />

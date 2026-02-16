@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { api } from '@/lib/api';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
     Loader2,
     ShoppingBag,
@@ -12,7 +13,9 @@ import {
     GraduationCap,
     ArrowRight,
     TrendingUp,
-    Sparkles,Newspaper
+    Sparkles,
+    Newspaper,
+    Plus
 } from 'lucide-react';
 
 interface DashboardData {
@@ -203,40 +206,66 @@ interface SummaryCardProps {
 }
 
 function SummaryCard({ title, href, data, icon: Icon, color, bgColor }: SummaryCardProps) {
+    const itemCount = data?.length || 0;
+    const actionHref = title === "Marketplace" ? "/marketplace/create" : "/lost-found/create";
+    const actionLabel = title === "Marketplace" ? "Sell Item" : "Report Lost";
+
     return (
-        <Link to={href} className="group block">
-            <Card className="h-full border-border/50 hover:border-border hover:shadow-lg transition-all duration-300 overflow-hidden">
-                <CardHeader className="pb-2">
+        <Card className="h-full border-border/50 hover:border-border hover:shadow-xl transition-all duration-300 overflow-hidden group">
+            <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className={`p-2.5 rounded-xl ${bgColor}`}>
+                        <div className={`p-2.5 rounded-xl ${bgColor} group-hover:scale-110 transition-transform`}>
                             <Icon className={`w-5 h-5 ${color}`} />
                         </div>
-                        <CardTitle className="text-base sm:text-lg font-bold group-hover:text-brand-navy transition-colors">
-                            {title}
-                        </CardTitle>
+                        <div>
+                            <CardTitle className="text-base sm:text-lg font-bold group-hover:text-brand-navy transition-colors">
+                                {title}
+                            </CardTitle>
+                            <p className="text-xs text-muted-foreground">{itemCount} active listings</p>
+                        </div>
                     </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                    {data && data.length > 0 ? (
-                        <ul className="space-y-2">
-                            {data.slice(0, 3).map((i) => (
-                                <li key={i.id} className="text-sm truncate text-muted-foreground group-hover:text-foreground transition-colors">
-                                    • {i.title || i.content || i.itemName}
-                                </li>
+                    <Link to={actionHref}>
+                        <Button size="icon" variant="ghost" className={`h-8 w-8 rounded-full ${bgColor} ${color} hover:scale-110`}>
+                            <Plus className="w-4 h-4" />
+                        </Button>
+                    </Link>
+                </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+                <Link to={href} className="block">
+                    <div className={`rounded-xl p-3 ${bgColor} border border-border/20 mb-3 group-hover:border-border/40 transition-colors`}>
+                        {data && data.length > 0 ? (
+                            <ul className="space-y-1.5">
+                                {data.slice(0, 2).map((i) => (
+                                    <li key={i.id} className="text-xs truncate text-muted-foreground flex items-center gap-2">
+                                        <div className={`w-1 h-1 rounded-full ${color.replace('text-', 'bg-')}`} />
+                                        {i.title || i.content || i.itemName}
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-xs text-muted-foreground italic flex items-center gap-2">
+                                <TrendingUp className="w-3.5 h-3.5" />
+                                Start exploring now
+                            </p>
+                        )}
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-muted-foreground group-hover:text-brand-navy flex items-center gap-1">
+                            Go to {title.toLowerCase()} <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                        </span>
+                        <div className="flex -space-x-2">
+                            {[1, 2, 3].map((_, i) => (
+                                <div key={i} className={`w-6 h-6 rounded-full border-2 border-background ${bgColor} flex items-center justify-center`}>
+                                    <Icon className={`w-3 h-3 ${color} opacity-40`} />
+                                </div>
                             ))}
-                        </ul>
-                    ) : (
-                        <p className="text-sm text-muted-foreground italic flex items-center gap-2">
-                            <TrendingUp className="w-4 h-4" />
-                            No recent activity
-                        </p>
-                    )}
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-3 group-hover:text-brand-navy transition-colors">
-                        View all <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                        </div>
                     </div>
-                </CardContent>
-            </Card>
-        </Link>
+                </Link>
+            </CardContent>
+        </Card>
     );
 }
 

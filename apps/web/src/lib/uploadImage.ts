@@ -1,35 +1,66 @@
 import { supabase } from "./supabase";
+import { compressImage } from "./compressImage";
+
+interface UploadOptions {
+    bucket: string;
+    folder?: string;
+    compress?: boolean;
+}
 
 /**
- * Upload a file to Supabase Storage and return its public URL.
- * 
- * @param file     The File object to upload
- * @param bucket   The storage bucket name (e.g. "marketplace-images")
- * @returns        The public URL of the uploaded file
+ * Uploads an image to Supabase Storage with optional compression.
  */
-export async function uploadImage(file: File, bucket: string): Promise<string> {
-    const ext = file.name.split(".").pop() || "jpg";
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+export async function uploadImage(
+    file: File,
+    options: string | UploadOptions
+): Promise<string> {
+    const bucket = typeof options === "string" ? options : options.bucket;
+    const folder = typeof options === "string" ? "" : options.folder || "";
+    const compress = typeof options === "string" ? true : options.compress !== false;
 
-    const { error } = await supabase.storage
+    let fileToUpload: File | Blob = file;
+
+    if (compress) {
+        try {
+            fileToUpload = await compressImage(file);
+        } catch (error) {
+            console.warn("Image compression failed, uploading original:", error);
+            fileToUpload = file;
+        }
+    }
+
+    // Generate a secure, unique file path
+    const ext = file.name.split(".").pop();
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).slice(2, 7);
+    const fileName = `${timestamp}-${random}.${ext}`;
+    const filePath = folder ? `${folder}/${fileName}` : fileName;
+
+    const { data, error } = await supabase.storage
         .from(bucket)
-        .upload(fileName, file, {
+        .upload(filePath, fileToUpload, {
+            contentType: fileToUpload.type,
             cacheControl: "3600",
             upsert: false,
         });
 
-    if (error) throw error;
+    if (error) {
+        throw error;
+    }
 
-    const { data: { publicUrl } } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(fileName);
+    const {
+        data: { publicUrl },
+    } = supabase.storage.from(bucket).getPublicUrl(data.path);
 
     return publicUrl;
 }
 
 /**
- * Upload multiple files to Supabase Storage and return their public URLs.
+ * Uploads multiple images concurrently.
  */
-export async function uploadImages(files: File[], bucket: string): Promise<string[]> {
-    return Promise.all(files.map(file => uploadImage(file, bucket)));
+export async function uploadImages(
+    files: File[],
+    options: string | UploadOptions
+): Promise<string[]> {
+    return Promise.all(files.map((file) => uploadImage(file, options)));
 }

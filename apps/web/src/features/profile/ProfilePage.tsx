@@ -7,19 +7,21 @@ import {
     Building2,
     GraduationCap,
     BookOpen,
-    Shield,
-    ShieldCheck,
     Save,
     Loader2,
-    CheckCircle2,
     AlertCircle,
-    Lock
+    Lock,
+    Camera
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
+import { uploadImage } from "@/lib/uploadImage";
+import { supabase } from "@/lib/supabase";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { toast } from "sonner";
 
 interface Profile {
     id: string;
@@ -34,7 +36,7 @@ interface Profile {
 }
 
 export function ProfilePage() {
-    const { user } = useAuth();
+    const { user, signOut, refresh } = useAuth();
     const [profile, setProfile] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -95,6 +97,33 @@ export function ProfilePage() {
         }
     };
 
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+            setUploadingAvatar(true);
+            const imageUrl = await uploadImage(file, { bucket: "avatars" });
+
+            const { error } = await supabase.auth.updateUser({
+                data: { avatar_url: imageUrl }
+            });
+
+            if (error) throw error;
+
+            // Refresh auth state to get updated user metadata
+            await refresh();
+            toast.success("Avatar updated successfully!");
+        } catch (err) {
+            console.error("Avatar upload failed:", err);
+            setError("Failed to upload avatar");
+        } finally {
+            setUploadingAvatar(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
@@ -102,6 +131,9 @@ export function ProfilePage() {
             </div>
         );
     }
+
+    const userAvatar = user?.user_metadata?.avatar_url;
+    const userFullName = profile?.fullName || user?.user_metadata?.full_name || "Student";
 
     return (
         <div className="max-w-4xl mx-auto pb-12">
@@ -134,41 +166,35 @@ export function ProfilePage() {
             >
                 {/* Profile Header */}
                 <div className="relative bg-gradient-to-r from-brand-navy via-brand-navy/95 to-brand-navy p-6 sm:p-8">
-                    <div className="flex flex-col sm:flex-row items-center gap-6">
+                    <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
                         {/* Avatar */}
-                        <div className="relative">
-                            <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl bg-gradient-to-br from-brand-yellow/30 to-brand-orange/20 flex items-center justify-center border-4 border-white/20">
-                                <User className="h-12 w-12 sm:h-14 sm:w-14 text-white" />
-                            </div>
-                            {profile?.isVerified && (
-                                <div className="absolute -bottom-2 -right-2 h-8 w-8 bg-green-500 rounded-full flex items-center justify-center border-4 border-brand-navy">
-                                    <ShieldCheck className="h-4 w-4 text-white" />
-                                </div>
-                            )}
+                        <div className="relative group">
+                            <Avatar className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl border-4 border-white/20 shadow-xl overflow-hidden">
+                                <AvatarImage src={userAvatar} className="object-cover" />
+                                <AvatarFallback className="bg-gradient-to-br from-brand-orange to-brand-yellow text-white text-3xl font-black">
+                                    {userFullName[0]}
+                                </AvatarFallback>
+                            </Avatar>
+
+                            <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-2xl">
+                                {uploadingAvatar ? (
+                                    <Loader2 className="w-6 h-6 text-white animate-spin" />
+                                ) : (
+                                    <Camera className="w-6 h-6 text-white" />
+                                )}
+                                <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" disabled={uploadingAvatar} />
+                            </label>
                         </div>
 
                         {/* User Info */}
-                        <div className="text-center sm:text-left">
+                        <div className="flex-1">
                             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1">
-                                {profile?.fullName || "Student"}
+                                {userFullName}
                             </h2>
                             <p className="text-white/70 flex items-center justify-center sm:justify-start gap-2">
                                 <Building2 className="h-4 w-4" />
                                 {profile?.universityName || "University"}
                             </p>
-                            <div className="mt-3 flex items-center justify-center sm:justify-start gap-2">
-                                {profile?.isVerified ? (
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/20 text-green-300 text-sm font-medium">
-                                        <ShieldCheck className="h-3.5 w-3.5" />
-                                        Verified Student
-                                    </span>
-                                ) : (
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-300 text-sm font-medium">
-                                        <Shield className="h-3.5 w-3.5" />
-                                        Pending Verification
-                                    </span>
-                                )}
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -302,7 +328,6 @@ export function ProfilePage() {
                             animate={{ opacity: 1, y: 0 }}
                             className="flex items-center gap-2 p-3 rounded-lg bg-green-50 text-green-600 text-sm"
                         >
-                            <CheckCircle2 className="h-4 w-4" />
                             Profile updated successfully!
                         </motion.div>
                     )}

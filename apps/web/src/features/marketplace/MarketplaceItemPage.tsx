@@ -76,6 +76,26 @@ export function MarketplaceItemPage() {
         year: 'numeric'
     });
 
+    const handleShare = async () => {
+        if (!item) return;
+        const shareData = {
+            title: item.title,
+            text: `Check out this ${item.title} on UniMARKY Marketplace!`,
+            url: window.location.href,
+        };
+
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+            } else {
+                await navigator.clipboard.writeText(window.location.href);
+                alert("Link copied to clipboard!");
+            }
+        } catch (err) {
+            console.error("Error sharing:", err);
+        }
+    };
+
     return (
         <div className="max-w-6xl mx-auto pb-12">
             {/* Back Button */}
@@ -112,19 +132,19 @@ export function MarketplaceItemPage() {
 
                     {/* Badge */}
                     <div className={`absolute top-4 left-4 px-4 py-2 rounded-full text-sm font-bold ${item.isNegotiable
-                            ? "bg-brand-orange text-white"
-                            : "bg-brand-navy text-white"
+                        ? "bg-brand-orange text-white"
+                        : "bg-brand-navy text-white"
                         }`}>
                         {item.isNegotiable ? "NEGOTIABLE" : "FIXED PRICE"}
                     </div>
 
                     {/* Action Buttons */}
                     <div className="absolute top-4 right-4 flex gap-2">
-                        <button className="p-3 rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white transition-colors">
-                            <Heart className="w-5 h-5 text-muted-foreground" />
-                        </button>
-                        <button className="p-3 rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white transition-colors">
-                            <Share2 className="w-5 h-5 text-muted-foreground" />
+                        <button
+                            onClick={handleShare}
+                            className="p-3 rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white transition-colors text-brand-navy"
+                        >
+                            <Share2 className="w-5 h-5" />
                         </button>
                     </div>
                 </motion.div>

@@ -9,6 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
 import { api } from "@/lib/api";
+import { uploadImage } from "@/lib/uploadImage";
 
 interface CreatePostProps {
     onPostCreated: (post: any) => void;
@@ -85,14 +86,7 @@ export function CreatePost({ onPostCreated, userRole, userName }: CreatePostProp
         try {
             let imageUrl: string | undefined;
             if (imageFile) {
-                const ext = imageFile.name.split(".").pop();
-                const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-                const { error: uploadError } = await supabase.storage
-                    .from("post-images")
-                    .upload(filePath, imageFile);
-                if (uploadError) throw uploadError;
-                const { data: { publicUrl } } = supabase.storage.from("post-images").getPublicUrl(filePath);
-                imageUrl = publicUrl;
+                imageUrl = await uploadImage(imageFile, { bucket: "post-images" });
             }
 
             const payload: any = { content, type, imageUrl };
