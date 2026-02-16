@@ -2,3 +2,5 @@ node_modules
 .agent
 .agents
 .env
+# DevContext - AI coding context
+.devctx/

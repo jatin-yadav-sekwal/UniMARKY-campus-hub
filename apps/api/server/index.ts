@@ -27,6 +27,7 @@ app.use("*", cors({
       process.env.VITE_DEV_SERVER_URL,
       process.env.VITE_WEB_URL,
       process.env.CORS_ORIGIN
+      
     ].filter((url): url is string => !!url); // Type guard to filter null/undefined
     
     // Allow requests with no origin (e.g. mobile apps, curl)

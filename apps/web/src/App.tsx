@@ -15,12 +15,14 @@ const AuthPage = lazy(() => import('@/features/auth/AuthPage').then(m => ({ defa
 const OnboardingPage = lazy(() => import('@/features/onboarding/OnboardingPage').then(m => ({ default: m.OnboardingPage })));
 const DashboardPage = lazy(() => import('@/features/dashboard/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const MarketplacePage = lazy(() => import('@/features/marketplace/MarketplacePage').then(m => ({ default: m.MarketplacePage })));
+const MyMarketplaceListingsPage = lazy(() => import('@/features/marketplace/MyMarketplaceListingsPage').then(m => ({ default: m.MyMarketplaceListingsPage })));
 const ListItemPage = lazy(() => import('@/features/marketplace/ListItemPage').then(m => ({ default: m.ListItemPage })));
 const MarketplaceItemPage = lazy(() => import('@/features/marketplace/MarketplaceItemPage').then(m => ({ default: m.MarketplaceItemPage })));
 const UnimediaPage = lazy(() => import('@/features/campus/pages/UnimediaPage').then(m => ({ default: m.UnimediaPage })));
 const MyContentPage = lazy(() => import('@/features/campus/pages/MyContentPage').then(m => ({ default: m.MyContentPage })));
 const PostDetailPage = lazy(() => import('@/features/campus/pages/PostDetailPage').then(m => ({ default: m.PostDetailPage })));
 const LostFoundPage = lazy(() => import('@/features/campus/pages/LostFoundPage').then(m => ({ default: m.LostFoundPage })));
+const MyLostFoundListingsPage = lazy(() => import('@/features/lostfound/MyLostFoundListingsPage').then(m => ({ default: m.MyLostFoundListingsPage })));
 const ReportItemPage = lazy(() => import('@/features/lostfound/ReportItemPage').then(m => ({ default: m.ReportItemPage })));
 const LostFoundItemPage = lazy(() => import('@/features/lostfound/LostFoundItemPage').then(m => ({ default: m.LostFoundItemPage })));
 const AnnouncementsPage = lazy(() => import('@/features/campus/pages/AnnouncementsPage').then(m => ({ default: m.AnnouncementsPage })));
@@ -82,12 +84,14 @@ export default function App() {
                     <Route element={<MainLayout />}>
                         <Route path="/dashboard" element={<DashboardPage />} />
                         <Route path="/marketplace" element={<MarketplacePage />} />
+                        <Route path="/marketplace/my-listings" element={<MyMarketplaceListingsPage />} />
                         <Route path="/marketplace/list" element={<ListItemPage />} />
                         <Route path="/marketplace/:id" element={<MarketplaceItemPage />} />
                         <Route path="/unimedia" element={<UnimediaPage />} />
                         <Route path="/unimedia/my-content" element={<MyContentPage />} />
                         <Route path="/unimedia/:id" element={<PostDetailPage />} />
                         <Route path="/lost-found" element={<LostFoundPage />} />
+                        <Route path="/lost-found/my-listings" element={<MyLostFoundListingsPage />} />
                         <Route path="/lost-found/report" element={<ReportItemPage />} />
                         <Route path="/lost-found/:id" element={<LostFoundItemPage />} />
                         <Route path="/announcements" element={<AnnouncementsPage />} />

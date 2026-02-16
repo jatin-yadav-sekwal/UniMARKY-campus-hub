@@ -84,6 +84,41 @@ lostFoundApp.post("/", zValidator("json", createReportSchema), async (c) => {
   return c.json(newItem[0], 201);
 });
 
+// GET /my-listings - Current user's listings
+lostFoundApp.get("/my-listings", async (c) => {
+  const userId = c.get("userId");
+  const university = c.get("universityName");
+  const limit = parseInt(c.req.query("limit") || "20");
+  const offset = parseInt(c.req.query("offset") || "0");
+
+  if (!userId || !university) {
+    return c.json({ items: [], hasMore: false, total: 0 });
+  }
+
+  // Build where conditions
+  const conditions = [
+    eq(lostFound.universityName, university),
+    eq(lostFound.reporterId, userId)
+  ];
+
+  // Get total count
+  const countResult = await db.select({ count: sql<number>`count(*)` })
+    .from(lostFound)
+    .where(and(...conditions));
+  const total = Number(countResult[0]?.count || 0);
+
+  // Get paginated items
+  const items = await db.select().from(lostFound)
+    .where(and(...conditions))
+    .orderBy(desc(lostFound.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+  const hasMore = offset + items.length < total;
+    
+  return c.json({ items, hasMore, total });
+});
+
 // GET /:id - Item Details with Reporter Info
 lostFoundApp.get("/:id", async (c) => {
   const id = c.req.param("id");
@@ -110,6 +145,35 @@ lostFoundApp.get("/:id", async (c) => {
     ...firstResult.item,
     reporter: firstResult.reporter
   });
+});
+
+// DELETE /:id - Delete listing
+lostFoundApp.delete("/:id", async (c) => {
+  const id = c.req.param("id");
+  const userId = c.get("userId");
+
+  if (!userId) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  // Check ownership
+  const item = await db.select().from(lostFound)
+    .where(eq(lostFound.id, id))
+    .limit(1);
+
+  if (item.length === 0) {
+    return c.json({ error: "Item not found" }, 404);
+  }
+
+  if (item[0].reporterId !== userId) {
+    return c.json({ error: "Forbidden: You can only delete your own listings" }, 403);
+  }
+
+  // Delete the item
+  await db.delete(lostFound)
+    .where(eq(lostFound.id, id));
+
+  return c.json({ message: "Item deleted successfully" });
 });
 
 export default lostFoundApp;

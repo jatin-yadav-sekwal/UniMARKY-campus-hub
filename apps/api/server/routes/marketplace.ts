@@ -75,6 +75,41 @@ marketplaceApp.post("/", zValidator("json", createItemSchema), async (c) => {
   return c.json(newItem[0], 201);
 });
 
+// GET /my-listings - Current user's listings
+marketplaceApp.get("/my-listings", async (c) => {
+  const userId = c.get("userId");
+  const university = c.get("universityName");
+  const limit = parseInt(c.req.query("limit") || "20");
+  const offset = parseInt(c.req.query("offset") || "0");
+
+  if (!userId || !university) {
+    return c.json({ items: [], hasMore: false, total: 0 });
+  }
+
+  // Build where conditions
+  const conditions = [
+    eq(marketplaceItems.universityName, university),
+    eq(marketplaceItems.sellerId, userId)
+  ];
+
+  // Get total count
+  const countResult = await db.select({ count: sql<number>`count(*)` })
+    .from(marketplaceItems)
+    .where(and(...conditions));
+  const total = Number(countResult[0]?.count || 0);
+
+  // Get paginated items
+  const items = await db.select().from(marketplaceItems)
+    .where(and(...conditions))
+    .orderBy(desc(marketplaceItems.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+  const hasMore = offset + items.length < total;
+    
+  return c.json({ items, hasMore, total });
+});
+
 // GET /:id - Item Details with Seller Info
 marketplaceApp.get("/:id", async (c) => {
   const id = c.req.param("id");
@@ -102,6 +137,35 @@ marketplaceApp.get("/:id", async (c) => {
     ...result[0].item,
     seller: result[0].seller
   });
+});
+
+// DELETE /:id - Delete listing
+marketplaceApp.delete("/:id", async (c) => {
+  const id = c.req.param("id");
+  const userId = c.get("userId");
+
+  if (!userId) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  // Check ownership
+  const item = await db.select().from(marketplaceItems)
+    .where(eq(marketplaceItems.id, id))
+    .limit(1);
+
+  if (item.length === 0) {
+    return c.json({ error: "Item not found" }, 404);
+  }
+
+  if (item[0].sellerId !== userId) {
+    return c.json({ error: "Forbidden: You can only delete your own listings" }, 403);
+  }
+
+  // Delete the item
+  await db.delete(marketplaceItems)
+    .where(eq(marketplaceItems.id, id));
+
+  return c.json({ message: "Item deleted successfully" });
 });
 
 export default marketplaceApp;

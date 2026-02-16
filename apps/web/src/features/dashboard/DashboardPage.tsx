@@ -7,19 +7,17 @@ import {
     Loader2,
     ShoppingBag,
     Search,
-    Newspaper,
     Utensils,
     Home,
     GraduationCap,
     ArrowRight,
     TrendingUp,
-    Sparkles
+    Sparkles,Newspaper
 } from 'lucide-react';
 
 interface DashboardData {
     marketplace?: { id: string; title?: string }[];
     lostFound?: { id: string; itemName?: string }[];
-    social?: { id: string; content?: string }[];
 }
 
 const quickAccessItems = [
@@ -141,12 +139,12 @@ export function DashboardPage() {
                 variants={container}
                 initial="hidden"
                 animate="show"
-                className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                className="grid gap-4 grid-cols-1 sm:grid-cols-2"
             >
                 <motion.div variants={item}>
                     <SummaryCard
                         title="Marketplace"
-                        href="/marketplace"
+                        href="/marketplace/my-listings"
                         data={data?.marketplace}
                         icon={ShoppingBag}
                         color="text-orange-500"
@@ -156,21 +154,11 @@ export function DashboardPage() {
                 <motion.div variants={item}>
                     <SummaryCard
                         title="Lost & Found"
-                        href="/lost-found"
+                        href="/lost-found/my-listings"
                         data={data?.lostFound}
                         icon={Search}
                         color="text-teal-500"
                         bgColor="bg-teal-500/10"
-                    />
-                </motion.div>
-                <motion.div variants={item}>
-                    <SummaryCard
-                        title="Campus Buzz"
-                        href="/unimedia"
-                        data={data?.social}
-                        icon={Newspaper}
-                        color="text-pink-500"
-                        bgColor="bg-pink-500/10"
                     />
                 </motion.div>
             </motion.div>
