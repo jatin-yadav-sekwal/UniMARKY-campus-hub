@@ -91,7 +91,7 @@ function LostFoundListingCard({ item, onDelete }: { item: LostFoundItem; onDelet
                         <Search className="w-3 h-3" /> View
                     </Link>
                     <Link
-                        to={`/lost-found/${item.id}`}
+                        to={`/lost-found/edit/${item.id}`}
                         className="flex-1 text-center text-[11px] text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center justify-center gap-1 transition-colors"
                     >
                         <Edit className="w-3 h-3" /> Edit

@@ -105,23 +105,39 @@ export function MarketplacePage() {
     return (
         <div className="relative min-h-screen pb-20">
             {/* Header Section */}
-            <div className="mb-6 sm:mb-8">
-                <motion.h1
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-2 sm:mb-3"
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 sm:mb-8">
+                <div>
+                    <motion.h1
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-2 sm:mb-3"
+                    >
+                        <span className="text-brand-navy">CAMPUS </span>
+                        <span className="bg-gradient-to-r from-brand-orange to-brand-yellow bg-clip-text text-transparent">DEALS</span>
+                    </motion.h1>
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.1 }}
+                        className="text-muted-foreground text-sm sm:text-base lg:text-lg max-w-xl"
+                    >
+                        Exclusive marketplace for verified university students. Buy, sell, and swap with your campus peers safely.
+                    </motion.p>
+                </div>
+
+                <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
                 >
-                    <span className="text-brand-navy">CAMPUS </span>
-                    <span className="bg-gradient-to-r from-brand-orange to-brand-yellow bg-clip-text text-transparent">DEALS</span>
-                </motion.h1>
-                <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className="text-muted-foreground text-sm sm:text-base lg:text-lg max-w-xl"
-                >
-                    Exclusive marketplace for verified university students. Buy, sell, and swap with your campus peers safely.
-                </motion.p>
+                    <Button
+                        onClick={() => navigate("/marketplace/my-listings")}
+                        variant="outline"
+                        className="rounded-full border-2 border-brand-navy text-brand-navy hover:bg-brand-navy hover:text-white transition-all font-bold"
+                    >
+                        My Listings
+                    </Button>
+                </motion.div>
             </div>
 
             {/* Filters & Search */}

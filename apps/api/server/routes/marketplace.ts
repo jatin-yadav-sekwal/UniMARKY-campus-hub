@@ -157,7 +157,7 @@ marketplaceApp.delete("/:id", async (c) => {
     return c.json({ error: "Item not found" }, 404);
   }
 
-  if (item[0].sellerId !== userId) {
+  if (item[0] != undefined && item[0].sellerId !== userId) {
     return c.json({ error: "Forbidden: You can only delete your own listings" }, 403);
   }
 
@@ -166,6 +166,41 @@ marketplaceApp.delete("/:id", async (c) => {
     .where(eq(marketplaceItems.id, id));
 
   return c.json({ message: "Item deleted successfully" });
+});
+
+// PATCH /:id - Update listing
+marketplaceApp.patch("/:id", zValidator("json", createItemSchema.partial()), async (c) => {
+  const id = c.req.param("id");
+  const body = c.req.valid("json");
+  const userId = c.get("userId");
+
+  if (!userId) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  // Check ownership
+  const item = await db.select().from(marketplaceItems)
+    .where(eq(marketplaceItems.id, id))
+    .limit(1);
+
+  if (item.length === 0) {
+    return c.json({ error: "Item not found" }, 404);
+  }
+
+  if (item[0] != undefined &&item[0].sellerId !== userId) {
+    return c.json({ error: "Forbidden: You can only edit your own listings" }, 403);
+  }
+
+  // Update the item
+  const updatedItem = await db.update(marketplaceItems)
+    .set({
+      ...body,
+      updatedAt: new Date(),
+    })
+    .where(eq(marketplaceItems.id, id))
+    .returning();
+
+  return c.json(updatedItem[0]);
 });
 
 export default marketplaceApp;

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { api } from '@/lib/api';
 import { Loader2, Search, Eye, Plus, ChevronDown, MapPin, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface LostFoundItem {
     id: string;
@@ -38,6 +39,7 @@ export function LostFoundPage() {
     const [total, setTotal] = useState(0);
     const [offset, setOffset] = useState(0);
     const [activeType, setActiveType] = useState("all");
+    const [searchQuery, setSearchQuery] = useState("");
     const LIMIT = 20;
 
     const fetchItems = useCallback(async (reset = false) => {
@@ -50,8 +52,9 @@ export function LostFoundPage() {
 
         try {
             const typeParam = activeType !== "all" ? `&type=${activeType}` : "";
+            const searchParam = searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : "";
             const response: LostFoundResponse = await api.get(
-                `/lostfound?limit=${LIMIT}&offset=${currentOffset}${typeParam}`
+                `/lostfound?limit=${LIMIT}&offset=${currentOffset}${typeParam}${searchParam}`
             );
 
             if (reset) {
@@ -68,12 +71,16 @@ export function LostFoundPage() {
             setLoading(false);
             setLoadingMore(false);
         }
-    }, [offset, activeType]);
+    }, [offset, activeType, searchQuery]);
 
     useEffect(() => {
-        setOffset(0);
-        fetchItems(true);
-    }, [activeType]);
+        const timer = setTimeout(() => {
+            setOffset(0);
+            fetchItems(true);
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [activeType, searchQuery]);
 
     const handleTypeChange = (type: string) => {
         setActiveType(type);
@@ -93,48 +100,78 @@ export function LostFoundPage() {
     return (
         <div className="relative min-h-screen pb-20">
             {/* Header Section */}
-            <div className="mb-6 sm:mb-8">
-                <motion.h1
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-2 sm:mb-3"
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 sm:mb-8">
+                <div>
+                    <motion.h1
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-2 sm:mb-3"
+                    >
+                        <span className="text-brand-navy">LOST & </span>
+                        <span className="bg-gradient-to-r from-teal-500 to-emerald-500 bg-clip-text text-transparent">FOUND</span>
+                    </motion.h1>
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.1 }}
+                        className="text-muted-foreground text-sm sm:text-base lg:text-lg max-w-xl"
+                    >
+                        Help your campus community by reporting lost items or returning found ones.
+                    </motion.p>
+                </div>
+
+                <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
                 >
-                    <span className="text-brand-navy">LOST & </span>
-                    <span className="bg-gradient-to-r from-teal-500 to-emerald-500 bg-clip-text text-transparent">FOUND</span>
-                </motion.h1>
-                <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className="text-muted-foreground text-sm sm:text-base lg:text-lg max-w-xl"
-                >
-                    Help your campus community by reporting lost items or returning found ones.
-                </motion.p>
+                    <Button
+                        onClick={() => navigate("/lost-found/my-listings")}
+                        variant="outline"
+                        className="rounded-full border-2 border-brand-navy text-brand-navy hover:bg-brand-navy hover:text-white transition-all font-bold"
+                    >
+                        My Listings
+                    </Button>
+                </motion.div>
             </div>
 
-            {/* Type Filter Pills */}
+            {/* Type Filter Pills & Search */}
             <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="flex flex-wrap items-center gap-2 mb-6 sm:mb-8"
+                className="flex flex-col sm:flex-row gap-4 mb-6 sm:mb-8 justify-between"
             >
-                {typeFilters.map((filter) => (
-                    <button
-                        key={filter.value}
-                        onClick={() => handleTypeChange(filter.value)}
-                        className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 ${activeType === filter.value
-                            ? filter.value === "lost"
-                                ? "bg-red-500 text-white shadow-lg shadow-red-500/20"
-                                : filter.value === "found"
-                                    ? "bg-green-500 text-white shadow-lg shadow-green-500/20"
-                                    : "bg-brand-navy text-white shadow-lg shadow-brand-navy/20"
-                            : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
-                            }`}
-                    >
-                        {filter.label}
-                    </button>
-                ))}
+                <div className="flex flex-wrap items-center gap-2">
+                    {typeFilters.map((filter) => (
+                        <button
+                            key={filter.value}
+                            onClick={() => handleTypeChange(filter.value)}
+                            className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 ${activeType === filter.value
+                                ? filter.value === "lost"
+                                    ? "bg-red-500 text-white shadow-lg shadow-red-500/20"
+                                    : filter.value === "found"
+                                        ? "bg-green-500 text-white shadow-lg shadow-green-500/20"
+                                        : "bg-brand-navy text-white shadow-lg shadow-brand-navy/20"
+                                : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                                }`}
+                        >
+                            {filter.label}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Search */}
+                <div className="relative w-full sm:max-w-xs">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                        type="text"
+                        placeholder="Search lost items..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-9 sm:pl-10 h-10 sm:h-11 rounded-full border-border/50 bg-muted/30 text-sm focus-visible:ring-teal-500"
+                    />
+                </div>
             </motion.div>
 
             {/* Loading State */}

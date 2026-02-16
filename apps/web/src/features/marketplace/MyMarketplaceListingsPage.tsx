@@ -86,7 +86,7 @@ function MarketplaceListingCard({ item, onDelete }: { item: MarketplaceItem; onD
                         <Tag className="w-3 h-3" /> View
                     </Link>
                     <Link
-                        to={`/marketplace/${item.id}`}
+                        to={`/marketplace/edit/${item.id}`}
                         className="flex-1 text-center text-[11px] text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center justify-center gap-1 transition-colors"
                     >
                         <Edit className="w-3 h-3" /> Edit

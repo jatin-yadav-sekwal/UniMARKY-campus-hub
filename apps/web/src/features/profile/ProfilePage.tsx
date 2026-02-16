@@ -119,16 +119,41 @@ export function ProfilePage() {
 
         try {
             setUploadingAvatar(true);
+
+            // 1. Upload new image (compressImage is handled inside uploadImage by default or we can be explicit)
+            // default behavior of uploadImage with string bucket is compress: true
             const imageUrl = await uploadImage(file, "profile-avatars");
 
+            // 2. Delete old image if it exists in the bucket
+            const oldAvatarUrl = (user?.user_metadata as any)?.custom_avatar_url;
+            if (oldAvatarUrl && oldAvatarUrl.includes("profile-avatars")) {
+                try {
+                    // Extract the path from the URL. 
+                    // URL format: .../storage/v1/object/public/profile-avatars/path/to/file.ext
+                    const path = oldAvatarUrl.split("/profile-avatars/").pop();
+                    if (path) {
+                        await supabase.storage.from("profile-avatars").remove([path]);
+                    }
+                } catch (deleteErr) {
+                    console.warn("Failed to delete old avatar:", deleteErr);
+                    // Continue execution even if delete fails
+                }
+            }
+
+            // 3. Update Supabase Auth Metadata
             const { error } = await supabase.auth.updateUser({
                 data: { custom_avatar_url: imageUrl }
             });
 
             if (error) throw error;
 
-            // Update local state so avatar changes immediately
+            // 4. Update local state
             setAvatarUrl(imageUrl);
+
+            // force refresh user session to ensure metadata is sync (optional but good)
+            // useAuth might handle this automatically if it listens to auth state changes, 
+            // but explicit refresh might be safer if needed. For now relying on useAuth.
+
         } catch (err) {
             console.error("Avatar upload failed:", err);
             setError("Failed to upload avatar");

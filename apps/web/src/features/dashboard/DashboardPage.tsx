@@ -13,8 +13,10 @@ import {
     ArrowRight,
     TrendingUp,
     Sparkles,
-    Newspaper
+    Newspaper,
+    Plus
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface DashboardData {
     marketplace?: { id: string; title?: string }[];
@@ -226,62 +228,63 @@ function SummaryCard({
     const count = data?.length ?? 0;
 
     return (
-        <Link to={href} className="group block">
-            <Card className={`h-full border border-border/60 hover:border-border hover:shadow-xl transition-all duration-300 overflow-hidden bg-gradient-to-br ${gradient}`}>
-                <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                            <div className={`p-2.5 rounded-xl bg-background/70 ${bgColor}`}>
-                                <Icon className={`w-5 h-5 ${color}`} />
-                            </div>
-                            <CardTitle className="text-base sm:text-lg font-bold text-brand-navy dark:text-white group-hover:text-brand-navy transition-colors">
-                                {title}
-                            </CardTitle>
+        <Card className={`h-full border border-border/60 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden bg-gradient-to-br ${gradient}`}>
+            <CardHeader className="pb-3 border-b border-border/20">
+                <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        <div className={`p-2.5 rounded-xl bg-background/80 backdrop-blur-sm ${bgColor} shadow-sm`}>
+                            <Icon className={`w-5 h-5 ${color}`} />
                         </div>
-                        <div className="text-right">
-                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Active</p>
-                            <p className="text-2xl font-extrabold text-brand-navy/90 dark:text-white">
-                                {count}
+                        <CardTitle className="text-lg font-bold text-brand-navy dark:text-white">
+                            {title}
+                        </CardTitle>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent className="pt-4 space-y-4">
+                <div className="space-y-2">
+                    {data && data.length > 0 ? (
+                        data.slice(0, 3).map((i) => (
+                            <Link
+                                to={href}
+                                key={i.id}
+                                className="block group/item"
+                            >
+                                <div className="p-3 bg-white/60 dark:bg-black/20 backdrop-blur-sm rounded-lg border border-border/40 hover:border-brand-navy/30 hover:bg-white/80 dark:hover:bg-black/30 transition-all duration-200 flex items-center gap-3">
+                                    <div className={`w-1.5 h-8 rounded-full ${bgColor.replace('/10', '')}`} />
+                                    <span className="text-sm font-medium text-foreground/80 group-hover/item:text-brand-navy dark:group-hover/item:text-white truncate flex-1">
+                                        {i.title || i.content || i.itemName}
+                                    </span>
+                                    <ArrowRight className="w-3 h-3 text-muted-foreground opacity-0 group-hover/item:opacity-100 -translate-x-2 group-hover/item:translate-x-0 transition-all" />
+                                </div>
+                            </Link>
+                        ))
+                    ) : (
+                        <div className="p-6 text-center border-2 border-dashed border-border/40 rounded-xl bg-white/30 dark:bg-black/10">
+                            <p className="text-sm text-muted-foreground italic flex flex-col items-center gap-2">
+                                <TrendingUp className="w-5 h-5 opacity-50" />
+                                No recent activity yet.
                             </p>
                         </div>
-                    </div>
-                </CardHeader>
-                <CardContent className="pt-0 space-y-3">
-                    {data && data.length > 0 ? (
-                        <ul className="space-y-1.5">
-                            {data.slice(0, 3).map((i) => (
-                                <li
-                                    key={i.id}
-                                    className="text-sm truncate text-muted-foreground/90 group-hover:text-foreground transition-colors flex items-center gap-2"
-                                >
-                                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand-navy/40" />
-                                    {i.title || i.content || i.itemName}
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="text-sm text-muted-foreground italic flex items-center gap-2">
-                            <TrendingUp className="w-4 h-4" />
-                            No recent activity yet – start by creating one.
-                        </p>
                     )}
-                    <div className="flex items-center justify-between pt-1 border-t border-border/40 mt-1">
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-brand-navy transition-colors">
-                            View all <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-                        </div>
-                        {secondaryHref && secondaryLabel && (
-                            <Link
-                                to={secondaryHref}
-                                className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-background/80 text-brand-navy hover:bg-brand-navy hover:text-white transition-colors"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                {secondaryLabel}
-                            </Link>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
-        </Link>
+                </div>
+
+                <div className="flex items-center gap-2 pt-2">
+                    <Link to={href} className="flex-1">
+                        <Button variant="default" className="w-full bg-brand-navy hover:bg-brand-navy/90 text-white shadow-lg shadow-brand-navy/10 h-10 rounded-lg group">
+                            Show All ({count}) <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                    </Link>
+                    {secondaryHref && secondaryLabel && (
+                        <Link to={secondaryHref}>
+                            <Button variant="outline" size="icon" className="h-10 w-10 border-brand-navy/20 text-brand-navy hover:bg-brand-navy/5 rounded-lg" title={secondaryLabel}>
+                                <Plus className="w-5 h-5" />
+                            </Button>
+                        </Link>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
     );
 }
 

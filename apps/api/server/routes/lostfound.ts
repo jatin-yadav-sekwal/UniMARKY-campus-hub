@@ -3,7 +3,7 @@ import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { db } from "../db";
 import { lostFound, profiles } from "../db/schema";
-import { eq, desc, sql, and } from "drizzle-orm";
+import { eq, desc, sql, and, or, ilike } from "drizzle-orm";
 import type { Env } from "../middleware/auth";
 
 const lostFoundApp = new Hono<Env>();
@@ -23,6 +23,7 @@ lostFoundApp.get("/", async (c) => {
   const limit = parseInt(c.req.query("limit") || "20");
   const offset = parseInt(c.req.query("offset") || "0");
   const type = c.req.query("type"); // "lost" | "found" | undefined
+  const q = c.req.query("q"); // Search query
   
   if (!university) {
     return c.json({ items: [], hasMore: false, total: 0 });
@@ -32,6 +33,10 @@ lostFoundApp.get("/", async (c) => {
   const conditions = [eq(lostFound.universityName, university)];
   if (type && (type === "lost" || type === "found")) {
     conditions.push(eq(lostFound.type, type));
+  }
+  if (q) {
+    // @ts-ignore
+    conditions.push(or(ilike(lostFound.itemName, `%${q}%`), ilike(lostFound.description!, `%${q}%`)));
   }
 
   // Get total count
@@ -165,7 +170,7 @@ lostFoundApp.delete("/:id", async (c) => {
     return c.json({ error: "Item not found" }, 404);
   }
 
-  if (item[0].reporterId !== userId) {
+  if (item[0] != undefined && item[0].reporterId !== userId) {
     return c.json({ error: "Forbidden: You can only delete your own listings" }, 403);
   }
 
@@ -174,6 +179,42 @@ lostFoundApp.delete("/:id", async (c) => {
     .where(eq(lostFound.id, id));
 
   return c.json({ message: "Item deleted successfully" });
+});
+
+// PATCH /:id - Update listing
+lostFoundApp.patch("/:id", zValidator("json", createReportSchema.partial()), async (c) => {
+  const id = c.req.param("id");
+  const body = c.req.valid("json");
+  const userId = c.get("userId");
+  const university = c.get("universityName");
+
+  if (!userId || !university) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  // Check ownership
+  const item = await db.select().from(lostFound)
+    .where(eq(lostFound.id, id))
+    .limit(1);
+
+  if (item.length === 0) {
+    return c.json({ error: "Item not found" }, 404);
+  }
+
+  if (item[0] != undefined &&item[0].reporterId !== userId) {
+    return c.json({ error: "Forbidden: You can only edit your own listings" }, 403);
+  }
+
+  // Update the item
+  const updatedItem = await db.update(lostFound)
+    .set({
+      ...body,
+      updatedAt: new Date(),
+    })
+    .where(eq(lostFound.id, id))
+    .returning();
+
+  return c.json(updatedItem[0]);
 });
 
 export default lostFoundApp;
