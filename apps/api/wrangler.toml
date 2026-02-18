@@ -1,4 +1,4 @@
-name = "unmarky-api"
+name = "unimarky-campus-hub"
 main = "server/app.ts"
 compatibility_date = "2024-02-08"
 compatibility_flags = ["nodejs_compat"]
