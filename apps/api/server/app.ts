@@ -1,9 +1,9 @@
-import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { authMiddleware } from "./middleware/auth";
 import type { Env } from "./middleware/auth";
+import { initDb } from "./db";
 
 // Route Imports
 import profilesApp from "./routes/profiles";
@@ -16,17 +16,41 @@ import dashboardApp from "./routes/dashboard";
 import roleRequestsApp from "./routes/roleRequests";
 import studyApp from "./routes/study";
 
-const app = new Hono<Env>();
+// Add Bindings type for Cloudflare Workers
+type Bindings = {
+  DATABASE_URL: string;
+  VITE_DEV_SERVER_URL?: string;
+  VITE_WEB_URL?: string;
+  CORS_ORIGIN?: string;
+  PORT?: string;
+};
+
+// Merge Bindings into Env
+type AppEnv = Env & { Bindings: Bindings };
+
+const app = new Hono<AppEnv>();
 
 // Global Middleware
 app.use("*", logger());
+
+// Initialize DB from Env
+app.use("*", async (c, next) => {
+  if (c.env.DATABASE_URL) {
+    initDb(c.env.DATABASE_URL);
+  }
+  await next();
+});
+
 app.use("*", cors({
-  origin: (origin) => {
+  origin: (origin, c) => {
+    // Access env from context if available, fallback to process.env (for local node)
+    const env = c.env || (typeof process !== 'undefined' ? process.env : {});
+    
     const allowedOrigins = [ 
       "https://unimarky-campus-hub-web.vercel.app", // Hardcoded prod URL as fallback
-      process.env.VITE_DEV_SERVER_URL,
-      process.env.VITE_WEB_URL,
-      process.env.CORS_ORIGIN
+      env.VITE_DEV_SERVER_URL,
+      env.VITE_WEB_URL,
+      env.CORS_ORIGIN
       
     ].filter((url): url is string => !!url); // Type guard to filter null/undefined
     
@@ -36,9 +60,6 @@ app.use("*", cors({
     if (allowedOrigins.includes(origin)) {
       return origin;
     }
-    
-    // Optional: Log blocked origins for debugging (remove in strict production if needed)
-    console.log(`[CORS] Blocked origin: ${origin}. Allowed: ${allowedOrigins.join(', ')}`);
     
     return allowedOrigins[0]; 
   },
@@ -64,10 +85,4 @@ app.route("/api/dashboard", dashboardApp);
 app.route("/api/role-requests", roleRequestsApp);
 app.route("/api/study", studyApp);
 
-const port = Number(process.env.PORT) || 3000;
-console.log(`Server is running on port ${port}`);
-
-serve({
-  fetch: app.fetch,
-  port,
-});
+export default app;

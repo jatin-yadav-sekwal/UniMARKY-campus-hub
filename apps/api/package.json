@@ -14,10 +14,12 @@
     "typescript": "^5"
   },
   "scripts": {
-    "dev": "tsx watch server/index.ts",
+    "dev": "tsx watch server/dev.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "tsx server/db/seed.ts"
+    "db:seed": "tsx server/db/seed.ts",
+    "deploy": "wrangler deploy",
+    "build:worker": "bun build server/worker.ts --outfile dist/worker.js --target=node"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.6",
