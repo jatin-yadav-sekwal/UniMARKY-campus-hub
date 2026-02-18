@@ -47,12 +47,12 @@ app.use("*", cors({
     const env = c.env || (typeof process !== 'undefined' ? process.env : {});
     
     const allowedOrigins = [ 
-      "https://unimarky-campus-hub-web.vercel.app", // Hardcoded prod URL as fallback
+      "https://unimarky-web.pages.dev", // Hardcoded prod URL as fallback
       env.VITE_DEV_SERVER_URL,
       env.VITE_WEB_URL,
       env.CORS_ORIGIN
       
-    ].filter((url): url is string => !!url); // Type guard to filter null/undefined
+    ].filter((url): url is string => !!url && typeof url === 'string');
     
     // Allow requests with no origin (e.g. mobile apps, curl)
     if (!origin) return allowedOrigins[0] || "*";
@@ -60,6 +60,9 @@ app.use("*", cors({
     if (allowedOrigins.includes(origin)) {
       return origin;
     }
+    
+    // Optional: Log blocked origins for debugging (remove in strict production if needed)
+    console.log(`[CORS] Blocked origin: ${origin}. Allowed: ${allowedOrigins.join(', ')}`);
     
     return allowedOrigins[0]; 
   },
@@ -69,6 +72,7 @@ app.use("*", cors({
   maxAge: 600,
   credentials: true,
 }));
+
 app.use("/api/*", authMiddleware);
 
 // Health Check
