@@ -75,9 +75,15 @@ profilesApp.patch("/:id", async (c) => {
   
   const body = await c.req.json();
   
-  // Only allow updating specific fields (not fullName or universityName)
+  // Only allow updating specific fields
   const allowedFields: Record<string, any> = {};
   
+  if (body.fullName !== undefined) {
+    allowedFields.fullName = body.fullName;
+  }
+  if (body.universityName !== undefined) {
+    allowedFields.universityName = body.universityName;
+  }
   if (body.department !== undefined) {
     allowedFields.department = body.department;
   }

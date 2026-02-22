@@ -23,7 +23,8 @@ lostFoundApp.get("/", async (c) => {
   const limit = parseInt(c.req.query("limit") || "20");
   const offset = parseInt(c.req.query("offset") || "0");
   const type = c.req.query("type"); // "lost" | "found" | undefined
-  const q = c.req.query("q"); // Search query
+  const q = c.req.query("q");
+  const reporterId = c.req.query("userId");
   
   if (!university) {
     return c.json({ items: [], hasMore: false, total: 0 });
@@ -33,6 +34,9 @@ lostFoundApp.get("/", async (c) => {
   const conditions = [eq(lostFound.universityName, university)];
   if (type && (type === "lost" || type === "found")) {
     conditions.push(eq(lostFound.type, type));
+  }
+  if (reporterId) {
+    conditions.push(eq(lostFound.reporterId, reporterId));
   }
   if (q) {
     // @ts-ignore

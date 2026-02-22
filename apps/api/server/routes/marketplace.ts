@@ -26,6 +26,7 @@ marketplaceApp.get("/", async (c) => {
   const limit = parseInt(c.req.query("limit") || "20");
   const offset = parseInt(c.req.query("offset") || "0");
   const category = c.req.query("category");
+  const sellerId = c.req.query("userId");
   
   if (!university) {
     return c.json({ items: [], hasMore: false, total: 0 });
@@ -35,6 +36,9 @@ marketplaceApp.get("/", async (c) => {
   const conditions = [eq(marketplaceItems.universityName, university)];
   if (category && category !== "all") {
     conditions.push(eq(marketplaceItems.category, category));
+  }
+  if (sellerId) {
+    conditions.push(eq(marketplaceItems.sellerId, sellerId));
   }
 
   // Get total count
