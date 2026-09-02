@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ShieldCheck } from "lucide-react";
@@ -17,7 +17,7 @@ export function PrivacyPage() {
 
             <section className="pt-32 pb-20">
                 <div className="container px-4 mx-auto max-w-3xl">
-                    <motion.div {...fadeUp} className="mb-10 text-center">
+                    <m.div {...fadeUp} className="mb-10 text-center">
                         <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-500/10 text-teal-600 text-sm font-semibold mb-4">
                             <ShieldCheck className="w-4 h-4" /> Privacy
                         </span>
@@ -25,9 +25,9 @@ export function PrivacyPage() {
                             Privacy Policy
                         </h1>
                         <p className="text-muted-foreground">Last updated: February 12, 2026</p>
-                    </motion.div>
+                    </m.div>
 
-                    <motion.div {...fadeUp} className="prose prose-neutral max-w-none text-muted-foreground space-y-8">
+                    <m.div {...fadeUp} className="prose prose-neutral max-w-none text-muted-foreground space-y-8">
                         <Section title="1. Information We Collect">
                             <p>We collect information you provide during registration, including your name, university email address, and university affiliation. We also collect usage data such as pages visited, features used, and device information to improve our services.</p>
                         </Section>
@@ -86,7 +86,7 @@ export function PrivacyPage() {
                         <Section title="10. Contact Us">
                             <p>If you have any questions about this Privacy Policy, please reach out to us at <a href="mailto:jatinyadavsekwal88@gmail.com" className="text-brand-orange hover:underline">jatinyadavsekwal88@gmail.com</a>.</p>
                         </Section>
-                    </motion.div>
+                    </m.div>
                 </div>
             </section>
 

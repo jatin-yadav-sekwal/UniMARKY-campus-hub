@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { motion } from "motion/react";
+import { useReducer } from "react";
+import { m } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import {
     GraduationCap,
@@ -38,29 +38,27 @@ const CUH_DEPARTMENTS = [
     "Nutrition Biology",
     "Environmental Studies",
     "Geography",
-    "Statistics",
     "Economics",
     "Commerce",
     "Management Studies",
     "English & Foreign Languages",
-    "Hindi",
-    "Sanskrit",
-    "History & Archaeology",
-    "Political Science",
-    "Sociology",
-    "Psychology",
-    "Law",
+    "Hindi & Indian Languages",
     "Journalism & Mass Communication",
+    "Law",
     "Library & Information Science",
+    "Sociology",
+    "Political Science",
+    "History & Archaeology",
+    "Psychology",
     "Physical Education & Sports",
     "Teacher Education",
-    "Tourism & Hotel Management",
+    "Yoga",
     "Pharmaceutical Sciences",
-    "Vocational Studies & Skill Development",
-    "Applied Sciences & Humanities",
+    "MCA",
+    "B.Tech (Common/First Year)",
 ];
 
-const YEARS = ["1st Year", "2nd Year", "3rd Year", "4th Year", "5th Year"];
+const YEARS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 
 const CATEGORIES = [
     { value: "previous_year_papers", label: "Previous Year Papers" },
@@ -71,19 +69,72 @@ const CATEGORIES = [
     { value: "reference_books", label: "Reference Books" },
 ];
 
+interface StudyMaterialForm {
+    department: string;
+    year: string;
+    category: string;
+    subjectName: string;
+    title: string;
+    description: string;
+    fileUrl: string;
+}
+
+interface StudyMaterialPageState {
+    saving: boolean;
+    success: boolean;
+    error: string | null;
+    form: StudyMaterialForm;
+}
+
+type StudyMaterialPageAction =
+    | { type: "SET_FIELD"; field: keyof StudyMaterialForm; value: string }
+    | { type: "SUBMIT_START" }
+    | { type: "SUBMIT_SUCCESS" }
+    | { type: "SUBMIT_ERROR"; error: string }
+    | { type: "DISMISS_SUCCESS" };
+
+const initialForm: StudyMaterialForm = {
+    department: "",
+    year: "",
+    category: "",
+    subjectName: "",
+    title: "",
+    description: "",
+    fileUrl: "",
+};
+
+function studyMaterialPageReducer(
+    state: StudyMaterialPageState,
+    action: StudyMaterialPageAction
+): StudyMaterialPageState {
+    switch (action.type) {
+        case "SET_FIELD":
+            return { ...state, form: { ...state.form, [action.field]: action.value } };
+        case "SUBMIT_START":
+            return { ...state, saving: true, error: null };
+        case "SUBMIT_SUCCESS":
+            return { ...state, saving: false, success: true, form: initialForm };
+        case "SUBMIT_ERROR":
+            return { ...state, saving: false, error: action.error };
+        case "DISMISS_SUCCESS":
+            return { ...state, success: false };
+        default:
+            return state;
+    }
+}
+
 export function AddStudyMaterialPage() {
     const navigate = useNavigate();
-    const [saving, setSaving] = useState(false);
-    const [success, setSuccess] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
-    const [department, setDepartment] = useState("");
-    const [year, setYear] = useState("");
-    const [category, setCategory] = useState("");
-    const [subjectName, setSubjectName] = useState("");
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [fileUrl, setFileUrl] = useState("");
+    const [state, dispatch] = useReducer(studyMaterialPageReducer, {
+        saving: false,
+        success: false,
+        error: null,
+        form: initialForm,
+    });
+
+    const { saving, success, error, form } = state;
+    const { department, year, category, subjectName, title, description, fileUrl } = form;
 
     const driveWarning =
         fileUrl && isDriveUrl(fileUrl) && !isValidDriveLink(fileUrl)
@@ -98,8 +149,7 @@ export function AddStudyMaterialPage() {
         if (!canSubmit) return;
 
         try {
-            setSaving(true);
-            setError(null);
+            dispatch({ type: "SUBMIT_START" });
             await api.post("/study", {
                 department,
                 year,
@@ -109,22 +159,12 @@ export function AddStudyMaterialPage() {
                 description: description.trim() || null,
                 fileUrl: fileUrl.trim() || null,
             });
-            setSuccess(true);
-            // Reset form
-            setDepartment("");
-            setYear("");
-            setCategory("");
-            setSubjectName("");
-            setTitle("");
-            setDescription("");
-            setFileUrl("");
-            setTimeout(() => setSuccess(false), 3000);
+            dispatch({ type: "SUBMIT_SUCCESS" });
+            setTimeout(() => dispatch({ type: "DISMISS_SUCCESS" }), 3000);
         } catch (err: unknown) {
             const message =
                 err instanceof Error ? err.message : "Failed to add study material";
-            setError(message);
-        } finally {
-            setSaving(false);
+            dispatch({ type: "SUBMIT_ERROR", error: message });
         }
     };
 
@@ -138,7 +178,7 @@ export function AddStudyMaterialPage() {
                 <ArrowLeft className="h-4 w-4" /> Back
             </Button>
 
-            <motion.div
+            <m.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="flex items-center gap-3 mb-2"
@@ -152,12 +192,12 @@ export function AddStudyMaterialPage() {
                         Study Material
                     </span>
                 </h1>
-            </motion.div>
+            </m.div>
             <p className="text-muted-foreground mb-8 ml-1">
                 Share notes, papers, and resources with your fellow students.
             </p>
 
-            <motion.form
+            <m.form
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -168,7 +208,7 @@ export function AddStudyMaterialPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label>Department *</Label>
-                        <Select value={department} onValueChange={setDepartment}>
+                        <Select value={department} onValueChange={(val) => dispatch({ type: "SET_FIELD", field: "department", value: val })}>
                             <SelectTrigger className="h-11 rounded-xl">
                                 <SelectValue placeholder="Select Department" />
                             </SelectTrigger>
@@ -184,7 +224,7 @@ export function AddStudyMaterialPage() {
 
                     <div className="space-y-2">
                         <Label>Year *</Label>
-                        <Select value={year} onValueChange={setYear}>
+                        <Select value={year} onValueChange={(val) => dispatch({ type: "SET_FIELD", field: "year", value: val })}>
                             <SelectTrigger className="h-11 rounded-xl">
                                 <SelectValue placeholder="Select Year" />
                             </SelectTrigger>
@@ -203,7 +243,7 @@ export function AddStudyMaterialPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label>Category *</Label>
-                        <Select value={category} onValueChange={setCategory}>
+                        <Select value={category} onValueChange={(val) => dispatch({ type: "SET_FIELD", field: "category", value: val })}>
                             <SelectTrigger className="h-11 rounded-xl">
                                 <SelectValue placeholder="Select Category" />
                             </SelectTrigger>
@@ -224,7 +264,7 @@ export function AddStudyMaterialPage() {
                             <Input
                                 id="subjectName"
                                 value={subjectName}
-                                onChange={(e) => setSubjectName(e.target.value)}
+                                onChange={(e) => dispatch({ type: "SET_FIELD", field: "subjectName", value: e.target.value })}
                                 placeholder="e.g., Data Structures"
                                 className="pl-10 h-11 rounded-xl"
                                 required
@@ -241,7 +281,7 @@ export function AddStudyMaterialPage() {
                         <Input
                             id="title"
                             value={title}
-                            onChange={(e) => setTitle(e.target.value)}
+                            onChange={(e) => dispatch({ type: "SET_FIELD", field: "title", value: e.target.value })}
                             placeholder="e.g., DSA Mid-Sem 2024 Paper"
                             className="pl-10 h-11 rounded-xl"
                             required
@@ -255,7 +295,7 @@ export function AddStudyMaterialPage() {
                     <textarea
                         id="description"
                         value={description}
-                        onChange={(e) => setDescription(e.target.value)}
+                        onChange={(e) => dispatch({ type: "SET_FIELD", field: "description", value: e.target.value })}
                         placeholder="Brief description of the material..."
                         className="w-full p-3 rounded-xl border border-input bg-background text-sm min-h-[100px] resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                     />
@@ -274,7 +314,7 @@ export function AddStudyMaterialPage() {
                         <Input
                             id="fileUrl"
                             value={fileUrl}
-                            onChange={(e) => setFileUrl(e.target.value)}
+                            onChange={(e) => dispatch({ type: "SET_FIELD", field: "fileUrl", value: e.target.value })}
                             placeholder="https://drive.google.com/file/d/.../view?usp=sharing"
                             className="pl-10 h-11 rounded-xl"
                         />
@@ -295,14 +335,14 @@ export function AddStudyMaterialPage() {
 
                 {/* Success Message */}
                 {success && (
-                    <motion.div
+                    <m.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm flex items-center gap-2"
                     >
                         <CheckCircle2 className="h-4 w-4" />
                         Study material added successfully!
-                    </motion.div>
+                    </m.div>
                 )}
 
                 {/* Error Message */}
@@ -318,7 +358,7 @@ export function AddStudyMaterialPage() {
                     <Button
                         type="submit"
                         disabled={!canSubmit || saving}
-                        className="px-8 py-6 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white font-bold shadow-lg shadow-indigo-500/25 transition-all"
+                        className="px-8 py-6 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white font-bold shadow-lg shadow-indigo-500/25 transition-colors"
                     >
                         {saving ? (
                             <>
@@ -331,7 +371,7 @@ export function AddStudyMaterialPage() {
                         )}
                     </Button>
                 </div>
-            </motion.form>
+            </m.form>
         </div>
     );
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { m, AnimatePresence } from "motion/react";
 import {
     Loader2, ArrowUp, User, TrendingUp, Newspaper,
     CalendarDays, Megaphone, Sparkles, Trash2, Eye, Plus,
@@ -53,7 +53,7 @@ export function UnimediaPage() {
     const [loadingMore, setLoadingMore] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [activeTab, setActiveTab] = useState("all");
-    const [offset, setOffset] = useState(0);
+    const offsetRef = useRef(0);
 
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [showScrollTop, setShowScrollTop] = useState(false);
@@ -66,17 +66,20 @@ export function UnimediaPage() {
     /* Fetch Feed */
     const fetchPosts = useCallback(async (reset = false) => {
         if (reset) setLoading(true); else setLoadingMore(true);
-        const off = reset ? 0 : offset;
+        const off = reset ? 0 : offsetRef.current;
         try {
             const res = await api.get(`/social?type=${activeTab}&limit=${LIMIT}&offset=${off}`);
-            if (reset) { setPosts(res.items); setOffset(LIMIT); }
-            else { setPosts(prev => [...prev, ...res.items]); setOffset(prev => prev + LIMIT); }
+            if (reset) { setPosts(res.items); offsetRef.current = LIMIT; }
+            else { setPosts(prev => [...prev, ...res.items]); offsetRef.current += LIMIT; }
             setHasMore(res.hasMore);
         } catch (err) { console.error(err); }
         finally { setLoading(false); setLoadingMore(false); }
-    }, [activeTab, offset]);
+    }, [activeTab]);
 
-    useEffect(() => { fetchPosts(true); }, [activeTab]);
+    useEffect(() => {
+        offsetRef.current = 0;
+        fetchPosts(true);
+    }, [fetchPosts]);
 
     useEffect(() => {
         const handler = () => setShowScrollTop(window.scrollY > 400);
@@ -103,7 +106,7 @@ export function UnimediaPage() {
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`relative px-3.5 sm:px-5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold rounded-full whitespace-nowrap transition-all duration-300 ${activeTab === tab.id
+                            className={`relative px-3.5 sm:px-5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold rounded-full whitespace-nowrap transition-[color,background-color,border-color,box-shadow,transform] duration-300 ${activeTab === tab.id
                                 ? "bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-md shadow-rose-500/30 scale-[1.02]"
                                 : "bg-white/60 dark:bg-white/5 backdrop-blur-sm text-foreground/70 border border-white/50 dark:border-white/10 hover:border-rose-300 dark:hover:border-rose-500/30 hover:text-rose-600 dark:hover:text-rose-400 hover:shadow-sm"
                                 }`}
@@ -123,13 +126,13 @@ export function UnimediaPage() {
                         {loading ? (
                             <div><PostSkeleton /><PostSkeleton /><PostSkeleton /></div>
                         ) : posts.length === 0 ? (
-                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-16">
+                            <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-16">
                                 <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-rose-100/50 dark:bg-rose-900/20 flex items-center justify-center">
                                     <Rss className="w-8 h-8 text-rose-300 dark:text-rose-700" />
                                 </div>
                                 <h3 className="font-semibold text-foreground/70 mb-1">No posts yet</h3>
                                 <p className="text-sm text-muted-foreground">Be the first to share something!</p>
-                            </motion.div>
+                            </m.div>
                         ) : (
                             <AnimatePresence mode="popLayout">
                                 {posts.map((post) => (
@@ -207,15 +210,15 @@ export function UnimediaPage() {
             {/* ═══════ Scroll to Top FAB ═══════ */}
             <AnimatePresence>
                 {showScrollTop && (
-                    <motion.button
+                    <m.button
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/30 flex items-center justify-center hover:shadow-xl hover:shadow-rose-500/40 transition-all"
+                        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/30 flex items-center justify-center hover:shadow-xl hover:shadow-rose-500/40 transition-shadow"
                     >
                         <ArrowUp className="w-5 h-5" />
-                    </motion.button>
+                    </m.button>
                 )}
             </AnimatePresence>
         </div>

@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Mail, MapPin, Clock, Send, MessageCircle, ArrowRight } from "lucide-react";
@@ -39,15 +39,6 @@ const contactInfo = [
 ];
 
 export function ContactPage() {
-    const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
-    const [submitted, setSubmitted] = useState(false);
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        // In production, this would POST to an API endpoint
-        setSubmitted(true);
-    };
-
     return (
         <div className="bg-background min-h-screen">
             <Navbar />
@@ -56,7 +47,7 @@ export function ContactPage() {
             <section className="pt-32 pb-12 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-brand-navy/5 to-transparent" />
                 <div className="container px-4 mx-auto relative text-center">
-                    <motion.div {...fadeUp}>
+                    <m.div {...fadeUp}>
                         <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 text-blue-600 text-sm font-semibold mb-6">
                             <MessageCircle className="w-4 h-4" /> Get In Touch
                         </span>
@@ -69,7 +60,7 @@ export function ContactPage() {
                         <p className="text-lg text-muted-foreground max-w-xl mx-auto">
                             Got a question, feedback, or just want to say hi? We're all ears.
                         </p>
-                    </motion.div>
+                    </m.div>
                 </div>
             </section>
 
@@ -78,7 +69,7 @@ export function ContactPage() {
                 <div className="container px-4 mx-auto">
                     <div className="grid sm:grid-cols-3 gap-5 max-w-4xl mx-auto">
                         {contactInfo.map((info, i) => (
-                            <motion.div
+                            <m.div
                                 key={info.title}
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
@@ -92,7 +83,7 @@ export function ContactPage() {
                                 <h3 className="font-bold text-brand-navy mb-1">{info.title}</h3>
                                 <p className="text-sm font-medium text-foreground">{info.detail}</p>
                                 <p className="text-xs text-muted-foreground mt-0.5">{info.sub}</p>
-                            </motion.div>
+                            </m.div>
                         ))}
                     </div>
                 </div>
@@ -103,7 +94,7 @@ export function ContactPage() {
                 <div className="container px-4 mx-auto">
                     <div className="max-w-xl mx-auto bg-background rounded-2xl border border-border/40 p-6 sm:p-8">
                         {submitted ? (
-                            <motion.div
+                            <m.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 className="text-center py-12"
@@ -122,7 +113,7 @@ export function ContactPage() {
                                 >
                                     Send another message <ArrowRight className="w-4 h-4 ml-1" />
                                 </Button>
-                            </motion.div>
+                            </m.div>
                         ) : (
                             <form onSubmit={handleSubmit} className="space-y-5">
                                 <div className="grid sm:grid-cols-2 gap-4">

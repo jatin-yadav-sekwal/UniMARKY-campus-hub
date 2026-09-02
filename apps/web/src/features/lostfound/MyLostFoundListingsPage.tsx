@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { m, AnimatePresence } from "motion/react";
 import {
     Loader2, ArrowUp, Search, Trash2, Edit, Plus, MapPin, Calendar
 } from "lucide-react";
@@ -21,27 +21,27 @@ interface LostFoundItem {
 interface LostFoundResponse {
     items: LostFoundItem[];
     hasMore: boolean;
-    total: number;
 }
+
+const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+    });
+};
 
 /* ── Lost & Found Listing Card ── */
 function LostFoundListingCard({ item, onDelete }: { item: LostFoundItem; onDelete: () => void }) {
     const navigate = useNavigate();
 
-    const formatDate = (dateStr: string) => {
-        return new Date(dateStr).toLocaleDateString('en-IN', {
-            day: 'numeric',
-            month: 'short'
-        });
-    };
-
     return (
-        <motion.div
+        <m.div
             layout
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-white/70 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-white/50 dark:border-white/10 shadow-sm overflow-hidden group hover:shadow-md hover:border-teal-200/60 dark:hover:border-teal-500/20 transition-all"
+            className="bg-white/70 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-white/50 dark:border-white/10 shadow-sm overflow-hidden group hover:shadow-md hover:border-teal-200/60 dark:hover:border-teal-500/20 transition-[border-color,box-shadow]"
         >
             {item.imageUrl && (
                 <div className="relative h-36 sm:h-40 overflow-hidden">
@@ -64,47 +64,40 @@ function LostFoundListingCard({ item, onDelete }: { item: LostFoundItem; onDelet
                 </div>
             )}
             <div className="p-3 sm:p-4">
-                <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${item.type === "lost"
-                        ? "text-red-600 bg-red-100/60 dark:bg-red-900/30"
-                        : "text-green-600 bg-green-100/60 dark:bg-green-900/30"
-                        }`}>
-                        {item.type}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">
-                        {formatDate(item.createdAt)}
-                    </span>
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span className="truncate">{item.location}</span>
                 </div>
-                <h3 className="font-semibold text-sm line-clamp-2 mb-1">{item.itemName}</h3>
-                <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{item.description}</p>
-                {item.location && (
-                    <p className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
-                        <MapPin className="w-3 h-3" />
-                        {item.location}
-                    </p>
-                )}
-                <div className="flex gap-2 pt-2 mt-2 border-t border-teal-100/30 dark:border-white/5">
-                    <Link
-                        to={`/lost-found/${item.id}`}
-                        className="flex-1 text-center text-[11px] text-teal-600 hover:text-teal-700 dark:text-teal-400 flex items-center justify-center gap-1 transition-colors"
-                    >
-                        <Search className="w-3 h-3" /> View
-                    </Link>
-                    <Link
-                        to={`/lost-found/edit/${item.id}`}
-                        className="flex-1 text-center text-[11px] text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center justify-center gap-1 transition-colors"
-                    >
-                        <Edit className="w-3 h-3" /> Edit
-                    </Link>
-                    <button
-                        onClick={onDelete}
-                        className="flex-1 text-center text-[11px] text-red-400 hover:text-red-600 flex items-center justify-center gap-1 transition-colors"
-                    >
-                        <Trash2 className="w-3 h-3" /> Delete
-                    </button>
+                <h3 className="font-bold text-sm sm:text-base text-foreground truncate mb-1">{item.itemName}</h3>
+                <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{item.description}</p>
+                <div className="flex items-center justify-between pt-2 border-t border-teal-100/40 dark:border-white/5">
+                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                        <Calendar className="w-3 h-3" />
+                        <span>{formatDate(item.createdAt)}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Edit item"
+                            className="h-7 w-7 text-muted-foreground hover:text-teal-600"
+                            onClick={() => navigate(`/lost-found/edit/${item.id}`)}
+                        >
+                            <Edit className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Delete item"
+                            className="h-7 w-7 text-muted-foreground hover:text-red-600"
+                            onClick={onDelete}
+                        >
+                            <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                    </div>
                 </div>
             </div>
-        </motion.div>
+        </m.div>
     );
 }
 
@@ -115,21 +108,21 @@ export function MyLostFoundListingsPage() {
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [hasMore, setHasMore] = useState(true);
-    const [offset, setOffset] = useState(0);
+    const offsetRef = useRef(0);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const LIMIT = 20;
 
     const fetchItems = useCallback(async (reset = false) => {
         if (reset) setLoading(true); else setLoadingMore(true);
-        const off = reset ? 0 : offset;
+        const off = reset ? 0 : offsetRef.current;
         try {
             const res: LostFoundResponse = await api.get(`/lostfound/my-listings?limit=${LIMIT}&offset=${off}`);
             if (reset) {
                 setItems(res.items);
-                setOffset(LIMIT);
+                offsetRef.current = LIMIT;
             } else {
                 setItems(prev => [...prev, ...res.items]);
-                setOffset(prev => prev + LIMIT);
+                offsetRef.current += LIMIT;
             }
             setHasMore(res.hasMore);
         } catch (err) {
@@ -138,11 +131,11 @@ export function MyLostFoundListingsPage() {
             setLoading(false);
             setLoadingMore(false);
         }
-    }, [offset]);
+    }, []);
 
     useEffect(() => {
         fetchItems(true);
-    }, []);
+    }, [fetchItems]);
 
     useEffect(() => {
         const handler = () => setShowScrollTop(window.scrollY > 400);
@@ -172,7 +165,7 @@ export function MyLostFoundListingsPage() {
                     </div>
                     <Button
                         onClick={() => navigate("/lost-found/report")}
-                        className="rounded-full gap-1.5 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-semibold px-5 shadow-lg shadow-teal-500/30 transition-all"
+                        className="rounded-full gap-1.5 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-semibold px-5 shadow-lg shadow-teal-500/30 transition-colors"
                     >
                         <Plus className="w-4 h-4" /> Report New Item
                     </Button>
@@ -199,7 +192,7 @@ export function MyLostFoundListingsPage() {
                         ))}
                     </div>
                 ) : items.length === 0 ? (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-16">
+                    <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-16">
                         <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-teal-100/50 dark:bg-teal-900/20 flex items-center justify-center">
                             <Search className="w-8 h-8 text-teal-300 dark:text-teal-700" />
                         </div>
@@ -211,7 +204,7 @@ export function MyLostFoundListingsPage() {
                         >
                             Report Your First Item
                         </Button>
-                    </motion.div>
+                    </m.div>
                 ) : (
                     <AnimatePresence mode="popLayout">
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -241,15 +234,15 @@ export function MyLostFoundListingsPage() {
             {/* Scroll to Top FAB */}
             <AnimatePresence>
                 {showScrollTop && (
-                    <motion.button
+                    <m.button
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-teal-500 to-teal-600 text-white shadow-lg shadow-teal-500/30 flex items-center justify-center hover:shadow-xl hover:shadow-teal-500/40 transition-all"
+                        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-teal-500 to-teal-600 text-white shadow-lg shadow-teal-500/30 flex items-center justify-center hover:shadow-xl hover:shadow-teal-500/40 transition-shadow"
                     >
                         <ArrowUp className="w-5 h-5" />
-                    </motion.button>
+                    </m.button>
                 )}
             </AnimatePresence>
         </div>

@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { m, AnimatePresence } from "motion/react";
 import { Send, Trash2, Loader2, ChevronDown } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -13,28 +13,39 @@ interface CommentSectionProps {
     onCountChange: (delta: number) => void;
 }
 
+const timeAgo = (dateStr: string) => {
+    const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+    if (seconds < 60) return "now";
+    const m = Math.floor(seconds / 60);
+    if (m < 60) return `${m}m`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}h`;
+    const d = Math.floor(h / 24);
+    return `${d}d`;
+};
+
 export function CommentSection({ postId, currentUserId, commentsCount, onCountChange }: CommentSectionProps) {
     const [commentsList, setCommentsList] = useState<Comment[]>([]);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(false);
-    const [offset, setOffset] = useState(0);
+    const offsetRef = useRef(0);
     const [newComment, setNewComment] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const LIMIT = 5;
 
     // Fetch comments
-    const fetchComments = async (reset = false) => {
+    const fetchComments = useCallback(async (reset = false) => {
         setLoading(true);
-        const currentOffset = reset ? 0 : offset;
+        const currentOffset = reset ? 0 : offsetRef.current;
         try {
             const res = await api.get(`/social/${postId}/comments?limit=${LIMIT}&offset=${currentOffset}`);
             if (reset) {
                 setCommentsList(res.items);
-                setOffset(LIMIT);
+                offsetRef.current = LIMIT;
             } else {
                 setCommentsList(prev => [...prev, ...res.items]);
-                setOffset(prev => prev + LIMIT);
+                offsetRef.current += LIMIT;
             }
             setHasMore(res.hasMore);
         } catch (err) {
@@ -42,10 +53,28 @@ export function CommentSection({ postId, currentUserId, commentsCount, onCountCh
         } finally {
             setLoading(false);
         }
-    };
+    }, [postId]);
 
     useEffect(() => {
-        fetchComments(true);
+        let cancelled = false;
+        setLoading(true);
+        api.get(`/social/${postId}/comments?limit=${LIMIT}&offset=0`)
+            .then((res) => {
+                if (!cancelled) {
+                    setCommentsList(res.items);
+                    offsetRef.current = LIMIT;
+                    setHasMore(res.hasMore);
+                }
+            })
+            .catch((err) => {
+                console.error("Failed to fetch comments:", err);
+            })
+            .finally(() => {
+                if (!cancelled) setLoading(false);
+            });
+        return () => {
+            cancelled = true;
+        };
     }, [postId]);
 
     const handleSubmit = async () => {
@@ -87,16 +116,6 @@ export function CommentSection({ postId, currentUserId, commentsCount, onCountCh
         e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
     };
 
-    const timeAgo = (dateStr: string) => {
-        const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-        if (seconds < 60) return "now";
-        const m = Math.floor(seconds / 60);
-        if (m < 60) return `${m}m`;
-        const h = Math.floor(m / 60);
-        if (h < 24) return `${h}h`;
-        const d = Math.floor(h / 24);
-        return `${d}d`;
-    };
 
     return (
         <div className="pt-3">
@@ -108,20 +127,22 @@ export function CommentSection({ postId, currentUserId, commentsCount, onCountCh
                     onChange={autoResize}
                     onKeyDown={handleKeyDown}
                     placeholder="Write a comment..."
+                    aria-label="Write a comment"
                     maxLength={500}
                     rows={1}
-                    className="flex-1 min-h-[40px] max-h-[120px] px-3 py-2 text-sm bg-muted/50 border border-border/50 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-brand-navy/20 focus:border-brand-navy/30 transition-all placeholder:text-muted-foreground/60"
+                    className="flex-1 min-h-[40px] max-h-[120px] px-3 py-2 text-sm bg-muted/50 border border-border/50 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-brand-navy/20 focus:border-brand-navy/30 transition-colors placeholder:text-muted-foreground/60"
                 />
-                <motion.div whileTap={{ scale: 0.9 }}>
+                <m.div whileTap={{ scale: 0.9 }}>
                     <Button
                         size="icon"
                         onClick={handleSubmit}
                         disabled={!newComment.trim() || submitting}
+                        aria-label="Post comment"
                         className="h-10 w-10 rounded-xl bg-brand-navy hover:bg-brand-navy/90 text-white shrink-0"
                     >
                         {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                     </Button>
-                </motion.div>
+                </m.div>
             </div>
 
             {/* Character counter */}
@@ -134,7 +155,7 @@ export function CommentSection({ postId, currentUserId, commentsCount, onCountCh
             {/* Comments List */}
             <AnimatePresence mode="popLayout">
                 {commentsList.map((comment, i) => (
-                    <motion.div
+                    <m.div
                         key={comment.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -163,7 +184,7 @@ export function CommentSection({ postId, currentUserId, commentsCount, onCountCh
                                 )}
                             </div>
                         </div>
-                    </motion.div>
+                    </m.div>
                 ))}
             </AnimatePresence>
 

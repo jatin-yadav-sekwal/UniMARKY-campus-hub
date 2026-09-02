@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion } from 'motion/react';
+import { m } from 'motion/react';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Loader2, Mail } from 'lucide-react';
@@ -38,7 +38,7 @@ export function SocialAuth() {
                 </div>
             </div>
 
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <m.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button
                     variant="outline"
                     className="w-full"
@@ -69,7 +69,7 @@ export function SocialAuth() {
                     )}
                     Google
                 </Button>
-            </motion.div>
+            </m.div>
         </div>
     );
 }

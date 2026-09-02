@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Users, Target, Rocket, Heart, GraduationCap, Shield } from "lucide-react";
@@ -50,7 +50,7 @@ export function AboutPage() {
             <section className="pt-32 pb-16 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-brand-navy/5 to-transparent" />
                 <div className="container px-4 mx-auto relative text-center">
-                    <motion.div {...fadeUp}>
+                    <m.div {...fadeUp}>
                         <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-orange/10 text-brand-orange text-sm font-semibold mb-6">
                             <Users className="w-4 h-4" /> About Us
                         </span>
@@ -63,7 +63,7 @@ export function AboutPage() {
                         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                             UniMARKY was born out of frustration with scattered campus services. We wanted one unified place where students can buy, sell, eat, study, find housing, and connect — without the hassle.
                         </p>
-                    </motion.div>
+                    </m.div>
                 </div>
             </section>
 
@@ -71,7 +71,7 @@ export function AboutPage() {
             <section className="py-16 border-t border-border/30">
                 <div className="container px-4 mx-auto">
                     <div className="grid md:grid-cols-2 gap-12 items-center max-w-5xl mx-auto">
-                        <motion.div {...fadeUp}>
+                        <m.div {...fadeUp}>
                             <span className="text-xs font-bold tracking-widest text-brand-blue uppercase">Our Mission</span>
                             <h2 className="text-3xl font-black text-brand-navy mt-2 mb-4">
                                 Making campus life frictionless
@@ -82,8 +82,8 @@ export function AboutPage() {
                             <p className="text-muted-foreground leading-relaxed">
                                 UniMARKY brings every essential service into one beautiful, fast platform — verified and trusted by the student community.
                             </p>
-                        </motion.div>
-                        <motion.div {...fadeUp} className="flex items-center justify-center">
+                        </m.div>
+                        <m.div {...fadeUp} className="flex items-center justify-center">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-gradient-to-br from-brand-orange/10 to-amber-500/5 rounded-2xl p-6 border border-brand-orange/10 text-center">
                                     <p className="text-3xl font-black text-brand-navy">2K+</p>
@@ -102,7 +102,7 @@ export function AboutPage() {
                                     <p className="text-xs text-muted-foreground mt-1">Possibilities</p>
                                 </div>
                             </div>
-                        </motion.div>
+                        </m.div>
                     </div>
                 </div>
             </section>
@@ -110,13 +110,13 @@ export function AboutPage() {
             {/* Values */}
             <section className="py-16 bg-muted/20 border-y border-border/30">
                 <div className="container px-4 mx-auto">
-                    <motion.div {...fadeUp} className="text-center mb-12">
+                    <m.div {...fadeUp} className="text-center mb-12">
                         <h2 className="text-3xl font-black text-brand-navy">Our Values</h2>
                         <p className="text-muted-foreground mt-2">The principles that drive every pixel we build.</p>
-                    </motion.div>
+                    </m.div>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
                         {values.map((v, i) => (
-                            <motion.div
+                            <m.div
                                 key={v.title}
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
@@ -129,7 +129,7 @@ export function AboutPage() {
                                 </div>
                                 <h3 className="font-bold text-brand-navy mb-2">{v.title}</h3>
                                 <p className="text-sm text-muted-foreground leading-relaxed">{v.desc}</p>
-                            </motion.div>
+                            </m.div>
                         ))}
                     </div>
                 </div>

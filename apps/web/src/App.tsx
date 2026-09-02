@@ -64,72 +64,77 @@ function PageLoader() {
 }
 
 import { Toaster } from 'sonner';
+import { MotionConfig, LazyMotion, domMax } from 'motion/react';
 
 export default function App() {
     return (
-        <Suspense fallback={<PageLoader />}>
-            <Toaster position="top-center" richColors />
-            <ScrollToTop />
-            <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/auth" element={<AuthPage />} />
+        <MotionConfig reducedMotion="user">
+            <LazyMotion features={domMax} strict={false}>
+                <Suspense fallback={<PageLoader />}>
+                    <Toaster position="top-center" richColors />
+                    <ScrollToTop />
+                <Routes>
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/auth" element={<AuthPage />} />
 
-                {/* Public pages — no auth required */}
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/terms" element={<TermsPage />} />
-                <Route path="/privacy" element={<PrivacyPage />} />
+                    {/* Public pages — no auth required */}
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/terms" element={<TermsPage />} />
+                    <Route path="/privacy" element={<PrivacyPage />} />
 
-                <Route element={<ProtectedRoute requireOnboarding={false} />}>
-                    <Route path="/onboarding" element={<OnboardingPage />} />
-                </Route>
-
-                {/* Protected Dashboard Routes - Require Onboarding */}
-                <Route element={<ProtectedRoute requireOnboarding={true} />}>
-                    <Route element={<MainLayout />}>
-                        <Route path="/dashboard" element={<DashboardPage />} />
-                        <Route path="/marketplace" element={<MarketplacePage />} />
-                        <Route path="/marketplace/my-listings" element={<MyMarketplaceListingsPage />} />
-                        <Route path="/marketplace/list" element={<ListItemPage />} />
-                        <Route path="/marketplace/edit/:id" element={<EditMarketplaceItemPage />} />
-                        <Route path="/marketplace/:id" element={<MarketplaceItemPage />} />
-                        <Route path="/unimedia" element={<UnimediaPage />} />
-                        <Route path="/unimedia/my-content" element={<MyContentPage />} />
-                        <Route path="/unimedia/:id" element={<PostDetailPage />} />
-                        <Route path="/lost-found" element={<LostFoundPage />} />
-                        <Route path="/lost-found/my-listings" element={<MyLostFoundListingsPage />} />
-                        <Route path="/lost-found/report" element={<ReportItemPage />} />
-                        <Route path="/lost-found/edit/:id" element={<EditLostFoundItemPage />} />
-                        <Route path="/lost-found/:id" element={<LostFoundItemPage />} />
-                        <Route path="/announcements" element={<AnnouncementsPage />} />
-                        <Route path="/food" element={<FoodPage />} />
-                        <Route path="/food/:id" element={<RestaurantPage />} />
-                        <Route path="/food/menu/:id" element={<MenuItemPage />} />
-                        <Route path="/housing" element={<HousingPage />} />
-                        <Route path="/housing/:id" element={<AccommodationPage />} />
-                        <Route path="/profile" element={<ProfilePage />} />
-                        <Route path="/study" element={<StudyPage />} />
-
-                        {/* Role Request */}
-                        <Route path="/request-role" element={<RequestRolePage />} />
-
-                        {/* Superuser Routes */}
-                        <Route path="/superuser/dashboard" element={<SuperuserDashboard />} />
-                        <Route path="/superuser/add-restaurant" element={<AddRestaurantPage />} />
-                        <Route path="/superuser/edit-restaurant/:id" element={<EditRestaurantPage />} />
-                        <Route path="/superuser/add-menu/:restaurantId" element={<AddMenuItemPage />} />
-                        <Route path="/superuser/add-accommodation" element={<AddAccommodationPage />} />
-                        <Route path="/superuser/edit-accommodation/:id" element={<EditAccommodationPage />} />
-                        <Route path="/superuser/add-study-material" element={<AddStudyMaterialPage />} />
-
-                        {/* Admin Routes (userX) */}
-                        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                    <Route element={<ProtectedRoute requireOnboarding={false} />}>
+                        <Route path="/onboarding" element={<OnboardingPage />} />
                     </Route>
-                </Route>
 
-                {/* 404 */}
-                <Route path="*" element={<ErrorPage />} />
-            </Routes>
-        </Suspense>
-    );
+                    {/* Protected Dashboard Routes - Require Onboarding */}
+                    <Route element={<ProtectedRoute requireOnboarding={true} />}>
+                        <Route element={<MainLayout />}>
+                            <Route path="/dashboard" element={<DashboardPage />} />
+                            <Route path="/marketplace" element={<MarketplacePage />} />
+                            <Route path="/marketplace/my-listings" element={<MyMarketplaceListingsPage />} />
+                            <Route path="/marketplace/list" element={<ListItemPage />} />
+                            <Route path="/marketplace/edit/:id" element={<EditMarketplaceItemPage />} />
+                            <Route path="/marketplace/:id" element={<MarketplaceItemPage />} />
+                            <Route path="/unimedia" element={<UnimediaPage />} />
+                            <Route path="/unimedia/my-content" element={<MyContentPage />} />
+                            <Route path="/unimedia/:id" element={<PostDetailPage />} />
+                            <Route path="/lost-found" element={<LostFoundPage />} />
+                            <Route path="/lost-found/my-listings" element={<MyLostFoundListingsPage />} />
+                            <Route path="/lost-found/report" element={<ReportItemPage />} />
+                            <Route path="/lost-found/edit/:id" element={<EditLostFoundItemPage />} />
+                            <Route path="/lost-found/:id" element={<LostFoundItemPage />} />
+                            <Route path="/announcements" element={<AnnouncementsPage />} />
+                            <Route path="/food" element={<FoodPage />} />
+                            <Route path="/food/:id" element={<RestaurantPage />} />
+                            <Route path="/food/menu/:id" element={<MenuItemPage />} />
+                            <Route path="/housing" element={<HousingPage />} />
+                            <Route path="/housing/:id" element={<AccommodationPage />} />
+                            <Route path="/profile" element={<ProfilePage />} />
+                            <Route path="/study" element={<StudyPage />} />
+
+                            {/* Role Request */}
+                            <Route path="/request-role" element={<RequestRolePage />} />
+
+                            {/* Superuser Routes */}
+                            <Route path="/superuser/dashboard" element={<SuperuserDashboard />} />
+                            <Route path="/superuser/add-restaurant" element={<AddRestaurantPage />} />
+                            <Route path="/superuser/edit-restaurant/:id" element={<EditRestaurantPage />} />
+                            <Route path="/superuser/add-menu/:restaurantId" element={<AddMenuItemPage />} />
+                            <Route path="/superuser/add-accommodation" element={<AddAccommodationPage />} />
+                            <Route path="/superuser/edit-accommodation/:id" element={<EditAccommodationPage />} />
+                            <Route path="/superuser/add-study-material" element={<AddStudyMaterialPage />} />
+
+                            {/* Admin Routes (userX) */}
+                            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                        </Route>
+                    </Route>
+
+                    {/* 404 */}
+                    <Route path="*" element={<ErrorPage />} />
+                </Routes>
+            </Suspense>
+        </LazyMotion>
+    </MotionConfig>
+);
 }

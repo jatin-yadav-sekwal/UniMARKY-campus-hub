@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { m } from 'motion/react';
 import { api } from '@/lib/api';
 import { ArrowLeft, Star, MapPin, Clock, Phone, Loader2, Leaf, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -71,7 +71,7 @@ export function RestaurantPage() {
     }
 
     // Get unique categories
-    const categories = ["all", ...new Set(restaurant.menu.map(item => item.category).filter(Boolean))];
+    const categories = ["all", ...new Set(restaurant.menu.flatMap(item => item.category ? [item.category] : []))];
 
     // Filter menu by category
     const filteredMenu = activeCategory === "all"
@@ -91,7 +91,7 @@ export function RestaurantPage() {
     return (
         <div className="max-w-6xl mx-auto pb-12">
             {/* Back Button */}
-            <motion.button
+            <m.button
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 onClick={() => navigate("/food")}
@@ -99,10 +99,10 @@ export function RestaurantPage() {
             >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Food Zone
-            </motion.button>
+            </m.button>
 
             {/* Hero Section */}
-            <motion.div
+            <m.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="relative rounded-3xl overflow-hidden mb-8"
@@ -151,10 +151,10 @@ export function RestaurantPage() {
                         </div>
                     </div>
                 </div>
-            </motion.div>
+            </m.div>
 
             {/* Info Cards */}
-            <motion.div
+            <m.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -166,8 +166,8 @@ export function RestaurantPage() {
                     <p className="text-foreground leading-relaxed">{restaurant.description}</p>
                     {tags.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-4">
-                            {tags.map((tag, i) => (
-                                <span key={i} className="px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-medium">
+                            {tags.map((tag) => (
+                                <span key={tag} className="px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-medium">
                                     {tag}
                                 </span>
                             ))}
@@ -194,10 +194,10 @@ export function RestaurantPage() {
                         </a>
                     )}
                 </div>
-            </motion.div>
+            </m.div>
 
             {/* Menu Section */}
-            <motion.div
+            <m.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
@@ -213,7 +213,7 @@ export function RestaurantPage() {
                         <button
                             key={cat}
                             onClick={() => setActiveCategory(cat)}
-                            className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${activeCategory === cat
+                            className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${activeCategory === cat
                                     ? "bg-orange-500 text-white"
                                     : "bg-muted/50 text-muted-foreground hover:bg-muted"
                                 }`}
@@ -235,7 +235,7 @@ export function RestaurantPage() {
                                 <Link
                                     key={item.id}
                                     to={`/food/menu/${item.id}`}
-                                    className="group flex gap-4 p-4 rounded-2xl bg-background border border-border/50 hover:border-orange-500/50 hover:shadow-lg transition-all"
+                                    className="group flex gap-4 p-4 rounded-2xl bg-background border border-border/50 hover:border-orange-500/50 hover:shadow-lg transition-[border-color,box-shadow]"
                                 >
                                     {/* Image */}
                                     <div className="w-24 h-24 rounded-xl overflow-hidden shrink-0 bg-muted">
@@ -295,7 +295,7 @@ export function RestaurantPage() {
                         No menu items available yet.
                     </div>
                 )}
-            </motion.div>
+            </m.div>
         </div>
     );
 }

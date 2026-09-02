@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { ArrowLeft, MapPin, ImagePlus, X, Search, Eye, Rocket, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { uploadImage } from "@/lib/uploadImage";
 export function ReportItemPage() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [imageFile, setImageFile] = useState<File | null>(null);
+    const imageFileRef = useRef<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
@@ -25,8 +25,12 @@ export function ReportItemPage() {
         const file = e.target.files?.[0];
         if (file) {
             if (file.size > 5 * 1024 * 1024) { alert("Max file size is 5MB"); return; }
-            setImageFile(file);
-            setImagePreview(URL.createObjectURL(file));
+            imageFileRef.current = file;
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
         }
     };
 
@@ -36,8 +40,8 @@ export function ReportItemPage() {
 
         try {
             let imageUrl: string | undefined;
-            if (imageFile) {
-                imageUrl = await uploadImage(imageFile, "lostfound-images");
+            if (imageFileRef.current) {
+                imageUrl = await uploadImage(imageFileRef.current, "lostfound-images");
             }
             await api.post("/lostfound", { ...formData, imageUrl });
             navigate("/lost-found");
@@ -52,7 +56,7 @@ export function ReportItemPage() {
         <div className="min-h-screen bg-gradient-to-br from-teal-500/5 via-background to-emerald-500/5">
             <div className="container max-w-3xl mx-auto px-4 py-8">
                 {/* Header */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-8"
@@ -72,10 +76,10 @@ export function ReportItemPage() {
                     <p className="mt-3 text-muted-foreground text-lg">
                         Help your campus community by reporting lost or found items.
                     </p>
-                </motion.div>
+                </m.div>
 
                 {/* Form Card */}
-                <motion.form
+                <m.form
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
@@ -92,7 +96,7 @@ export function ReportItemPage() {
                                 <button
                                     type="button"
                                     onClick={() => setFormData(prev => ({ ...prev, type: "lost" }))}
-                                    className={`relative p-6 rounded-2xl border-2 transition-all duration-300 ${formData.type === "lost"
+                                    className={`relative p-6 rounded-2xl border-2 transition-colors duration-300 ${formData.type === "lost"
                                         ? "border-red-500 bg-red-50 dark:bg-red-500/10"
                                         : "border-border hover:border-muted-foreground"
                                         }`}
@@ -113,7 +117,7 @@ export function ReportItemPage() {
                                 <button
                                     type="button"
                                     onClick={() => setFormData(prev => ({ ...prev, type: "found" }))}
-                                    className={`relative p-6 rounded-2xl border-2 transition-all duration-300 ${formData.type === "found"
+                                    className={`relative p-6 rounded-2xl border-2 transition-colors duration-300 ${formData.type === "found"
                                         ? "border-green-500 bg-green-50 dark:bg-green-500/10"
                                         : "border-border hover:border-muted-foreground"
                                         }`}
@@ -138,7 +142,7 @@ export function ReportItemPage() {
                             <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
                                 Item Photo (Optional)
                             </Label>
-                            <label className="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border rounded-2xl cursor-pointer hover:border-teal-500/50 hover:bg-teal-500/5 transition-all duration-300 overflow-hidden">
+                            <label className="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border rounded-2xl cursor-pointer hover:border-teal-500/50 hover:bg-teal-500/5 transition-colors duration-300 overflow-hidden">
                                 {imagePreview ? (
                                     <>
                                         <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
@@ -147,7 +151,7 @@ export function ReportItemPage() {
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 setImagePreview(null);
-                                                setImageFile(null);
+                                                imageFileRef.current = null;
                                             }}
                                             className="absolute top-2 right-2 p-1.5 bg-background/90 rounded-full hover:bg-red-50"
                                         >
@@ -201,10 +205,12 @@ export function ReportItemPage() {
 
                         {/* Description */}
                         <div>
-                            <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
+                            <Label htmlFor="description" className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
                                 Description
                             </Label>
                             <textarea
+                                id="description"
+                                aria-label="Description"
                                 placeholder="Provide any distinguishing features or additional details..."
                                 value={formData.description}
                                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
@@ -216,14 +222,14 @@ export function ReportItemPage() {
 
                     {/* Footer */}
                     <div className="mt-10 pt-6 border-t border-border/50 flex justify-end">
-                        <motion.div
+                        <m.div
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                         >
                             <Button
                                 type="submit"
                                 disabled={loading}
-                                className={`px-8 py-6 rounded-full font-bold text-lg shadow-lg transition-all gap-2 ${formData.type === "lost"
+                                className={`px-8 py-6 rounded-full font-bold text-lg shadow-lg transition-shadow gap-2 ${formData.type === "lost"
                                     ? "bg-gradient-to-r from-red-500 to-red-600 hover:shadow-red-500/25"
                                     : "bg-gradient-to-r from-green-500 to-emerald-500 hover:shadow-green-500/25"
                                     }`}
@@ -231,9 +237,9 @@ export function ReportItemPage() {
                                 {loading ? "Submitting..." : `REPORT AS ${formData.type.toUpperCase()}`}
                                 <Rocket className="w-5 h-5" />
                             </Button>
-                        </motion.div>
+                        </m.div>
                     </div>
-                </motion.form>
+                </m.form>
             </div>
         </div>
     );

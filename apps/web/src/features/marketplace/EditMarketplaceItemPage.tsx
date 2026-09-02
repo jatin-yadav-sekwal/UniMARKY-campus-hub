@@ -1,37 +1,139 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { motion } from "motion/react";
-import { Upload, Tag, DollarSign, Calendar, FileText, Rocket, ArrowLeft, ImagePlus, X, Loader2, Save } from "lucide-react";
+import { m } from "motion/react";
+import { ArrowLeft, Tag, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
 import { uploadImage } from "@/lib/uploadImage";
+import { MarketplacePhotoUploader } from "./components/MarketplacePhotoUploader";
 
-const categories = [
-    { value: "textbooks", label: "Textbooks" },
-    { value: "electronics", label: "Electronics" },
-    { value: "dorm-decor", label: "Dorm Decor" },
-    { value: "fashion", label: "Fashion" },
-    { value: "services", label: "Services" },
-    { value: "fitness", label: "Fitness" },
+const CATEGORIES = [
+    { value: "books", label: "Books & Study Material" },
+    { value: "electronics", label: "Electronics & Gadgets" },
+    { value: "cycles", label: "Cycles & Mobility" },
+    { value: "hostel-essentials", label: "Hostel Essentials" },
+    { value: "fashion", label: "Clothing & Fashion" },
+    { value: "sports", label: "Sports & Fitness" },
     { value: "other", label: "Other" },
 ];
 
-const conditions = [
+const CONDITIONS = [
     { value: "new", label: "Brand New" },
     { value: "like-new", label: "Like New" },
-    { value: "great", label: "Great Condition" },
     { value: "good", label: "Good Condition" },
     { value: "fair", label: "Fair Condition" },
 ];
+
+interface SelectFieldsProps {
+    category: string;
+    condition: string;
+    onChangeCategory: (val: string) => void;
+    onChangeCondition: (val: string) => void;
+}
+
+function CategoryConditionSelects({
+    category,
+    condition,
+    onChangeCategory,
+    onChangeCondition,
+}: SelectFieldsProps) {
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <Label htmlFor="category" className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
+                    Category
+                </Label>
+                <select
+                    id="category"
+                    aria-label="Category"
+                    value={category}
+                    onChange={(e) => onChangeCategory(e.target.value)}
+                    className="w-full h-14 px-4 rounded-xl border border-border/50 bg-background text-foreground text-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange"
+                    required
+                >
+                    <option value="">Select Category</option>
+                    {CATEGORIES.map(cat => (
+                        <option key={cat.value} value={cat.value}>{cat.label}</option>
+                    ))}
+                </select>
+            </div>
+            <div>
+                <Label htmlFor="condition" className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
+                    Condition
+                </Label>
+                <select
+                    id="condition"
+                    aria-label="Condition"
+                    value={condition}
+                    onChange={(e) => onChangeCondition(e.target.value)}
+                    className="w-full h-14 px-4 rounded-xl border border-border/50 bg-background text-foreground text-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange"
+                >
+                    <option value="">Select Condition</option>
+                    {CONDITIONS.map(cond => (
+                        <option key={cond.value} value={cond.value}>{cond.label}</option>
+                    ))}
+                </select>
+            </div>
+        </div>
+    );
+}
+
+interface PriceInputProps {
+    price: string;
+    isNegotiable: boolean;
+    onPriceChange: (val: string) => void;
+    onNegotiableChange: (val: boolean) => void;
+}
+
+function PriceNegotiableField({
+    price,
+    isNegotiable,
+    onPriceChange,
+    onNegotiableChange,
+}: PriceInputProps) {
+    return (
+        <div>
+            <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
+                Price (₹)
+            </Label>
+            <div className="flex items-center gap-4">
+                <div className="relative flex-1">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-lg">₹</span>
+                    <Input
+                        type="number"
+                        placeholder="0.00"
+                        value={price}
+                        onChange={(e) => onPriceChange(e.target.value)}
+                        className="h-14 pl-8 rounded-xl border-border/50 text-lg"
+                        required
+                    />
+                </div>
+                <label className="flex items-center gap-3 cursor-pointer">
+                    <div className="relative">
+                        <input
+                            type="checkbox"
+                            checked={isNegotiable}
+                            onChange={(e) => onNegotiableChange(e.target.checked)}
+                            className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-muted rounded-full peer-checked:bg-brand-orange transition-colors" />
+                        <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm peer-checked:translate-x-5 transition-transform" />
+                    </div>
+                    <span className="text-sm font-medium whitespace-nowrap">Open to negotiations</span>
+                </label>
+            </div>
+        </div>
+    );
+}
 
 export function EditMarketplaceItemPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
-    const [imageFile, setImageFile] = useState<File | null>(null);
+    const imageFileRef = useRef<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
@@ -47,39 +149,55 @@ export function EditMarketplaceItemPage() {
 
     useEffect(() => {
         if (!id) return;
-        const fetchItem = async () => {
-            try {
-                const item = await api.get(`/marketplace/${id}`);
-                setFormData({
-                    title: item.title,
-                    description: item.description || "",
-                    category: item.category || "",
-                    condition: item.condition || "",
-                    manufacturedYear: item.manufacturedYear || "",
-                    price: item.price,
-                    isNegotiable: item.isNegotiable,
-                    imageUrl: item.imageUrl || "",
-                });
-                if (item.imageUrl) {
-                    setImagePreview(item.imageUrl);
+        let cancelled = false;
+        api.get(`/marketplace/${id}`)
+            .then((item) => {
+                if (!cancelled) {
+                    setFormData({
+                        title: item.title,
+                        description: item.description || "",
+                        category: item.category || "",
+                        condition: item.condition || "",
+                        manufacturedYear: item.manufacturedYear || "",
+                        price: item.price,
+                        isNegotiable: item.isNegotiable,
+                        imageUrl: item.imageUrl || "",
+                    });
+                    if (item.imageUrl) {
+                        setImagePreview(item.imageUrl);
+                    }
                 }
-            } catch (error) {
+            })
+            .catch((error) => {
                 console.error("Failed to fetch item:", error);
-                // navigate("/marketplace/my-listings"); // Optional: redirect on error
-            } finally {
-                setFetching(false);
-            }
+            })
+            .finally(() => {
+                if (!cancelled) {
+                    setFetching(false);
+                }
+            });
+        return () => {
+            cancelled = true;
         };
-        fetchItem();
     }, [id]);
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             if (file.size > 5 * 1024 * 1024) { alert("Max file size is 5MB"); return; }
-            setImageFile(file);
-            setImagePreview(URL.createObjectURL(file));
+            imageFileRef.current = file;
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
         }
+    };
+
+    const handleRemoveImage = () => {
+        setImagePreview(null);
+        imageFileRef.current = null;
+        setFormData(prev => ({ ...prev, imageUrl: "" }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -88,8 +206,8 @@ export function EditMarketplaceItemPage() {
 
         try {
             let imageUrl = formData.imageUrl;
-            if (imageFile) {
-                imageUrl = await uploadImage(imageFile, "marketplace-images");
+            if (imageFileRef.current) {
+                imageUrl = await uploadImage(imageFileRef.current, "marketplace-images");
             }
 
             await api.patch(`/marketplace/${id}`, {
@@ -116,7 +234,7 @@ export function EditMarketplaceItemPage() {
         <div className="min-h-screen bg-gradient-to-br from-brand-orange/5 via-background to-brand-yellow/5">
             <div className="container max-w-3xl mx-auto px-4 py-8">
                 {/* Header */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-8"
@@ -137,10 +255,10 @@ export function EditMarketplaceItemPage() {
                         <span className="text-brand-navy">UPDATE YOUR </span>
                         <span className="bg-gradient-to-r from-brand-orange to-brand-yellow bg-clip-text text-transparent">ITEM.</span>
                     </h1>
-                </motion.div>
+                </m.div>
 
                 {/* Form Card */}
-                <motion.form
+                <m.form
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
@@ -153,47 +271,12 @@ export function EditMarketplaceItemPage() {
                     </div>
 
                     <div className="space-y-8">
-                        {/* Product Photos */}
-                        <div>
-                            <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
-                                Product Photos
-                            </Label>
-                            <label className="relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-2xl cursor-pointer hover:border-brand-orange/50 hover:bg-brand-orange/5 transition-all duration-300 overflow-hidden">
-                                {imagePreview ? (
-                                    <>
-                                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                setImagePreview(null);
-                                                setImageFile(null);
-                                                setFormData(prev => ({ ...prev, imageUrl: "" }));
-                                            }}
-                                            className="absolute top-2 right-2 p-1.5 bg-background/90 rounded-full hover:bg-red-50"
-                                        >
-                                            <X className="w-4 h-4 text-red-500" />
-                                        </button>
-                                    </>
-                                ) : (
-                                    <div className="flex flex-col items-center gap-3 text-muted-foreground">
-                                        <div className="p-4 rounded-2xl bg-brand-orange/10">
-                                            <ImagePlus className="w-8 h-8 text-brand-orange" />
-                                        </div>
-                                        <div className="text-center">
-                                            <p className="font-semibold text-foreground">Upload new photo</p>
-                                            <p className="text-sm">Click to change current image</p>
-                                        </div>
-                                    </div>
-                                )}
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
-                                    className="hidden"
-                                />
-                            </label>
-                        </div>
+                        <MarketplacePhotoUploader
+                            imagePreview={imagePreview}
+                            subtitle="Click to change current image"
+                            onUpload={handleImageUpload}
+                            onRemove={handleRemoveImage}
+                        />
 
                         {/* Product Name */}
                         <div>
@@ -209,47 +292,21 @@ export function EditMarketplaceItemPage() {
                             />
                         </div>
 
-                        {/* Category & Year Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
-                                    Category
-                                </Label>
-                                <select
-                                    value={formData.category}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                                    className="w-full h-14 px-4 rounded-xl border border-border/50 bg-background text-foreground text-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange"
-                                    required
-                                >
-                                    <option value="">Select Category</option>
-                                    {categories.map(cat => (
-                                        <option key={cat.value} value={cat.value}>{cat.label}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
-                                    Condition
-                                </Label>
-                                <select
-                                    value={formData.condition}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, condition: e.target.value }))}
-                                    className="w-full h-14 px-4 rounded-xl border border-border/50 bg-background text-foreground text-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange"
-                                >
-                                    <option value="">Select Condition</option>
-                                    {conditions.map(cond => (
-                                        <option key={cond.value} value={cond.value}>{cond.label}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
+                        <CategoryConditionSelects
+                            category={formData.category}
+                            condition={formData.condition}
+                            onChangeCategory={(val) => setFormData(prev => ({ ...prev, category: val }))}
+                            onChangeCondition={(val) => setFormData(prev => ({ ...prev, condition: val }))}
+                        />
 
                         {/* Description */}
                         <div>
-                            <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
+                            <Label htmlFor="description" className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
                                 Description
                             </Label>
                             <textarea
+                                id="description"
+                                aria-label="Description"
                                 placeholder="Tell us about the condition, usage, and why you're selling it..."
                                 value={formData.description}
                                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
@@ -258,57 +315,31 @@ export function EditMarketplaceItemPage() {
                             />
                         </div>
 
-                        {/* Price Section */}
-                        <div>
-                            <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
-                                Price (₹)
-                            </Label>
-                            <div className="flex items-center gap-4">
-                                <div className="relative flex-1">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-lg">₹</span>
-                                    <Input
-                                        type="number"
-                                        placeholder="0.00"
-                                        value={formData.price}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                                        className="h-14 pl-8 rounded-xl border-border/50 text-lg"
-                                        required
-                                    />
-                                </div>
-                                <label className="flex items-center gap-3 cursor-pointer">
-                                    <div className="relative">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.isNegotiable}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, isNegotiable: e.target.checked }))}
-                                            className="sr-only peer"
-                                        />
-                                        <div className="w-11 h-6 bg-muted rounded-full peer-checked:bg-brand-orange transition-colors" />
-                                        <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm peer-checked:translate-x-5 transition-transform" />
-                                    </div>
-                                    <span className="text-sm font-medium whitespace-nowrap">Open to negotiations</span>
-                                </label>
-                            </div>
-                        </div>
+                        <PriceNegotiableField
+                            price={formData.price}
+                            isNegotiable={formData.isNegotiable}
+                            onPriceChange={(val) => setFormData(prev => ({ ...prev, price: val }))}
+                            onNegotiableChange={(val) => setFormData(prev => ({ ...prev, isNegotiable: val }))}
+                        />
                     </div>
 
                     {/* Footer */}
                     <div className="mt-10 pt-6 border-t border-border/50 flex flex-col sm:flex-row items-center justify-end gap-4">
-                        <motion.div
+                        <m.div
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                         >
                             <Button
                                 type="submit"
                                 disabled={loading}
-                                className="px-8 py-6 rounded-full bg-gradient-to-r from-brand-orange to-brand-orange/90 text-white font-bold text-lg shadow-lg shadow-brand-orange/25 hover:shadow-xl transition-all gap-2"
+                                className="px-8 py-6 rounded-full bg-gradient-to-r from-brand-orange to-brand-orange/90 text-white font-bold text-lg shadow-lg shadow-brand-orange/25 hover:shadow-xl transition-shadow gap-2"
                             >
                                 {loading ? "Updating..." : "SAVE CHANGES"}
                                 <Save className="w-5 h-5" />
                             </Button>
-                        </motion.div>
+                        </m.div>
                     </div>
-                </motion.form>
+                </m.form>
             </div>
         </div>
     );

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { m } from 'motion/react';
 import { api } from '@/lib/api';
 import { ArrowLeft, Star, Loader2, Leaf, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -65,7 +65,7 @@ export function MenuItemPage() {
     return (
         <div className="max-w-4xl mx-auto pb-12">
             {/* Back Button */}
-            <motion.button
+            <m.button
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 onClick={() => navigate(-1)}
@@ -73,11 +73,11 @@ export function MenuItemPage() {
             >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Menu
-            </motion.button>
+            </m.button>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Image */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                 >
@@ -94,10 +94,10 @@ export function MenuItemPage() {
                             </div>
                         )}
                     </div>
-                </motion.div>
+                </m.div>
 
                 {/* Details */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
@@ -171,6 +171,7 @@ export function MenuItemPage() {
                                 <div className="flex items-center gap-3">
                                     <button
                                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                        aria-label="Decrease quantity"
                                         className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors"
                                     >
                                         <Minus className="w-4 h-4" />
@@ -178,6 +179,7 @@ export function MenuItemPage() {
                                     <span className="w-8 text-center font-bold text-lg">{quantity}</span>
                                     <button
                                         onClick={() => setQuantity(quantity + 1)}
+                                        aria-label="Increase quantity"
                                         className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors"
                                     >
                                         <Plus className="w-4 h-4" />
@@ -199,7 +201,7 @@ export function MenuItemPage() {
                             </div>
                         )}
                     </div>
-                </motion.div>
+                </m.div>
             </div>
         </div>
     );

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { m } from 'motion/react';
 import { api } from '@/lib/api';
-import { ArrowLeft, Phone, User, BadgeCheck, Tag, Calendar, MapPin, MessageCircle, Share2, Loader2 } from 'lucide-react';
+import { ArrowLeft, Phone, User, BadgeCheck, Tag, Calendar, MessageCircle, Share2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface SellerInfo {
@@ -35,6 +35,102 @@ const conditionLabels: Record<string, string> = {
     "fair": "Fair Condition",
 };
 
+function MarketplaceImageCard({
+    imageUrl,
+    title,
+    isNegotiable,
+    onShare,
+}: {
+    imageUrl?: string;
+    title: string;
+    isNegotiable: boolean;
+    onShare: () => void;
+}) {
+    return (
+        <m.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative"
+        >
+            <div className="aspect-square rounded-3xl overflow-hidden bg-muted/30 border border-border/50">
+                {imageUrl ? (
+                    <img
+                        src={imageUrl}
+                        alt={title}
+                        className="w-full h-full object-cover"
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                        <Tag className="w-20 h-20 text-muted-foreground/30" />
+                    </div>
+                )}
+            </div>
+
+            <div className={`absolute top-4 left-4 px-4 py-2 rounded-full text-sm font-bold ${
+                isNegotiable ? "bg-brand-orange text-white" : "bg-brand-navy text-white"
+            }`}>
+                {isNegotiable ? "NEGOTIABLE" : "FIXED PRICE"}
+            </div>
+
+            <div className="absolute top-4 right-4 flex gap-2">
+                <button
+                    onClick={onShare}
+                    aria-label="Share listing"
+                    className="p-3 rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white transition-colors text-brand-navy"
+                >
+                    <Share2 className="w-5 h-5" />
+                </button>
+            </div>
+        </m.div>
+    );
+}
+
+function MarketplaceSellerCard({ seller }: { seller?: SellerInfo }) {
+    return (
+        <div className="p-6 rounded-2xl bg-muted/30 border border-border/50">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">
+                Contact Seller
+            </h3>
+
+            <div className="flex items-center gap-4 mb-4">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-brand-navy to-brand-navy/80 flex items-center justify-center">
+                    <User className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                    <div className="flex items-center gap-2">
+                        <p className="font-bold text-lg text-foreground">
+                            {seller?.fullName || "Anonymous Seller"}
+                        </p>
+                        {seller?.isVerified && (
+                            <BadgeCheck className="w-5 h-5 text-blue-500" />
+                        )}
+                    </div>
+                    {seller?.department && (
+                        <p className="text-sm text-muted-foreground">
+                            {seller.department}
+                        </p>
+                    )}
+                </div>
+            </div>
+
+            {seller?.mobileNumber ? (
+                <a
+                    href={`tel:${seller.mobileNumber}`}
+                    className="flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-gradient-to-r from-brand-navy to-brand-navy/90 text-white font-bold text-lg hover:shadow-lg hover:shadow-brand-navy/25 transition-shadow"
+                >
+                    <Phone className="w-5 h-5" />
+                    {seller.mobileNumber}
+                </a>
+            ) : (
+                <div className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-muted text-muted-foreground">
+                    <MessageCircle className="w-5 h-5" />
+                    Contact info not available
+                </div>
+            )}
+        </div>
+    );
+}
+
 export function MarketplaceItemPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -44,7 +140,6 @@ export function MarketplaceItemPage() {
 
     useEffect(() => {
         if (!id) return;
-
         api.get(`/marketplace/${id}`)
             .then(setItem)
             .catch((err) => setError(err.message))
@@ -98,8 +193,7 @@ export function MarketplaceItemPage() {
 
     return (
         <div className="max-w-6xl mx-auto pb-12">
-            {/* Back Button */}
-            <motion.button
+            <m.button
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 onClick={() => navigate("/marketplace")}
@@ -107,56 +201,22 @@ export function MarketplaceItemPage() {
             >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Marketplace
-            </motion.button>
+            </m.button>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Image Section */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="relative"
-                >
-                    <div className="aspect-square rounded-3xl overflow-hidden bg-muted/30 border border-border/50">
-                        {item.imageUrl ? (
-                            <img
-                                src={item.imageUrl}
-                                alt={item.title}
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                                <Tag className="w-20 h-20 text-muted-foreground/30" />
-                            </div>
-                        )}
-                    </div>
+                <MarketplaceImageCard
+                    imageUrl={item.imageUrl}
+                    title={item.title}
+                    isNegotiable={item.isNegotiable}
+                    onShare={handleShare}
+                />
 
-                    {/* Badge */}
-                    <div className={`absolute top-4 left-4 px-4 py-2 rounded-full text-sm font-bold ${item.isNegotiable
-                        ? "bg-brand-orange text-white"
-                        : "bg-brand-navy text-white"
-                        }`}>
-                        {item.isNegotiable ? "NEGOTIABLE" : "FIXED PRICE"}
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="absolute top-4 right-4 flex gap-2">
-                        <button
-                            onClick={handleShare}
-                            className="p-3 rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white transition-colors text-brand-navy"
-                        >
-                            <Share2 className="w-5 h-5" />
-                        </button>
-                    </div>
-                </motion.div>
-
-                {/* Details Section */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                     className="flex flex-col"
                 >
-                    {/* Category & Condition */}
                     <div className="flex items-center gap-2 mb-3">
                         <span className="px-3 py-1 rounded-full bg-muted text-xs font-bold uppercase tracking-wide">
                             {item.category?.replace("-", " ") || "General"}
@@ -168,18 +228,15 @@ export function MarketplaceItemPage() {
                         )}
                     </div>
 
-                    {/* Title */}
                     <h1 className="text-3xl md:text-4xl font-black text-foreground mb-2">
                         {item.title}
                     </h1>
 
-                    {/* Posted Date */}
                     <p className="text-sm text-muted-foreground flex items-center gap-1 mb-6">
                         <Calendar className="w-4 h-4" />
                         Listed on {formattedDate}
                     </p>
 
-                    {/* Price */}
                     <div className="p-6 rounded-2xl bg-gradient-to-br from-brand-orange/10 to-brand-yellow/5 border border-brand-orange/20 mb-6">
                         <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Expected Price</p>
                         <p className="text-4xl font-black text-brand-navy">
@@ -192,7 +249,6 @@ export function MarketplaceItemPage() {
                         )}
                     </div>
 
-                    {/* Description */}
                     {item.description && (
                         <div className="mb-6">
                             <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-2">
@@ -204,49 +260,8 @@ export function MarketplaceItemPage() {
                         </div>
                     )}
 
-                    {/* Seller Info Card */}
-                    <div className="p-6 rounded-2xl bg-muted/30 border border-border/50">
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">
-                            Contact Seller
-                        </h3>
-
-                        <div className="flex items-center gap-4 mb-4">
-                            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-brand-navy to-brand-navy/80 flex items-center justify-center">
-                                <User className="w-7 h-7 text-white" />
-                            </div>
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <p className="font-bold text-lg text-foreground">
-                                        {item.seller?.fullName || "Anonymous Seller"}
-                                    </p>
-                                    {item.seller?.isVerified && (
-                                        <BadgeCheck className="w-5 h-5 text-blue-500" />
-                                    )}
-                                </div>
-                                {item.seller?.department && (
-                                    <p className="text-sm text-muted-foreground">
-                                        {item.seller.department}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-
-                        {item.seller?.mobileNumber ? (
-                            <a
-                                href={`tel:${item.seller.mobileNumber}`}
-                                className="flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-gradient-to-r from-brand-navy to-brand-navy/90 text-white font-bold text-lg hover:shadow-lg hover:shadow-brand-navy/25 transition-all"
-                            >
-                                <Phone className="w-5 h-5" />
-                                {item.seller.mobileNumber}
-                            </a>
-                        ) : (
-                            <div className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-muted text-muted-foreground">
-                                <MessageCircle className="w-5 h-5" />
-                                Contact info not available
-                            </div>
-                        )}
-                    </div>
-                </motion.div>
+                    <MarketplaceSellerCard seller={item.seller} />
+                </m.div>
             </div>
         </div>
     );

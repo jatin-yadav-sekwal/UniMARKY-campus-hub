@@ -1,61 +1,187 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { motion } from "motion/react";
-import { ArrowLeft, MapPin, ImagePlus, X, Search, Eye, Rocket, Loader2, Save } from "lucide-react";
+import { m } from "motion/react";
+import { ArrowLeft, MapPin, ImagePlus, X, Search, Eye, Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
 import { uploadImage } from "@/lib/uploadImage";
 
+type ItemType = "lost" | "found";
+
+const TYPE_OPTIONS = [
+    {
+        type: "lost" as ItemType,
+        label: "I LOST something",
+        icon: Search,
+        activeBorder: "border-red-500 bg-red-50 dark:bg-red-500/10",
+        activeBg: "bg-red-500",
+        activeText: "text-red-500",
+        dotBg: "bg-red-500",
+    },
+    {
+        type: "found" as ItemType,
+        label: "I FOUND something",
+        icon: Eye,
+        activeBorder: "border-green-500 bg-green-50 dark:bg-green-500/10",
+        activeBg: "bg-green-500",
+        activeText: "text-green-500",
+        dotBg: "bg-green-500",
+    },
+];
+
+interface TypeToggleProps {
+    currentType: ItemType;
+    onSelect: (type: ItemType) => void;
+}
+
+function TypeToggle({ currentType, onSelect }: TypeToggleProps) {
+    return (
+        <div>
+            <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
+                What are you reporting?
+            </Label>
+            <div className="grid grid-cols-2 gap-4">
+                {TYPE_OPTIONS.map((opt) => {
+                    const Icon = opt.icon;
+                    const isSelected = currentType === opt.type;
+                    return (
+                        <button
+                            key={opt.type}
+                            type="button"
+                            onClick={() => onSelect(opt.type)}
+                            className={`relative p-6 rounded-2xl border-2 transition-all duration-300 ${
+                                isSelected ? opt.activeBorder : "border-border hover:border-muted-foreground"
+                            }`}
+                        >
+                            <div className="flex flex-col items-center gap-3">
+                                <div className={`p-4 rounded-2xl ${isSelected ? opt.activeBg : "bg-muted"}`}>
+                                    <Icon className={`w-8 h-8 ${isSelected ? "text-white" : "text-muted-foreground"}`} />
+                                </div>
+                                <span className={`text-lg font-bold ${isSelected ? opt.activeText : "text-muted-foreground"}`}>
+                                    {opt.label}
+                                </span>
+                            </div>
+                            {isSelected && (
+                                <div className={`absolute top-3 right-3 w-3 h-3 rounded-full ${opt.dotBg}`} />
+                            )}
+                        </button>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+interface PhotoUploaderProps {
+    imagePreview: string | null;
+    onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onRemove: () => void;
+}
+
+function PhotoUploader({ imagePreview, onUpload, onRemove }: PhotoUploaderProps) {
+    return (
+        <div>
+            <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
+                Item Photo (Optional)
+            </Label>
+            <label className="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border rounded-2xl cursor-pointer hover:border-teal-500/50 hover:bg-teal-500/5 transition-colors duration-300 overflow-hidden">
+                {imagePreview ? (
+                    <>
+                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                onRemove();
+                            }}
+                            className="absolute top-2 right-2 p-1.5 bg-background/90 rounded-full hover:bg-red-50"
+                        >
+                            <X className="w-4 h-4 text-red-500" />
+                        </button>
+                    </>
+                ) : (
+                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                        <ImagePlus className="w-8 h-8 text-teal-500" />
+                        <p className="text-sm">Change photo</p>
+                    </div>
+                )}
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={onUpload}
+                    className="hidden"
+                />
+            </label>
+        </div>
+    );
+}
+
 export function EditLostFoundItemPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
-    const [imageFile, setImageFile] = useState<File | null>(null);
+    const imageFileRef = useRef<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
         itemName: "",
         description: "",
-        type: "lost" as "lost" | "found",
+        type: "lost" as ItemType,
         location: "",
         imageUrl: "",
     });
 
     useEffect(() => {
         if (!id) return;
-        const fetchItem = async () => {
-            try {
-                const item = await api.get(`/lostfound/${id}`);
-                setFormData({
-                    itemName: item.itemName,
-                    description: item.description || "",
-                    type: item.type as "lost" | "found",
-                    location: item.location || "",
-                    imageUrl: item.imageUrl || "",
-                });
-                if (item.imageUrl) {
-                    setImagePreview(item.imageUrl);
+        let cancelled = false;
+        api.get(`/lostfound/${id}`)
+            .then((item) => {
+                if (!cancelled) {
+                    setFormData({
+                        itemName: item.itemName,
+                        description: item.description || "",
+                        type: item.type as ItemType,
+                        location: item.location || "",
+                        imageUrl: item.imageUrl || "",
+                    });
+                    if (item.imageUrl) {
+                        setImagePreview(item.imageUrl);
+                    }
                 }
-            } catch (error) {
+            })
+            .catch((error) => {
                 console.error("Failed to fetch item:", error);
-                // navigate("/lost-found/my-listings");
-            } finally {
-                setFetching(false);
-            }
+            })
+            .finally(() => {
+                if (!cancelled) {
+                    setFetching(false);
+                }
+            });
+        return () => {
+            cancelled = true;
         };
-        fetchItem();
     }, [id]);
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             if (file.size > 5 * 1024 * 1024) { alert("Max file size is 5MB"); return; }
-            setImageFile(file);
-            setImagePreview(URL.createObjectURL(file));
+            imageFileRef.current = file;
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
         }
+    };
+
+    const handleRemoveImage = () => {
+        setImagePreview(null);
+        imageFileRef.current = null;
+        setFormData(prev => ({ ...prev, imageUrl: "" }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -64,8 +190,8 @@ export function EditLostFoundItemPage() {
 
         try {
             let imageUrl = formData.imageUrl;
-            if (imageFile) {
-                imageUrl = await uploadImage(imageFile, "lostfound-images");
+            if (imageFileRef.current) {
+                imageUrl = await uploadImage(imageFileRef.current, "lostfound-images");
             }
             await api.patch(`/lostfound/${id}`, { ...formData, imageUrl });
             navigate("/lost-found/my-listings");
@@ -88,7 +214,7 @@ export function EditLostFoundItemPage() {
         <div className="min-h-screen bg-gradient-to-br from-teal-500/5 via-background to-emerald-500/5">
             <div className="container max-w-3xl mx-auto px-4 py-8">
                 {/* Header */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-8"
@@ -105,10 +231,10 @@ export function EditLostFoundItemPage() {
                         <span className="text-brand-navy">EDIT </span>
                         <span className="bg-gradient-to-r from-teal-500 to-emerald-500 bg-clip-text text-transparent">REPORT</span>
                     </h1>
-                </motion.div>
+                </m.div>
 
                 {/* Form Card */}
-                <motion.form
+                <m.form
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
@@ -116,92 +242,16 @@ export function EditLostFoundItemPage() {
                     className="relative bg-background rounded-3xl border border-border/50 shadow-xl p-6 md:p-10"
                 >
                     <div className="space-y-8">
-                        {/* Type Toggle */}
-                        <div>
-                            <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
-                                What are you reporting?
-                            </Label>
-                            <div className="grid grid-cols-2 gap-4">
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData(prev => ({ ...prev, type: "lost" }))}
-                                    className={`relative p - 6 rounded - 2xl border - 2 transition - all duration - 300 ${formData.type === "lost"
-                                            ? "border-red-500 bg-red-50 dark:bg-red-500/10"
-                                            : "border-border hover:border-muted-foreground"
-                                        }`}
-                                >
-                                    <div className="flex flex-col items-center gap-3">
-                                        <div className={`p - 4 rounded - 2xl ${formData.type === "lost" ? "bg-red-500" : "bg-muted"}`}>
-                                            <Search className={`w - 8 h - 8 ${formData.type === "lost" ? "text-white" : "text-muted-foreground"}`} />
-                                        </div>
-                                        <span className={`text - lg font - bold ${formData.type === "lost" ? "text-red-500" : "text-muted-foreground"}`}>
-                                            I LOST something
-                                        </span>
-                                    </div>
-                                    {formData.type === "lost" && (
-                                        <div className="absolute top-3 right-3 w-3 h-3 rounded-full bg-red-500" />
-                                    )}
-                                </button>
+                        <TypeToggle
+                            currentType={formData.type}
+                            onSelect={(type) => setFormData(prev => ({ ...prev, type }))}
+                        />
 
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData(prev => ({ ...prev, type: "found" }))}
-                                    className={`relative p - 6 rounded - 2xl border - 2 transition - all duration - 300 ${formData.type === "found"
-                                            ? "border-green-500 bg-green-50 dark:bg-green-500/10"
-                                            : "border-border hover:border-muted-foreground"
-                                        }`}
-                                >
-                                    <div className="flex flex-col items-center gap-3">
-                                        <div className={`p - 4 rounded - 2xl ${formData.type === "found" ? "bg-green-500" : "bg-muted"}`}>
-                                            <Eye className={`w - 8 h - 8 ${formData.type === "found" ? "text-white" : "text-muted-foreground"}`} />
-                                        </div>
-                                        <span className={`text - lg font - bold ${formData.type === "found" ? "text-green-500" : "text-muted-foreground"}`}>
-                                            I FOUND something
-                                        </span>
-                                    </div>
-                                    {formData.type === "found" && (
-                                        <div className="absolute top-3 right-3 w-3 h-3 rounded-full bg-green-500" />
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Item Photo */}
-                        <div>
-                            <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
-                                Item Photo (Optional)
-                            </Label>
-                            <label className="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border rounded-2xl cursor-pointer hover:border-teal-500/50 hover:bg-teal-500/5 transition-all duration-300 overflow-hidden">
-                                {imagePreview ? (
-                                    <>
-                                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                setImagePreview(null);
-                                                setImageFile(null);
-                                                setFormData(prev => ({ ...prev, imageUrl: "" }));
-                                            }}
-                                            className="absolute top-2 right-2 p-1.5 bg-background/90 rounded-full hover:bg-red-50"
-                                        >
-                                            <X className="w-4 h-4 text-red-500" />
-                                        </button>
-                                    </>
-                                ) : (
-                                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                                        <ImagePlus className="w-8 h-8 text-teal-500" />
-                                        <p className="text-sm">Change photo</p>
-                                    </div>
-                                )}
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
-                                    className="hidden"
-                                />
-                            </label>
-                        </div>
+                        <PhotoUploader
+                            imagePreview={imagePreview}
+                            onUpload={handleImageUpload}
+                            onRemove={handleRemoveImage}
+                        />
 
                         {/* Item Name */}
                         <div>
@@ -235,10 +285,12 @@ export function EditLostFoundItemPage() {
 
                         {/* Description */}
                         <div>
-                            <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
+                            <Label htmlFor="description" className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
                                 Description
                             </Label>
                             <textarea
+                                id="description"
+                                aria-label="Description"
                                 placeholder="Provide any distinguishing features or additional details..."
                                 value={formData.description}
                                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
@@ -250,24 +302,25 @@ export function EditLostFoundItemPage() {
 
                     {/* Footer */}
                     <div className="mt-10 pt-6 border-t border-border/50 flex justify-end">
-                        <motion.div
+                        <m.div
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                         >
                             <Button
                                 type="submit"
                                 disabled={loading}
-                                className={`px - 8 py - 6 rounded - full font - bold text - lg shadow - lg transition - all gap - 2 ${formData.type === "lost"
+                                className={`px-8 py-6 rounded-full font-bold text-lg shadow-lg transition-all gap-2 ${
+                                    formData.type === "lost"
                                         ? "bg-gradient-to-r from-red-500 to-red-600 hover:shadow-red-500/25"
                                         : "bg-gradient-to-r from-green-500 to-emerald-500 hover:shadow-green-500/25"
-                                    }`}
+                                }`}
                             >
                                 {loading ? "Saving..." : "SAVE CHANGES"}
                                 <Save className="w-5 h-5" />
                             </Button>
-                        </motion.div>
+                        </m.div>
                     </div>
-                </motion.form>
+                </m.form>
             </div>
         </div>
     );

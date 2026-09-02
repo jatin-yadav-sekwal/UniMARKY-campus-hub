@@ -1,4 +1,4 @@
-import { motion, useInView, useMotionValue, useTransform } from "motion/react";
+import { m, useInView, useMotionValue, useTransform } from "motion/react";
 import { Link } from "react-router-dom";
 import { ShoppingBag, MessageSquare, BookOpen, Search, Utensils, House, ArrowUpRight, Sparkles } from "lucide-react";
 import { useRef, useState, useCallback } from "react";
@@ -92,7 +92,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
     );
 
     return (
-        <motion.div
+        <m.div
             ref={cardRef}
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
@@ -109,47 +109,47 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
                     onMouseEnter={handleMouseEnter}
                 >
                     {/* Mouse-following glow */}
-                    <motion.div
+                    <m.div
                         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
                         style={{ background }}
                     />
 
                     {/* Single-run border light sweep on first hover */}
                     {hasHovered && (
-                        <motion.div
+                        <m.div
                             className="absolute inset-0 pointer-events-none"
                             initial={{ opacity: 1 }}
                             animate={{ opacity: 0 }}
                             transition={{ duration: 1.2, ease: "easeOut" }}
                         >
-                            <motion.div
+                            <m.div
                                 className="absolute top-0 left-0 right-0 h-[2px]"
                                 style={{ background: `linear-gradient(90deg, transparent, ${feature.glowColor}, transparent)` }}
                                 initial={{ x: "-100%" }}
                                 animate={{ x: "100%" }}
                                 transition={{ duration: 0.8, ease: "easeInOut" }}
                             />
-                            <motion.div
+                            <m.div
                                 className="absolute bottom-0 left-0 right-0 h-[2px]"
                                 style={{ background: `linear-gradient(90deg, transparent, ${feature.glowColor}, transparent)` }}
                                 initial={{ x: "100%" }}
                                 animate={{ x: "-100%" }}
                                 transition={{ duration: 0.8, ease: "easeInOut", delay: 0.1 }}
                             />
-                        </motion.div>
+                        </m.div>
                     )}
 
                     <div className="relative p-5 sm:p-6 flex flex-col h-full">
                         {/* Top row: Icon + Arrow */}
                         <div className="flex items-center justify-between mb-4">
-                            <motion.div
+                            <m.div
                                 className={`w-11 h-11 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center shadow-lg`}
                                 whileHover={{ scale: 1.1, rotate: 5 }}
                                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
                             >
                                 <feature.icon className="w-5 h-5 text-white" />
-                            </motion.div>
-                            <div className="p-1.5 rounded-full bg-muted/30 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0 translate-x-2">
+                            </m.div>
+                            <div className="p-1.5 rounded-full bg-muted/30 opacity-0 group-hover:opacity-100 transition-[opacity,transform] duration-300 group-hover:translate-x-0 translate-x-2">
                                 <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground" />
                             </div>
                         </div>
@@ -169,7 +169,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
 
                         {/* CTA */}
                         <div className="mt-4 pt-3 border-t border-border/30">
-                            <span className={`inline-flex items-center gap-1.5 text-xs font-bold bg-gradient-to-r ${feature.gradient} bg-clip-text text-transparent group-hover:gap-2.5 transition-all duration-300`}>
+                            <span className={`inline-flex items-center gap-1.5 text-xs font-bold bg-gradient-to-r ${feature.gradient} bg-clip-text text-transparent group-hover:gap-2.5 transition-[gap] duration-300`}>
                                 {feature.action}
                                 <ArrowUpRight className="w-3 h-3" style={{ color: feature.glowColor }} />
                             </span>
@@ -177,7 +177,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
                     </div>
                 </div>
             </Link>
-        </motion.div>
+        </m.div>
     );
 }
 
@@ -197,7 +197,7 @@ export function EcosystemSection() {
             <div ref={sectionRef} className="container px-4 mx-auto relative">
                 {/* Header */}
                 <div className="max-w-3xl mx-auto text-center mb-14 md:mb-16">
-                    <motion.div
+                    <m.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                         transition={{ duration: 0.6 }}
@@ -205,9 +205,9 @@ export function EcosystemSection() {
                     >
                         <Sparkles className="w-4 h-4 text-brand-navy" />
                         <span className="text-sm font-semibold text-brand-navy">The Ecosystem</span>
-                    </motion.div>
+                    </m.div>
 
-                    <motion.h2
+                    <m.h2
                         initial={{ opacity: 0, y: 20 }}
                         animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                         transition={{ duration: 0.6, delay: 0.1 }}
@@ -217,16 +217,16 @@ export function EcosystemSection() {
                         <span className="bg-gradient-to-r from-brand-orange to-brand-yellow bg-clip-text text-transparent">
                             One Platform
                         </span>
-                    </motion.h2>
+                    </m.h2>
 
-                    <motion.p
+                    <m.p
                         initial={{ opacity: 0, y: 20 }}
                         animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                         transition={{ duration: 0.6, delay: 0.2 }}
                         className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto"
                     >
                         A unified hub for every aspect of campus life. From buying textbooks to finding food — we've got you covered.
-                    </motion.p>
+                    </m.p>
                 </div>
 
                 {/* Feature Grid — compact 3-col */}
@@ -237,7 +237,7 @@ export function EcosystemSection() {
                 </div>
 
                 {/* Bottom CTA */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                     transition={{ duration: 0.6, delay: 0.7 }}
@@ -249,7 +249,7 @@ export function EcosystemSection() {
                             Join the waitlist →
                         </Link>
                     </p> */}
-                </motion.div>
+                </m.div>
             </div>
         </section>
     );

@@ -4,3 +4,6 @@ node_modules
 .env
 # DevContext - AI coding context
 .devctx/
+flutter-sdk/
+.idea
+dist

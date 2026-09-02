@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import {
     Shield,
     ShieldCheck,
@@ -82,7 +82,7 @@ export function RequestRolePage() {
         <div className="max-w-3xl mx-auto pb-12">
             {/* Header */}
             <div className="mb-8">
-                <motion.h1
+                <m.h1
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="text-3xl sm:text-4xl font-black tracking-tight mb-2"
@@ -91,19 +91,19 @@ export function RequestRolePage() {
                     <span className="bg-gradient-to-r from-brand-orange to-brand-yellow bg-clip-text text-transparent">
                         SUPERUSER
                     </span>
-                </motion.h1>
-                <motion.p
+                </m.h1>
+                <m.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.1 }}
                     className="text-muted-foreground"
                 >
                     Request elevated privileges to manage restaurants and accommodations
-                </motion.p>
+                </m.p>
             </div>
 
             {/* Benefits Card */}
-            <motion.div
+            <m.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
@@ -131,11 +131,11 @@ export function RequestRolePage() {
                         Dedicated superuser dashboard
                     </li>
                 </ul>
-            </motion.div>
+            </m.div>
 
             {/* Past Requests */}
             {requests.length > 0 && (
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
@@ -169,12 +169,12 @@ export function RequestRolePage() {
                             </span>
                         </div>
                     ))}
-                </motion.div>
+                </m.div>
             )}
 
             {/* Submit Form */}
             {!hasPending && (
-                <motion.form
+                <m.form
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.25 }}
@@ -205,13 +205,13 @@ export function RequestRolePage() {
                     )}
 
                     {success && (
-                        <motion.div
+                        <m.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             className="flex items-center gap-2 p-3 rounded-lg bg-green-50 text-green-600 text-sm"
                         >
                             <CheckCircle2 className="h-4 w-4" /> Request submitted! An admin will review it soon.
-                        </motion.div>
+                        </m.div>
                     )}
 
                     <Button
@@ -225,7 +225,7 @@ export function RequestRolePage() {
                             <><Send className="mr-2 h-4 w-4" /> Submit Request</>
                         )}
                     </Button>
-                </motion.form>
+                </m.form>
             )}
 
             {hasPending && !success && (

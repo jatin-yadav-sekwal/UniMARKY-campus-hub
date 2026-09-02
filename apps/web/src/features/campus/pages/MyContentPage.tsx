@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { m, AnimatePresence } from "motion/react";
 import {
     Loader2, ArrowUp, User, Sparkles, Trash2, Eye, Plus
 } from "lucide-react";
@@ -16,50 +16,76 @@ const MY_CONTENT_TABS = [
     { id: "event", label: "My Events" },
 ] as const;
 
+const TYPE_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
+    post: { color: "text-rose-600", bg: "bg-rose-100/60 dark:bg-rose-900/30", label: "Post" },
+    event: { color: "text-violet-600", bg: "bg-violet-100/60 dark:bg-violet-900/30", label: "Event" },
+    announcement: { color: "text-amber-600", bg: "bg-amber-100/60 dark:bg-amber-900/30", label: "News" },
+};
+
+const DEFAULT_TYPE_CONFIG = { color: "text-rose-600", bg: "bg-rose-100/60 dark:bg-rose-900/30", label: "Post" };
+
 /* ── My Content Grid Card ── */
 function MyContentCard({ post, onDelete }: { post: Post; onDelete: () => void }) {
-    const typeConfig: Record<string, { color: string; bg: string; label: string }> = {
-        post: { color: "text-rose-600", bg: "bg-rose-100/60 dark:bg-rose-900/30", label: "Post" },
-        event: { color: "text-violet-600", bg: "bg-violet-100/60 dark:bg-violet-900/30", label: "Event" },
-        announcement: { color: "text-amber-600", bg: "bg-amber-100/60 dark:bg-amber-900/30", label: "News" },
-    };
-    const cfg = typeConfig[post.type] ?? { color: "text-rose-600", bg: "bg-rose-100/60", label: "Post" };
+    const navigate = useNavigate();
+    const config = TYPE_CONFIG[post.type] ?? DEFAULT_TYPE_CONFIG;
 
     return (
-        <motion.div
+        <m.div
             layout
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-white/70 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-white/50 dark:border-white/10 shadow-sm overflow-hidden group hover:shadow-md hover:border-rose-200/60 dark:hover:border-rose-500/20 transition-all"
+            className="bg-white/70 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-white/50 dark:border-white/10 shadow-sm overflow-hidden group hover:shadow-md hover:border-rose-200/60 dark:hover:border-rose-500/20 transition-[border-color,box-shadow]"
         >
             {post.imageUrl && (
                 <div className="relative h-36 sm:h-40 overflow-hidden">
                     <img src={post.imageUrl} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                    <span className={`absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${config.bg} ${config.color}`}>
+                        {config.label}
+                    </span>
                 </div>
             )}
             <div className="p-3 sm:p-4">
-                <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${cfg.color} ${cfg.bg}`}>
-                        {cfg.label}
+                {!post.imageUrl && (
+                    <div className="flex items-center justify-between mb-2">
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${config.bg} ${config.color}`}>
+                            {config.label}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">{new Date(post.createdAt).toLocaleDateString()}</span>
+                    </div>
+                )}
+                {post.title && (
+                    <h3 className="font-bold text-sm sm:text-base text-foreground truncate mb-1">{post.title}</h3>
+                )}
+                <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{post.content}</p>
+                <div className="flex items-center justify-between pt-2 border-t border-rose-100/40 dark:border-white/5">
+                    <span className="text-[11px] text-muted-foreground">
+                        ❤️ {post.likesCount} · 💬 {post.commentsCount}
                     </span>
-                    <span className="text-[10px] text-muted-foreground">
-                        {new Date(post.createdAt).toLocaleDateString()}
-                    </span>
-                </div>
-                <p className="font-semibold text-sm line-clamp-2 mb-2">{post.title || post.content.slice(0, 60)}</p>
-                <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-                    <span className="flex items-center gap-1"><Sparkles className="w-3 h-3" />{post.likesCount}</span>
-                    <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{post.commentsCount}</span>
-                </div>
-                <div className="flex justify-end pt-2 mt-2 border-t border-rose-100/30 dark:border-white/5">
-                    <button onClick={onDelete} className="text-[11px] text-red-400 hover:text-red-600 flex items-center gap-1 transition-colors">
-                        <Trash2 className="w-3 h-3" /> Delete
-                    </button>
+                    <div className="flex items-center gap-1">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label="View post"
+                            className="h-7 w-7 text-muted-foreground hover:text-rose-600"
+                            onClick={() => navigate(`/post/${post.id}`)}
+                        >
+                            <Eye className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Delete post"
+                            className="h-7 w-7 text-muted-foreground hover:text-red-600"
+                            onClick={onDelete}
+                        >
+                            <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                    </div>
                 </div>
             </div>
-        </motion.div>
+        </m.div>
     );
 }
 
@@ -71,24 +97,24 @@ export function MyContentPage() {
     const [myPostsLoading, setMyPostsLoading] = useState(true);
     const [myPostsLoadingMore, setMyPostsLoadingMore] = useState(false);
     const [myPostsHasMore, setMyPostsHasMore] = useState(true);
-    const [myPostsOffset, setMyPostsOffset] = useState(0);
+    const myPostsOffsetRef = useRef(0);
     const [myContentTab, setMyContentTab] = useState("all");
     const [showScrollTop, setShowScrollTop] = useState(false);
     const LIMIT = 10;
 
     const fetchMyPosts = useCallback(async (reset = false) => {
         if (reset) setMyPostsLoading(true); else setMyPostsLoadingMore(true);
-        const off = reset ? 0 : myPostsOffset;
+        const off = reset ? 0 : myPostsOffsetRef.current;
         try {
             const res = await api.get(`/social/my-posts?limit=${LIMIT}&offset=${off}`);
-            if (reset) { setMyPosts(res.items); setMyPostsOffset(LIMIT); }
-            else { setMyPosts(prev => [...prev, ...res.items]); setMyPostsOffset(prev => prev + LIMIT); }
+            if (reset) { setMyPosts(res.items); myPostsOffsetRef.current = LIMIT; }
+            else { setMyPosts(prev => [...prev, ...res.items]); myPostsOffsetRef.current += LIMIT; }
             setMyPostsHasMore(res.hasMore);
         } catch (err) { console.error(err); }
         finally { setMyPostsLoading(false); setMyPostsLoadingMore(false); }
-    }, [myPostsOffset]);
+    }, []);
 
-    useEffect(() => { fetchMyPosts(true); }, []);
+    useEffect(() => { fetchMyPosts(true); }, [fetchMyPosts]);
 
     useEffect(() => {
         const handler = () => setShowScrollTop(window.scrollY > 400);
@@ -116,7 +142,7 @@ export function MyContentPage() {
                     </div>
                     <Button
                         onClick={() => navigate("/unimedia")}
-                        className="rounded-full gap-1.5 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-semibold px-5 shadow-lg shadow-rose-500/30 transition-all"
+                        className="rounded-full gap-1.5 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-semibold px-5 shadow-lg shadow-rose-500/30 transition-colors"
                     >
                         <Plus className="w-4 h-4" /> Create New
                     </Button>
@@ -128,7 +154,7 @@ export function MyContentPage() {
                         <button
                             key={tab.id}
                             onClick={() => setMyContentTab(tab.id)}
-                            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-all ${myContentTab === tab.id
+                            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${myContentTab === tab.id
                                 ? "border-rose-500 text-rose-600 dark:text-rose-400"
                                 : "border-transparent text-muted-foreground hover:text-foreground"
                                 }`}
@@ -159,7 +185,7 @@ export function MyContentPage() {
                         ))}
                     </div>
                 ) : filteredMyPosts.length === 0 ? (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-16">
+                    <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-16">
                         <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-rose-100/50 dark:bg-rose-900/20 flex items-center justify-center">
                             <User className="w-8 h-8 text-rose-300 dark:text-rose-700" />
                         </div>
@@ -171,7 +197,7 @@ export function MyContentPage() {
                         >
                             Create Your First Post
                         </Button>
-                    </motion.div>
+                    </m.div>
                 ) : (
                     <AnimatePresence mode="popLayout">
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -201,15 +227,15 @@ export function MyContentPage() {
             {/* Scroll to Top FAB */}
             <AnimatePresence>
                 {showScrollTop && (
-                    <motion.button
+                    <m.button
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/30 flex items-center justify-center hover:shadow-xl hover:shadow-rose-500/40 transition-all"
+                        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/30 flex items-center justify-center hover:shadow-xl hover:shadow-rose-500/40 transition-shadow"
                     >
                         <ArrowUp className="w-5 h-5" />
-                    </motion.button>
+                    </m.button>
                 )}
             </AnimatePresence>
         </div>

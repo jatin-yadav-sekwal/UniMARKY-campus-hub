@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { Megaphone, Calendar, Pin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,25 +19,32 @@ export function AnnouncementsPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        let cancelled = false;
         const fetchAnnouncements = async () => {
-            if (!user?.user_metadata?.university_name) return;
+            const uniName = user?.user_metadata?.university_name;
+            if (!uniName) {
+                if (!cancelled) setLoading(false);
+                return;
+            }
 
             try {
-                // Assuming the API route uses the university query param
-                const res = await fetch(`http://localhost:3000/api/campus/announcements?university=${encodeURIComponent(user.user_metadata.university_name)}`);
+                const res = await fetch(`http://localhost:3000/api/campus/announcements?university=${encodeURIComponent(uniName)}`);
                 if (res.ok) {
                     const data = await res.json();
-                    setAnnouncements(data);
+                    if (!cancelled) setAnnouncements(data);
                 }
             } catch (error) {
                 console.error("Failed to fetch announcements", error);
             } finally {
-                setLoading(false);
+                if (!cancelled) setLoading(false);
             }
         };
 
         fetchAnnouncements();
-    }, [user]);
+        return () => {
+            cancelled = true;
+        };
+    }, [user?.user_metadata?.university_name]);
 
     return (
         <div className="container min-h-screen py-8 space-y-8">
@@ -66,7 +73,7 @@ export function AnnouncementsPage() {
             ) : (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {announcements.map((item, i) => (
-                        <motion.div
+                        <m.div
                             key={item.id}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -95,7 +102,7 @@ export function AnnouncementsPage() {
                                     </p>
                                 </CardContent>
                             </Card>
-                        </motion.div>
+                        </m.div>
                     ))}
                 </div>
             )}

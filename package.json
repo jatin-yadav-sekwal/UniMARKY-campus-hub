@@ -1,7 +1,11 @@
 {
   "name": "unmarky-monorepo",
-  "workspaces": ["apps/*"],
+  "workspaces": [
+    "apps/web",
+    "apps/api"
+  ],
   "dependencies": {
-    "@supabase-js/source": "supabase/supabase-js"
+    "@supabase-js/source": "supabase/supabase-js",
+    "react-doctor": "^0.9.12"
   }
 }

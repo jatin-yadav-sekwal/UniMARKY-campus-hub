@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'motion/react';
+import { m } from 'motion/react';
 import { api } from '@/lib/api';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -74,6 +74,19 @@ const quickAccessItems = [
     },
 ];
 
+const container = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: { staggerChildren: 0.08 }
+    }
+};
+
+const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+};
+
 export function DashboardPage() {
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -102,49 +115,37 @@ export function DashboardPage() {
         );
     }
 
-    const container = {
-        hidden: { opacity: 0 },
-        show: {
-            opacity: 1,
-            transition: { staggerChildren: 0.08 }
-        }
-    };
-
-    const item = {
-        hidden: { opacity: 0, y: 20 },
-        show: { opacity: 1, y: 0 }
-    };
 
     return (
         <div className="space-y-8 pb-12">
             {/* Header */}
             <div className="space-y-2">
-                <motion.h1
+                <m.h1
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight"
                 >
                     <span className="text-brand-navy">YOUR </span>
                     <span className="bg-gradient-to-r from-brand-blue to-brand-orange bg-clip-text text-transparent">CAMPUS HUB</span>
-                </motion.h1>
-                <motion.p
+                </m.h1>
+                <m.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.1 }}
                     className="text-muted-foreground text-base sm:text-lg"
                 >
                     Everything your campus needs, in one place.
-                </motion.p>
+                </m.p>
             </div>
 
             {/* Stats Overview */}
-            <motion.div
+            <m.div
                 variants={container}
                 initial="hidden"
                 animate="show"
                 className="grid gap-4 grid-cols-1 lg:grid-cols-2"
             >
-                <motion.div variants={item}>
+                <m.div variants={item}>
                     <SummaryCard
                         title="Marketplace"
                         href="/marketplace/my-listings"
@@ -156,8 +157,8 @@ export function DashboardPage() {
                         bgColor="bg-orange-500/10"
                         gradient="from-amber-50 via-white to-orange-50 dark:from-amber-950/40 dark:via-background dark:to-orange-950/30"
                     />
-                </motion.div>
-                <motion.div variants={item}>
+                </m.div>
+                <m.div variants={item}>
                     <SummaryCard
                         title="Lost & Found"
                         href="/lost-found/my-listings"
@@ -169,8 +170,8 @@ export function DashboardPage() {
                         bgColor="bg-teal-500/10"
                         gradient="from-teal-50 via-white to-emerald-50 dark:from-teal-950/40 dark:via-background dark:to-emerald-950/30"
                     />
-                </motion.div>
-            </motion.div>
+                </m.div>
+            </m.div>
 
             {/* Quick Access Section */}
             <div className="space-y-4">
@@ -179,14 +180,14 @@ export function DashboardPage() {
                     <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-brand-navy">Explore Campus</h2>
                 </div>
 
-                <motion.div
+                <m.div
                     variants={container}
                     initial="hidden"
                     animate="show"
                     className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6"
                 >
                     {quickAccessItems.map((qItem) => (
-                        <motion.div
+                        <m.div
                             key={qItem.href}
                             variants={{
                                 hidden: { opacity: 0, scale: 0.9 },
@@ -194,9 +195,9 @@ export function DashboardPage() {
                             }}
                         >
                             <QuickAccessCard {...qItem} />
-                        </motion.div>
+                        </m.div>
                     ))}
-                </motion.div>
+                </m.div>
             </div>
         </div>
     );
@@ -228,7 +229,7 @@ function SummaryCard({
     const count = data?.length ?? 0;
 
     return (
-        <Card className={`h-full border border-border/60 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden bg-gradient-to-br ${gradient}`}>
+        <Card className={`h-full border border-border/60 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden bg-gradient-to-br ${gradient}`}>
             <CardHeader className="pb-3 border-b border-border/20">
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
@@ -250,12 +251,12 @@ function SummaryCard({
                                 key={i.id}
                                 className="block group/item"
                             >
-                                <div className="p-3 bg-white/60 dark:bg-black/20 backdrop-blur-sm rounded-lg border border-border/40 hover:border-brand-navy/30 hover:bg-white/80 dark:hover:bg-black/30 transition-all duration-200 flex items-center gap-3">
+                                <div className="p-3 bg-white/60 dark:bg-black/20 backdrop-blur-sm rounded-lg border border-border/40 hover:border-brand-navy/30 hover:bg-white/80 dark:hover:bg-black/30 transition-colors duration-200 flex items-center gap-3">
                                     <div className={`w-1.5 h-8 rounded-full ${bgColor.replace('/10', '')}`} />
                                     <span className="text-sm font-medium text-foreground/80 group-hover/item:text-brand-navy dark:group-hover/item:text-white truncate flex-1">
                                         {i.title || i.content || i.itemName}
                                     </span>
-                                    <ArrowRight className="w-3 h-3 text-muted-foreground opacity-0 group-hover/item:opacity-100 -translate-x-2 group-hover/item:translate-x-0 transition-all" />
+                                    <ArrowRight className="w-3 h-3 text-muted-foreground opacity-0 group-hover/item:opacity-100 -translate-x-2 group-hover/item:translate-x-0 transition-[opacity,transform]" />
                                 </div>
                             </Link>
                         ))
@@ -300,7 +301,7 @@ interface QuickAccessCardProps {
 function QuickAccessCard({ title, href, desc, icon: Icon, gradient, shadowColor }: QuickAccessCardProps) {
     return (
         <Link to={href} className="group block">
-            <motion.div
+            <m.div
                 whileHover={{ scale: 1.03, y: -2 }}
                 whileTap={{ scale: 0.98 }}
                 className={`relative h-full p-4 sm:p-5 rounded-2xl bg-gradient-to-br ${gradient} text-white shadow-lg ${shadowColor} hover:shadow-xl transition-shadow duration-300 overflow-hidden`}
@@ -314,7 +315,7 @@ function QuickAccessCard({ title, href, desc, icon: Icon, gradient, shadowColor 
                     <h3 className="text-sm sm:text-base font-bold mb-0.5 sm:mb-1">{title}</h3>
                     <p className="text-[10px] sm:text-xs opacity-80 line-clamp-1">{desc}</p>
                 </div>
-            </motion.div>
+            </m.div>
         </Link>
     );
 }

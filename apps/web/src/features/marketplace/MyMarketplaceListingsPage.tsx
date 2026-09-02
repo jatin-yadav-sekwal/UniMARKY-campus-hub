@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { m, AnimatePresence } from "motion/react";
 import {
     Loader2, ArrowUp, ShoppingBag, Trash2, Edit, Plus, Tag, DollarSign
 } from "lucide-react";
@@ -39,12 +39,12 @@ function MarketplaceListingCard({ item, onDelete }: { item: MarketplaceItem; onD
     const navigate = useNavigate();
 
     return (
-        <motion.div
+        <m.div
             layout
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-white/70 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-white/50 dark:border-white/10 shadow-sm overflow-hidden group hover:shadow-md hover:border-orange-200/60 dark:hover:border-orange-500/20 transition-all"
+            className="bg-white/70 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-white/50 dark:border-white/10 shadow-sm overflow-hidden group hover:shadow-md hover:border-orange-200/60 dark:hover:border-orange-500/20 transition-[border-color,box-shadow]"
         >
             {item.imageUrl && (
                 <div className="relative h-36 sm:h-40 overflow-hidden">
@@ -99,7 +99,7 @@ function MarketplaceListingCard({ item, onDelete }: { item: MarketplaceItem; onD
                     </button>
                 </div>
             </div>
-        </motion.div>
+        </m.div>
     );
 }
 
@@ -110,21 +110,21 @@ export function MyMarketplaceListingsPage() {
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [hasMore, setHasMore] = useState(true);
-    const [offset, setOffset] = useState(0);
+    const offsetRef = useRef(0);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const LIMIT = 20;
 
     const fetchItems = useCallback(async (reset = false) => {
         if (reset) setLoading(true); else setLoadingMore(true);
-        const off = reset ? 0 : offset;
+        const off = reset ? 0 : offsetRef.current;
         try {
             const res: MarketplaceResponse = await api.get(`/marketplace/my-listings?limit=${LIMIT}&offset=${off}`);
             if (reset) {
                 setItems(res.items);
-                setOffset(LIMIT);
+                offsetRef.current = LIMIT;
             } else {
                 setItems(prev => [...prev, ...res.items]);
-                setOffset(prev => prev + LIMIT);
+                offsetRef.current += LIMIT;
             }
             setHasMore(res.hasMore);
         } catch (err) {
@@ -133,11 +133,11 @@ export function MyMarketplaceListingsPage() {
             setLoading(false);
             setLoadingMore(false);
         }
-    }, [offset]);
+    }, []);
 
     useEffect(() => {
         fetchItems(true);
-    }, []);
+    }, [fetchItems]);
 
     useEffect(() => {
         const handler = () => setShowScrollTop(window.scrollY > 400);
@@ -167,7 +167,7 @@ export function MyMarketplaceListingsPage() {
                     </div>
                     <Button
                         onClick={() => navigate("/marketplace/list")}
-                        className="rounded-full gap-1.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold px-5 shadow-lg shadow-orange-500/30 transition-all"
+                        className="rounded-full gap-1.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold px-5 shadow-lg shadow-orange-500/30 transition-colors"
                     >
                         <Plus className="w-4 h-4" /> List New Item
                     </Button>
@@ -194,7 +194,7 @@ export function MyMarketplaceListingsPage() {
                         ))}
                     </div>
                 ) : items.length === 0 ? (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-16">
+                    <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-16">
                         <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-orange-100/50 dark:bg-orange-900/20 flex items-center justify-center">
                             <ShoppingBag className="w-8 h-8 text-orange-300 dark:text-orange-700" />
                         </div>
@@ -206,7 +206,7 @@ export function MyMarketplaceListingsPage() {
                         >
                             List Your First Item
                         </Button>
-                    </motion.div>
+                    </m.div>
                 ) : (
                     <AnimatePresence mode="popLayout">
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -236,15 +236,15 @@ export function MyMarketplaceListingsPage() {
             {/* Scroll to Top FAB */}
             <AnimatePresence>
                 {showScrollTop && (
-                    <motion.button
+                    <m.button
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 flex items-center justify-center hover:shadow-xl hover:shadow-orange-500/40 transition-all"
+                        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 flex items-center justify-center hover:shadow-xl hover:shadow-orange-500/40 transition-shadow"
                     >
                         <ArrowUp className="w-5 h-5" />
-                    </motion.button>
+                    </m.button>
                 )}
             </AnimatePresence>
         </div>

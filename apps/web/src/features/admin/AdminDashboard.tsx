@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { useState, useEffect, useCallback } from "react";
+import { m, AnimatePresence } from "motion/react";
 import {
     Shield,
     ShieldCheck,
@@ -42,11 +42,7 @@ export function AdminDashboard() {
     const [processing, setProcessing] = useState<string | null>(null);
     const [filter, setFilter] = useState<"pending" | "approved" | "rejected">("pending");
 
-    useEffect(() => {
-        fetchRequests();
-    }, [filter]);
-
-    const fetchRequests = async () => {
+    const refreshRequests = useCallback(async () => {
         try {
             setLoading(true);
             const data = await api.get(`/role-requests?status=${filter}`);
@@ -56,7 +52,25 @@ export function AdminDashboard() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [filter]);
+
+    useEffect(() => {
+        let cancelled = false;
+        setLoading(true);
+        api.get(`/role-requests?status=${filter}`)
+            .then((data) => {
+                if (!cancelled) setRequests(data);
+            })
+            .catch((err) => {
+                console.error("Failed to fetch requests:", err);
+            })
+            .finally(() => {
+                if (!cancelled) setLoading(false);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, [filter]);
 
     const handleAction = async (requestId: string, status: "approved" | "rejected") => {
         setProcessing(requestId);
@@ -75,7 +89,7 @@ export function AdminDashboard() {
         <div className="max-w-5xl mx-auto pb-12">
             {/* Header */}
             <div className="mb-8">
-                <motion.h1
+                <m.h1
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight mb-2"
@@ -84,19 +98,19 @@ export function AdminDashboard() {
                     <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
                         DASHBOARD
                     </span>
-                </motion.h1>
-                <motion.p
+                </m.h1>
+                <m.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.1 }}
                     className="text-muted-foreground"
                 >
                     Review and manage superuser role requests
-                </motion.p>
+                </m.p>
             </div>
 
             {/* Filter Pills */}
-            <motion.div
+            <m.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
@@ -107,7 +121,7 @@ export function AdminDashboard() {
                     <button
                         key={status}
                         onClick={() => setFilter(status)}
-                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all capitalize ${filter === status
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors capitalize ${filter === status
                                 ? status === "pending"
                                     ? "bg-yellow-100 text-yellow-800 border border-yellow-300"
                                     : status === "approved"
@@ -119,30 +133,38 @@ export function AdminDashboard() {
                         {status}
                     </button>
                 ))}
-            </motion.div>
+            </m.div>
 
             {/* Requests List */}
-            {loading ? (
-                <div className="flex items-center justify-center py-20">
-                    <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
-                </div>
-            ) : requests.length === 0 ? (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-center py-16 bg-muted/20 rounded-2xl border border-dashed border-border"
-                >
-                    <Shield className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
-                    <p className="text-lg font-medium text-muted-foreground">No {filter} requests</p>
-                    <p className="text-sm text-muted-foreground/70 mt-1">
-                        {filter === "pending" ? "All caught up!" : `No ${filter} requests to show.`}
-                    </p>
-                </motion.div>
-            ) : (
-                <div className="space-y-4">
-                    <AnimatePresence mode="popLayout">
+            <AnimatePresence mode="wait">
+                {loading ? (
+                    <m.div
+                        key="loading"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="flex items-center justify-center py-20"
+                    >
+                        <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+                    </m.div>
+                ) : requests.length === 0 ? (
+                    <m.div
+                        key="empty"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="text-center py-16 bg-muted/20 rounded-2xl border border-dashed border-border"
+                    >
+                        <Shield className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
+                        <p className="text-lg font-medium text-muted-foreground">No {filter} requests</p>
+                        <p className="text-sm text-muted-foreground/70 mt-1">
+                            {filter === "pending" ? "All caught up!" : `No ${filter} requests to show.`}
+                        </p>
+                    </m.div>
+                ) : (
+                    <m.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
                         {requests.map((item, index) => (
-                            <motion.div
+                            <m.div
                                 key={item.request.id}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -240,11 +262,11 @@ export function AdminDashboard() {
                                         </span>
                                     )}
                                 </div>
-                            </motion.div>
+                            </m.div>
                         ))}
-                    </AnimatePresence>
-                </div>
-            )}
+                    </m.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

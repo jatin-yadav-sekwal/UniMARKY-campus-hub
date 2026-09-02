@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "motion/react";
-import { Upload, Tag, DollarSign, Calendar, FileText, Rocket, ArrowLeft, ImagePlus, X, Loader2 } from "lucide-react";
+import { m } from "motion/react";
+import { Upload, Tag, DollarSign, Calendar, FileText, Rocket, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
 import { uploadImage } from "@/lib/uploadImage";
+import { MarketplacePhotoUploader } from "./components/MarketplacePhotoUploader";
 
 const categories = [
     { value: "textbooks", label: "Textbooks" },
@@ -29,7 +30,7 @@ const conditions = [
 export function ListItemPage() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [imageFile, setImageFile] = useState<File | null>(null);
+    const imageFileRef = useRef<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
@@ -46,8 +47,12 @@ export function ListItemPage() {
         const file = e.target.files?.[0];
         if (file) {
             if (file.size > 5 * 1024 * 1024) { alert("Max file size is 5MB"); return; }
-            setImageFile(file);
-            setImagePreview(URL.createObjectURL(file));
+            imageFileRef.current = file;
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
         }
     };
 
@@ -57,8 +62,8 @@ export function ListItemPage() {
 
         try {
             let imageUrl: string | undefined;
-            if (imageFile) {
-                imageUrl = await uploadImage(imageFile, "marketplace-images");
+            if (imageFileRef.current) {
+                imageUrl = await uploadImage(imageFileRef.current, "marketplace-images");
             }
             await api.post("/marketplace", { ...formData, imageUrl });
             navigate("/marketplace");
@@ -73,7 +78,7 @@ export function ListItemPage() {
         <div className="min-h-screen bg-gradient-to-br from-brand-orange/5 via-background to-brand-yellow/5">
             <div className="container max-w-3xl mx-auto px-4 py-8">
                 {/* Header */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-8"
@@ -97,10 +102,10 @@ export function ListItemPage() {
                     <p className="mt-3 text-muted-foreground text-lg">
                         Ready to declutter? Fill in the details below to list your item on the campus marketplace.
                     </p>
-                </motion.div>
+                </m.div>
 
                 {/* Form Card */}
-                <motion.form
+                <m.form
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
@@ -113,46 +118,15 @@ export function ListItemPage() {
                     </div>
 
                     <div className="space-y-8">
-                        {/* Product Photos */}
-                        <div>
-                            <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
-                                Product Photos
-                            </Label>
-                            <label className="relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-2xl cursor-pointer hover:border-brand-orange/50 hover:bg-brand-orange/5 transition-all duration-300 overflow-hidden">
-                                {imagePreview ? (
-                                    <>
-                                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                setImagePreview(null);
-                                                setImageFile(null);
-                                            }}
-                                            className="absolute top-2 right-2 p-1.5 bg-background/90 rounded-full hover:bg-red-50"
-                                        >
-                                            <X className="w-4 h-4 text-red-500" />
-                                        </button>
-                                    </>
-                                ) : (
-                                    <div className="flex flex-col items-center gap-3 text-muted-foreground">
-                                        <div className="p-4 rounded-2xl bg-brand-orange/10">
-                                            <ImagePlus className="w-8 h-8 text-brand-orange" />
-                                        </div>
-                                        <div className="text-center">
-                                            <p className="font-semibold text-foreground">Upload high-res images</p>
-                                            <p className="text-sm">Drag and drop or click to browse files</p>
-                                        </div>
-                                    </div>
-                                )}
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
-                                    className="hidden"
-                                />
-                            </label>
-                        </div>
+                        <MarketplacePhotoUploader
+                            imagePreview={imagePreview}
+                            subtitle="Drag and drop or click to browse files"
+                            onUpload={handleImageUpload}
+                            onRemove={() => {
+                                setImagePreview(null);
+                                imageFileRef.current = null;
+                            }}
+                        />
 
                         {/* Product Name */}
                         <div>
@@ -171,10 +145,12 @@ export function ListItemPage() {
                         {/* Category & Year Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
+                                <Label htmlFor="category" className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
                                     Category
                                 </Label>
                                 <select
+                                    id="category"
+                                    aria-label="Category"
                                     value={formData.category}
                                     onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                                     className="w-full h-14 px-4 rounded-xl border border-border/50 bg-background text-foreground text-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange"
@@ -187,10 +163,12 @@ export function ListItemPage() {
                                 </select>
                             </div>
                             <div>
-                                <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
+                                <Label htmlFor="condition" className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
                                     Condition
                                 </Label>
                                 <select
+                                    id="condition"
+                                    aria-label="Condition"
                                     value={formData.condition}
                                     onChange={(e) => setFormData(prev => ({ ...prev, condition: e.target.value }))}
                                     className="w-full h-14 px-4 rounded-xl border border-border/50 bg-background text-foreground text-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange"
@@ -205,10 +183,12 @@ export function ListItemPage() {
 
                         {/* Description */}
                         <div>
-                            <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
+                            <Label htmlFor="description" className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
                                 Description
                             </Label>
                             <textarea
+                                id="description"
+                                aria-label="Description"
                                 placeholder="Tell us about the condition, usage, and why you're selling it..."
                                 value={formData.description}
                                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
@@ -257,21 +237,21 @@ export function ListItemPage() {
                             By listing, you agree to{" "}
                             <a href="#" className="text-brand-orange hover:underline">UNMARKY's Marketplace Guidelines</a>.
                         </p>
-                        <motion.div
+                        <m.div
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                         >
                             <Button
                                 type="submit"
                                 disabled={loading}
-                                className="px-8 py-6 rounded-full bg-gradient-to-r from-brand-orange to-brand-orange/90 text-white font-bold text-lg shadow-lg shadow-brand-orange/25 hover:shadow-xl transition-all gap-2"
+                                className="px-8 py-6 rounded-full bg-gradient-to-r from-brand-orange to-brand-orange/90 text-white font-bold text-lg shadow-lg shadow-brand-orange/25 hover:shadow-xl transition-shadow gap-2"
                             >
                                 {loading ? "Listing..." : "LIST ITEM"}
                                 <Rocket className="w-5 h-5" />
                             </Button>
-                        </motion.div>
+                        </m.div>
                     </div>
-                </motion.form>
+                </m.form>
             </div>
         </div>
     );

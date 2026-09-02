@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { motion } from "motion/react";
+import { useState, useEffect, useRef } from "react";
+import { m } from "motion/react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
     UtensilsCrossed,
@@ -28,8 +28,16 @@ export function EditRestaurantPage() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
-    const [imageFile, setImageFile] = useState<File | null>(null);
+    const imageFileRef = useRef<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (imagePreview && imagePreview.startsWith("blob:")) {
+                URL.revokeObjectURL(imagePreview);
+            }
+        };
+    }, [imagePreview]);
 
     const [form, setForm] = useState({
         name: "",
@@ -44,31 +52,36 @@ export function EditRestaurantPage() {
     });
 
     useEffect(() => {
-        fetchRestaurant();
-    }, [id]);
-
-    const fetchRestaurant = async () => {
-        try {
-            setLoading(true);
-            const data = await api.get(`/food/${id}`);
-            setForm({
-                name: data.name || "",
-                description: data.description || "",
-                cuisine: data.cuisine || "",
-                tags: data.tags || "",
-                address: data.address || "",
-                phone: data.phone || "",
-                timing: data.timing || "",
-                priceRange: data.priceRange || "",
-                location: data.location || "",
+        if (!id) return;
+        let cancelled = false;
+        setLoading(true);
+        api.get(`/food/${id}`)
+            .then((data) => {
+                if (!cancelled) {
+                    setForm({
+                        name: data.name || "",
+                        description: data.description || "",
+                        cuisine: data.cuisine || "",
+                        tags: data.tags || "",
+                        address: data.address || "",
+                        phone: data.phone || "",
+                        timing: data.timing || "",
+                        priceRange: data.priceRange || "",
+                        location: data.location || "",
+                    });
+                    if (data.imageUrl) setImagePreview(data.imageUrl);
+                }
+            })
+            .catch(() => {
+                if (!cancelled) setError("Failed to load restaurant");
+            })
+            .finally(() => {
+                if (!cancelled) setLoading(false);
             });
-            if (data.imageUrl) setImagePreview(data.imageUrl);
-        } catch (err) {
-            setError("Failed to load restaurant");
-        } finally {
-            setLoading(false);
-        }
-    };
+        return () => {
+            cancelled = true;
+        };
+    }, [id]);
 
     const updateField = (field: string, value: string) => {
         setForm((prev) => ({ ...prev, [field]: value }));
@@ -85,8 +98,8 @@ export function EditRestaurantPage() {
             setSaving(true);
             setError(null);
             let imageUrl: string | undefined;
-            if (imageFile) {
-                imageUrl = await uploadImage(imageFile, "restaurant-images");
+            if (imageFileRef.current) {
+                imageUrl = await uploadImage(imageFileRef.current, "restaurant-images");
             }
             await api.patch(`/food/${id}`, { ...form, ...(imageUrl ? { imageUrl } : {}) });
             setSuccess(true);
@@ -112,17 +125,17 @@ export function EditRestaurantPage() {
                 <ArrowLeft className="h-4 w-4" /> Back
             </Button>
 
-            <motion.h1
+            <m.h1
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-3xl sm:text-4xl font-black tracking-tight mb-2"
             >
                 <span className="text-brand-navy">EDIT </span>
                 <span className="bg-gradient-to-r from-brand-orange to-brand-yellow bg-clip-text text-transparent">RESTAURANT</span>
-            </motion.h1>
+            </m.h1>
             <p className="text-muted-foreground mb-8">Update your restaurant details</p>
 
-            <motion.form
+            <m.form
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -178,7 +191,7 @@ export function EditRestaurantPage() {
                     </div>
                     <div className="space-y-2">
                         <Label>Restaurant Photo</Label>
-                        <label className="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-brand-orange/50 hover:bg-brand-orange/5 transition-all overflow-hidden">
+                        <label className="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-brand-orange/50 hover:bg-brand-orange/5 transition-colors overflow-hidden">
                             {imagePreview ? (
                                 <>
                                     <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
@@ -187,7 +200,7 @@ export function EditRestaurantPage() {
                                         onClick={(e) => {
                                             e.preventDefault();
                                             setImagePreview(null);
-                                            setImageFile(null);
+                                            imageFileRef.current = null;
                                         }}
                                         className="absolute top-2 right-2 p-1.5 bg-background/90 rounded-full hover:bg-red-50"
                                     >
@@ -207,8 +220,12 @@ export function EditRestaurantPage() {
                                     const file = e.target.files?.[0];
                                     if (file) {
                                         if (file.size > 5 * 1024 * 1024) { alert("Max 5MB"); return; }
-                                        setImageFile(file);
-                                        setImagePreview(URL.createObjectURL(file));
+                                        imageFileRef.current = file;
+                                        const reader = new FileReader();
+                                        reader.onloadend = () => {
+                                            setImagePreview(reader.result as string);
+                                        };
+                                        reader.readAsDataURL(file);
                                     }
                                 }}
                                 className="hidden"
@@ -219,21 +236,21 @@ export function EditRestaurantPage() {
 
                 {error && <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">{error}</div>}
                 {success && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-3 rounded-lg bg-green-50 text-green-600 text-sm">
+                    <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-3 rounded-lg bg-green-50 text-green-600 text-sm">
                         Restaurant updated successfully!
-                    </motion.div>
+                    </m.div>
                 )}
 
                 <div className="flex justify-end pt-4">
                     <Button
                         type="submit"
                         disabled={saving}
-                        className="px-8 py-6 rounded-xl bg-gradient-to-r from-brand-navy to-brand-navy/90 hover:from-brand-orange hover:to-brand-yellow font-bold transition-all duration-300"
+                        className="px-8 py-6 rounded-xl bg-gradient-to-r from-brand-navy to-brand-navy/90 hover:from-brand-orange hover:to-brand-yellow font-bold transition-colors duration-300"
                     >
                         {saving ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</>) : (<><Save className="mr-2 h-4 w-4" /> Save Changes</>)}
                     </Button>
                 </div>
-            </motion.form>
+            </m.form>
         </div>
     );
 }

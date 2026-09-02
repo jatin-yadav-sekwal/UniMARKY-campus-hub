@@ -71,7 +71,7 @@ export function Footer() {
 
 function SocialIcon({ icon: Icon }: { icon: React.ComponentType<{ className?: string }> }) {
     return (
-        <a href="https://www.instagram.com/unimarky/" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+        <a href="https://www.instagram.com/unimarky/" target="_blank" rel="noopener noreferrer" aria-label="UniMARKY Instagram" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
             <Icon className="w-5 h-5 text-white" />
         </a>
     )

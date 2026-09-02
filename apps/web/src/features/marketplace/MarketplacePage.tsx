@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
+import { m, AnimatePresence } from 'motion/react';
 import { api } from '@/lib/api';
 import { Loader2, Search, Eye, Plus, ChevronDown, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -35,12 +35,11 @@ const categories = [
 ];
 
 const conditionLabels: Record<string, string> = {
-    "new": "NEW",
-    "like-new": "LIKE NEW",
-    "great": "GREAT CONDITION",
-    "good": "GOOD CONDITION",
-    "fair": "FAIR CONDITION",
-    "": "USED",
+    new: "Brand New",
+    "like-new": "Like New",
+    great: "Great Condition",
+    good: "Good Condition",
+    fair: "Fair Condition",
 };
 
 export function MarketplacePage() {
@@ -50,13 +49,13 @@ export function MarketplacePage() {
     const [loadingMore, setLoadingMore] = useState(false);
     const [hasMore, setHasMore] = useState(false);
     const [total, setTotal] = useState(0);
-    const [offset, setOffset] = useState(0);
+    const offsetRef = useRef(0);
     const [activeCategory, setActiveCategory] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
     const LIMIT = 20;
 
     const fetchItems = useCallback(async (reset = false) => {
-        const currentOffset = reset ? 0 : offset;
+        const currentOffset = reset ? 0 : offsetRef.current;
         if (reset) {
             setLoading(true);
         } else {
@@ -75,19 +74,19 @@ export function MarketplacePage() {
             }
             setHasMore(response.hasMore);
             setTotal(response.total);
-            setOffset(currentOffset + response.items.length);
+            offsetRef.current = currentOffset + response.items.length;
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
             setLoading(false);
             setLoadingMore(false);
         }
-    }, [offset, activeCategory]);
+    }, [activeCategory]);
 
     useEffect(() => {
-        setOffset(0);
+        offsetRef.current = 0;
         fetchItems(true);
-    }, [activeCategory]);
+    }, [fetchItems]);
 
     const handleCategoryChange = (category: string) => {
         setActiveCategory(category);
@@ -107,25 +106,25 @@ export function MarketplacePage() {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 sm:mb-8">
                 <div>
-                    <motion.h1
+                    <m.h1
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-2 sm:mb-3"
                     >
                         <span className="text-brand-navy">CAMPUS </span>
                         <span className="bg-gradient-to-r from-brand-orange to-brand-yellow bg-clip-text text-transparent">DEALS</span>
-                    </motion.h1>
-                    <motion.p
+                    </m.h1>
+                    <m.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.1 }}
                         className="text-muted-foreground text-sm sm:text-base lg:text-lg max-w-xl"
                     >
                         Exclusive marketplace for verified university students. Buy, sell, and swap with your campus peers safely.
-                    </motion.p>
+                    </m.p>
                 </div>
 
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.2 }}
@@ -133,15 +132,15 @@ export function MarketplacePage() {
                     <Button
                         onClick={() => navigate("/marketplace/my-listings")}
                         variant="outline"
-                        className="rounded-full border-2 border-brand-navy text-brand-navy hover:bg-brand-navy hover:text-white transition-all font-bold"
+                        className="rounded-full border-2 border-brand-navy text-brand-navy hover:bg-brand-navy hover:text-white transition-colors font-bold"
                     >
                         My Listings
                     </Button>
-                </motion.div>
+                </m.div>
             </div>
 
             {/* Filters & Search */}
-            <motion.div
+            <m.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
@@ -154,7 +153,7 @@ export function MarketplacePage() {
                             <button
                                 key={cat.value}
                                 onClick={() => handleCategoryChange(cat.value)}
-                                className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 whitespace-nowrap ${activeCategory === cat.value
+                                className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-colors duration-300 whitespace-nowrap ${activeCategory === cat.value
                                     ? "bg-brand-navy text-white shadow-lg shadow-brand-navy/20"
                                     : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
                                     }`}
@@ -171,156 +170,162 @@ export function MarketplacePage() {
                     <Input
                         type="text"
                         placeholder="Search textbooks, tech..."
+                        aria-label="Search marketplace items"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="pl-9 sm:pl-10 h-10 sm:h-11 rounded-full border-border/50 bg-muted/30 text-sm"
                     />
                 </div>
-            </motion.div>
+            </m.div>
 
-            {/* Loading State */}
-            {loading ? (
-                <div className="flex items-center justify-center py-20">
-                    <Loader2 className="w-8 h-8 animate-spin text-brand-orange" />
-                </div>
-            ) : (
-                <>
-                    {/* Items Grid */}
-                    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        <AnimatePresence mode="popLayout">
-                            {filteredItems.map((item, index) => (
-                                <motion.div
-                                    key={item.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.9 }}
-                                    transition={{ delay: index * 0.05 }}
-                                    layout
-                                >
-                                    <Link to={`/marketplace/${item.id}`} className="group block">
-                                        <div className="relative overflow-hidden rounded-2xl bg-muted/30 border border-border/50 hover:border-border hover:shadow-xl transition-all duration-300">
-                                            {/* Image */}
-                                            <div className="relative aspect-square bg-gradient-to-br from-muted to-muted/50 overflow-hidden">
-                                                {item.imageUrl ? (
-                                                    <img
-                                                        src={item.imageUrl}
-                                                        alt={item.title}
-                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center">
-                                                        <Tag className="w-12 h-12 text-muted-foreground/30" />
-                                                    </div>
-                                                )}
-
-                                                {/* Badge */}
-                                                <div className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold ${item.isNegotiable
-                                                    ? "bg-brand-orange text-white"
-                                                    : "bg-brand-navy text-white"
-                                                    }`}>
-                                                    {item.isNegotiable ? "NEGOTIABLE" : "FIXED PRICE"}
+            {/* Main Content Area */}
+            <AnimatePresence mode="wait">
+                {loading ? (
+                    <m.div
+                        key="loading"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="flex items-center justify-center py-20"
+                    >
+                        <Loader2 className="w-8 h-8 animate-spin text-brand-orange" />
+                    </m.div>
+                ) : filteredItems.length === 0 ? (
+                    <m.div
+                        key="empty"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="text-center py-20"
+                    >
+                        <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-muted/50 flex items-center justify-center">
+                            <Tag className="w-10 h-10 text-muted-foreground/50" />
+                        </div>
+                        <h3 className="text-xl font-bold text-foreground mb-2">No items found</h3>
+                        <p className="text-muted-foreground mb-6">
+                            {searchQuery ? "Try a different search term" : "Be the first to list an item!"}
+                        </p>
+                        <Button onClick={() => navigate("/marketplace/list")} className="rounded-full">
+                            List Your First Item
+                        </Button>
+                    </m.div>
+                ) : (
+                    <m.div
+                        key="grid"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                    >
+                        {filteredItems.map((item, index) => (
+                            <m.div
+                                key={item.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                transition={{ delay: index * 0.05 }}
+                                layout
+                            >
+                                <Link to={`/marketplace/${item.id}`} className="group block">
+                                    <div className="relative overflow-hidden rounded-2xl bg-muted/30 border border-border/50 hover:border-border hover:shadow-xl transition-shadow duration-300">
+                                        {/* Image */}
+                                        <div className="relative aspect-square bg-gradient-to-br from-muted to-muted/50 overflow-hidden">
+                                            {item.imageUrl ? (
+                                                <img
+                                                    src={item.imageUrl}
+                                                    alt={item.title}
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                    <Tag className="w-12 h-12 text-muted-foreground/30" />
                                                 </div>
+                                            )}
 
-                                                {/* Quick View */}
-                                                <motion.button
-                                                    initial={{ opacity: 0 }}
-                                                    whileHover={{ opacity: 1 }}
-                                                    className="absolute bottom-3 right-3 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                                                >
-                                                    <Eye className="w-4 h-4 text-brand-navy" />
-                                                </motion.button>
+                                            {/* Badge */}
+                                            <div className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold ${item.isNegotiable
+                                                ? "bg-brand-orange text-white"
+                                                : "bg-brand-navy text-white"
+                                                }`}>
+                                                {item.isNegotiable ? "NEGOTIABLE" : "FIXED PRICE"}
                                             </div>
 
-                                            {/* Content */}
-                                            <div className="p-4">
-                                                <h3 className="font-bold text-foreground truncate group-hover:text-brand-navy transition-colors">
-                                                    {item.title}
-                                                </h3>
-                                                <p className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
-                                                    {item.category?.replace("-", " ")} • {conditionLabels[item.condition] || item.condition || "USED"}
-                                                </p>
+                                            {/* Quick View */}
+                                            <m.button
+                                                initial={{ opacity: 0 }}
+                                                whileHover={{ opacity: 1 }}
+                                                aria-label={`Quick view ${item.title}`}
+                                                className="absolute bottom-3 right-3 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                <Eye className="w-4 h-4 text-brand-navy" />
+                                            </m.button>
+                                        </div>
 
-                                                <div className="flex items-center justify-between mt-3">
-                                                    <div>
-                                                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Expected Price</p>
-                                                        <p className="text-xl font-black text-brand-navy">₹{parseFloat(item.price).toLocaleString()}</p>
-                                                    </div>
-                                                    <button className="p-2 rounded-full bg-muted/50 hover:bg-muted transition-colors">
-                                                        <Eye className="w-4 h-4 text-muted-foreground" />
-                                                    </button>
-                                                </div>
+                                        {/* Content */}
+                                        <div className="p-4">
+                                            <h3 className="font-bold text-foreground truncate group-hover:text-brand-orange transition-colors">
+                                                {item.title}
+                                            </h3>
+                                            <p className="text-xl font-extrabold text-brand-orange mt-1">
+                                                ₹{parseFloat(item.price).toLocaleString()}
+                                            </p>
+
+                                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50 text-xs text-muted-foreground">
+                                                <span className="capitalize">{item.category?.replace("-", " ")}</span>
+                                                <span>{conditionLabels[item.condition] || item.condition || "Used"}</span>
                                             </div>
                                         </div>
-                                    </Link>
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-                    </div>
+                                    </div>
+                                </Link>
+                            </m.div>
+                        ))}
+                    </m.div>
+                )}
+            </AnimatePresence>
 
-                    {/* Empty State */}
-                    {filteredItems.length === 0 && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="text-center py-20"
-                        >
-                            <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-muted/50 flex items-center justify-center">
-                                <Tag className="w-10 h-10 text-muted-foreground/50" />
-                            </div>
-                            <h3 className="text-xl font-bold text-foreground mb-2">No items found</h3>
-                            <p className="text-muted-foreground mb-6">
-                                {searchQuery ? "Try a different search term" : "Be the first to list an item!"}
-                            </p>
-                            <Button onClick={() => navigate("/marketplace/list")} className="rounded-full">
-                                List Your First Item
-                            </Button>
-                        </motion.div>
-                    )}
+            {/* Load More Button */}
+            {hasMore && filteredItems.length > 0 && (
+                <m.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex justify-center mt-12"
+                >
+                    <Button
+                        onClick={handleLoadMore}
+                        disabled={loadingMore}
+                        variant="outline"
+                        className="px-8 py-6 rounded-full font-bold text-lg border-2 hover:bg-brand-navy hover:text-white hover:border-brand-navy transition-colors gap-2"
+                    >
+                        {loadingMore ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                            <>
+                                View More Items
+                                <ChevronDown className="w-5 h-5" />
+                            </>
+                        )}
+                    </Button>
+                </m.div>
+            )}
 
-                    {/* Load More Button */}
-                    {hasMore && filteredItems.length > 0 && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="flex justify-center mt-12"
-                        >
-                            <Button
-                                onClick={handleLoadMore}
-                                disabled={loadingMore}
-                                variant="outline"
-                                className="px-8 py-6 rounded-full font-bold text-lg border-2 hover:bg-brand-navy hover:text-white hover:border-brand-navy transition-all gap-2"
-                            >
-                                {loadingMore ? (
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                ) : (
-                                    <>
-                                        View More Items
-                                        <ChevronDown className="w-5 h-5" />
-                                    </>
-                                )}
-                            </Button>
-                        </motion.div>
-                    )}
-
-                    {/* Results Count */}
-                    {!loading && total > 0 && (
-                        <p className="text-center text-sm text-muted-foreground mt-6">
-                            Showing {filteredItems.length} of {total} items
-                        </p>
-                    )}
-                </>
+            {/* Results Count */}
+            {!loading && total > 0 && (
+                <p className="text-center text-sm text-muted-foreground mt-6">
+                    Showing {filteredItems.length} of {total} items
+                </p>
             )}
 
             {/* Floating Add Button */}
-            <motion.button
-                initial={{ scale: 0 }}
+            <m.button
+                initial={{ scale: 0.001 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
                 onClick={() => navigate("/marketplace/list")}
-                className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-gradient-to-r from-brand-orange to-brand-yellow text-white shadow-2xl shadow-brand-orange/30 hover:shadow-brand-orange/50 hover:scale-110 transition-all duration-300 flex items-center justify-center"
+                aria-label="List an item on marketplace"
+                className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-gradient-to-r from-brand-orange to-brand-yellow text-white shadow-2xl shadow-brand-orange/30 hover:shadow-brand-orange/50 hover:scale-110 transition-transform duration-300 flex items-center justify-center"
             >
                 <Plus className="w-8 h-8" strokeWidth={2.5} />
-            </motion.button>
+            </m.button>
         </div>
     );
 }

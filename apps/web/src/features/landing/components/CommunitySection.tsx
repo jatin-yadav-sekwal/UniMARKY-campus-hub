@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Star, ThumbsUp, Laugh, Info, Heart } from "lucide-react";
 
@@ -165,7 +165,11 @@ function ReviewCard({ review }: { review: Review }) {
 }
 
 function TickerRow({ reviews, direction = "left", duration = 35 }: { reviews: Review[]; direction?: "left" | "right"; duration?: number }) {
-    const tripled = [...reviews, ...reviews, ...reviews];
+    const tripled = [
+        ...reviews.map(r => ({ ...r, uniqueKey: `c1-${r.name}-${r.dept}` })),
+        ...reviews.map(r => ({ ...r, uniqueKey: `c2-${r.name}-${r.dept}` })),
+        ...reviews.map(r => ({ ...r, uniqueKey: `c3-${r.name}-${r.dept}` }))
+    ];
     const xStart = direction === "left" ? 0 : -1200;
     const xEnd = direction === "left" ? -1200 : 0;
 
@@ -173,15 +177,15 @@ function TickerRow({ reviews, direction = "left", duration = 35 }: { reviews: Re
         <div className="flex relative w-full">
             <div className="absolute left-0 top-0 bottom-0 w-24 sm:w-32 bg-gradient-to-r from-background to-transparent z-10" />
             <div className="absolute right-0 top-0 bottom-0 w-24 sm:w-32 bg-gradient-to-l from-background to-transparent z-10" />
-            <motion.div
+            <m.div
                 className="flex gap-4 whitespace-nowrap"
                 animate={{ x: [xStart, xEnd] }}
                 transition={{ repeat: Infinity, duration, ease: "linear" }}
             >
-                {tripled.map((review, i) => (
-                    <ReviewCard key={`${review.initials}-${i}`} review={review} />
+                {tripled.map(review => (
+                    <ReviewCard key={review.uniqueKey} review={review} />
                 ))}
-            </motion.div>
+            </m.div>
         </div>
     );
 }
@@ -190,7 +194,7 @@ export function CommunitySection() {
     return (
         <section id="community" className="py-20 overflow-hidden bg-background border-t border-border/40">
             <div className="container px-4 mx-auto mb-10 text-center">
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -203,10 +207,10 @@ export function CommunitySection() {
                     <p className="text-muted-foreground max-w-lg mx-auto text-sm">
                         Real reviews from real students across the campus. No cap. 💯
                     </p>
-                </motion.div>
+                </m.div>
 
                 {/* Stats */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -229,7 +233,7 @@ export function CommunitySection() {
                         <p className="text-2xl font-black text-brand-navy">500+</p>
                         <p className="text-[11px] text-muted-foreground">Reviews</p>
                     </div>
-                </motion.div>
+                </m.div>
             </div>
 
             {/* Two ticker rows moving in opposite directions */}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { m, AnimatePresence } from 'motion/react';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -77,7 +77,7 @@ export function AuthForm() {
                 </TabsList>
 
                 <AnimatePresence mode="wait">
-                    <motion.div
+                    <m.div
                         key={mode}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -142,7 +142,7 @@ export function AuthForm() {
                                 {mode === 'login' ? 'Sign In' : 'Create Account'}
                             </Button>
                         </form>
-                    </motion.div>
+                    </m.div>
                 </AnimatePresence>
             </Tabs>
         </div>

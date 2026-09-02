@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { motion } from "motion/react";
+import { useEffect, useReducer, useRef } from "react";
+import { m } from "motion/react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
     Plus,
@@ -32,86 +32,184 @@ interface MenuItem {
     isAvailable: boolean;
 }
 
+interface MenuItemForm {
+    name: string;
+    description: string;
+    price: string;
+    category: string;
+    isVeg: boolean;
+}
+
+interface MenuItemPageState {
+    saving: boolean;
+    error: string | null;
+    success: boolean;
+    menuItems: MenuItem[];
+    loadingMenu: boolean;
+    restaurantName: string;
+    deleting: string | null;
+    imagePreview: string | null;
+    form: MenuItemForm;
+}
+
+type MenuItemPageAction =
+    | { type: "LOAD_MENU_START" }
+    | { type: "LOAD_MENU_SUCCESS"; restaurantName: string; menuItems: MenuItem[] }
+    | { type: "LOAD_MENU_ERROR"; error: string }
+    | { type: "SET_FIELD"; field: keyof MenuItemForm; value: any }
+    | { type: "SET_IMAGE_PREVIEW"; preview: string | null }
+    | { type: "SUBMIT_START" }
+    | { type: "SUBMIT_SUCCESS"; newItem: MenuItem }
+    | { type: "SUBMIT_ERROR"; error: string }
+    | { type: "DISMISS_SUCCESS" }
+    | { type: "DELETE_START"; id: string }
+    | { type: "DELETE_SUCCESS"; id: string }
+    | { type: "DELETE_ERROR" };
+
+const initialForm: MenuItemForm = {
+    name: "",
+    description: "",
+    price: "",
+    category: "",
+    isVeg: true,
+};
+
+function menuItemPageReducer(state: MenuItemPageState, action: MenuItemPageAction): MenuItemPageState {
+    switch (action.type) {
+        case "LOAD_MENU_START":
+            return { ...state, loadingMenu: true };
+        case "LOAD_MENU_SUCCESS":
+            return {
+                ...state,
+                loadingMenu: false,
+                restaurantName: action.restaurantName,
+                menuItems: action.menuItems,
+            };
+        case "LOAD_MENU_ERROR":
+            return { ...state, loadingMenu: false, error: action.error };
+        case "SET_FIELD":
+            return { ...state, form: { ...state.form, [action.field]: action.value } };
+        case "SET_IMAGE_PREVIEW":
+            return { ...state, imagePreview: action.preview };
+        case "SUBMIT_START":
+            return { ...state, saving: true, error: null };
+        case "SUBMIT_SUCCESS":
+            return {
+                ...state,
+                saving: false,
+                success: true,
+                menuItems: [...state.menuItems, action.newItem],
+                form: initialForm,
+                imagePreview: null,
+            };
+        case "SUBMIT_ERROR":
+            return { ...state, saving: false, error: action.error };
+        case "DISMISS_SUCCESS":
+            return { ...state, success: false };
+        case "DELETE_START":
+            return { ...state, deleting: action.id };
+        case "DELETE_SUCCESS":
+            return {
+                ...state,
+                deleting: null,
+                menuItems: state.menuItems.filter((item) => item.id !== action.id),
+            };
+        case "DELETE_ERROR":
+            return { ...state, deleting: null };
+        default:
+            return state;
+    }
+}
+
 export function AddMenuItemPage() {
     const { restaurantId } = useParams<{ restaurantId: string }>();
     const navigate = useNavigate();
-    const [saving, setSaving] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState(false);
-    const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-    const [loadingMenu, setLoadingMenu] = useState(true);
-    const [restaurantName, setRestaurantName] = useState("");
-    const [deleting, setDeleting] = useState<string | null>(null);
-    const [imageFile, setImageFile] = useState<File | null>(null);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const imageFileRef = useRef<File | null>(null);
 
-    const [form, setForm] = useState({
-        name: "",
-        description: "",
-        price: "",
-        category: "",
-        isVeg: true,
+    const [state, dispatch] = useReducer(menuItemPageReducer, {
+        saving: false,
+        error: null,
+        success: false,
+        menuItems: [],
+        loadingMenu: true,
+        restaurantName: "",
+        deleting: null,
+        imagePreview: null,
+        form: initialForm,
     });
 
+    const {
+        saving,
+        error,
+        success,
+        menuItems,
+        loadingMenu,
+        restaurantName,
+        deleting,
+        imagePreview,
+        form,
+    } = state;
+
     useEffect(() => {
-        fetchRestaurant();
+        if (!restaurantId) return;
+        let cancelled = false;
+        dispatch({ type: "LOAD_MENU_START" });
+        api.get(`/food/${restaurantId}`)
+            .then((data) => {
+                if (!cancelled) {
+                    dispatch({
+                        type: "LOAD_MENU_SUCCESS",
+                        restaurantName: data.name,
+                        menuItems: data.menu || [],
+                    });
+                }
+            })
+            .catch((err) => {
+                console.error("Failed to load menu:", err);
+                if (!cancelled) {
+                    dispatch({ type: "LOAD_MENU_ERROR", error: "Failed to load menu" });
+                }
+            });
+        return () => {
+            cancelled = true;
+        };
     }, [restaurantId]);
 
-    const fetchRestaurant = async () => {
-        try {
-            setLoadingMenu(true);
-            const data = await api.get(`/food/${restaurantId}`);
-            setRestaurantName(data.name);
-            setMenuItems(data.menu || []);
-        } catch (err) {
-            console.error("Failed to fetch restaurant:", err);
-        } finally {
-            setLoadingMenu(false);
-        }
-    };
-
-    const updateField = (field: string, value: string | boolean) => {
-        setForm((prev) => ({ ...prev, [field]: value }));
+    const updateField = (field: keyof MenuItemForm, value: any) => {
+        dispatch({ type: "SET_FIELD", field, value });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!form.name.trim() || !form.price.trim()) {
-            setError("Name and price are required");
+            dispatch({ type: "SUBMIT_ERROR", error: "Name and price are required" });
             return;
         }
 
         try {
-            setSaving(true);
-            setError(null);
+            dispatch({ type: "SUBMIT_START" });
             let imageUrl: string | undefined;
-            if (imageFile) {
-                imageUrl = await uploadImage(imageFile, "menu-images");
+            if (imageFileRef.current) {
+                imageUrl = await uploadImage(imageFileRef.current, "menu-images");
             }
             const newItem = await api.post(`/food/${restaurantId}/menu`, { ...form, imageUrl });
-            setMenuItems((prev) => [...prev, newItem]);
-            setForm({ name: "", description: "", price: "", category: "", isVeg: true });
-            setImageFile(null);
-            setImagePreview(null);
-            setSuccess(true);
-            setTimeout(() => setSuccess(false), 3000);
+            imageFileRef.current = null;
+            dispatch({ type: "SUBMIT_SUCCESS", newItem });
+            setTimeout(() => dispatch({ type: "DISMISS_SUCCESS" }), 3000);
         } catch (err: any) {
-            setError(err.message || "Failed to add menu item");
-        } finally {
-            setSaving(false);
+            dispatch({ type: "SUBMIT_ERROR", error: err.message || "Failed to add menu item" });
         }
     };
 
     const handleDelete = async (menuItemId: string) => {
         if (!confirm("Delete this menu item?")) return;
-        setDeleting(menuItemId);
+        dispatch({ type: "DELETE_START", id: menuItemId });
         try {
             await api.delete(`/food/menu/${menuItemId}`);
-            setMenuItems((prev) => prev.filter((item) => item.id !== menuItemId));
+            dispatch({ type: "DELETE_SUCCESS", id: menuItemId });
         } catch (err) {
             console.error("Failed to delete:", err);
-        } finally {
-            setDeleting(null);
+            dispatch({ type: "DELETE_ERROR" });
         }
     };
 
@@ -121,7 +219,7 @@ export function AddMenuItemPage() {
                 <ArrowLeft className="h-4 w-4" /> Back
             </Button>
 
-            <motion.h1
+            <m.h1
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-3xl sm:text-4xl font-black tracking-tight mb-2"
@@ -130,12 +228,12 @@ export function AddMenuItemPage() {
                 <span className="bg-gradient-to-r from-brand-orange to-brand-yellow bg-clip-text text-transparent">
                     {restaurantName || "RESTAURANT"}
                 </span>
-            </motion.h1>
+            </m.h1>
             <p className="text-muted-foreground mb-8">Add and manage menu items</p>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Add Form */}
-                <motion.form
+                <m.form
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
@@ -184,7 +282,7 @@ export function AddMenuItemPage() {
 
                     <div className="space-y-2">
                         <Label>Item Photo</Label>
-                        <label className="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-brand-orange/50 hover:bg-brand-orange/5 transition-all overflow-hidden">
+                        <label className="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-brand-orange/50 hover:bg-brand-orange/5 transition-colors overflow-hidden">
                             {imagePreview ? (
                                 <>
                                     <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
@@ -192,8 +290,8 @@ export function AddMenuItemPage() {
                                         type="button"
                                         onClick={(e) => {
                                             e.preventDefault();
-                                            setImagePreview(null);
-                                            setImageFile(null);
+                                            dispatch({ type: "SET_IMAGE_PREVIEW", preview: null });
+                                            imageFileRef.current = null;
                                         }}
                                         className="absolute top-2 right-2 p-1.5 bg-background/90 rounded-full hover:bg-red-50"
                                     >
@@ -213,8 +311,12 @@ export function AddMenuItemPage() {
                                     const file = e.target.files?.[0];
                                     if (file) {
                                         if (file.size > 5 * 1024 * 1024) { alert("Max 5MB"); return; }
-                                        setImageFile(file);
-                                        setImagePreview(URL.createObjectURL(file));
+                                        imageFileRef.current = file;
+                                        const reader = new FileReader();
+                                        reader.onloadend = () => {
+                                            dispatch({ type: "SET_IMAGE_PREVIEW", preview: reader.result as string });
+                                        };
+                                        reader.readAsDataURL(file);
                                     }
                                 }}
                                 className="hidden"
@@ -236,9 +338,9 @@ export function AddMenuItemPage() {
 
                     {error && <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">{error}</div>}
                     {success && (
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-3 rounded-lg bg-green-50 text-green-600 text-sm flex items-center gap-2">
+                        <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-3 rounded-lg bg-green-50 text-green-600 text-sm flex items-center gap-2">
                             <CheckCircle2 className="h-4 w-4" /> Menu item added!
-                        </motion.div>
+                        </m.div>
                     )}
 
                     <Button
@@ -248,10 +350,10 @@ export function AddMenuItemPage() {
                     >
                         {saving ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...</>) : (<><Plus className="mr-2 h-4 w-4" /> Add Item</>)}
                     </Button>
-                </motion.form>
+                </m.form>
 
                 {/* Existing Menu Items */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
@@ -296,7 +398,7 @@ export function AddMenuItemPage() {
                             ))}
                         </div>
                     )}
-                </motion.div>
+                </m.div>
             </div>
         </div>
     );

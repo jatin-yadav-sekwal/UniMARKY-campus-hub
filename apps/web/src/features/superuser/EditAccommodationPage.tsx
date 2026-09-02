@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { motion } from "motion/react";
+import { useState, useEffect, useRef } from "react";
+import { m } from "motion/react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
     Building2,
@@ -27,9 +27,17 @@ export function EditAccommodationPage() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
-    const [imageFiles, setImageFiles] = useState<File[]>([]);
+    const imageFilesRef = useRef<File[]>([]);
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
     const [existingImages, setExistingImages] = useState<string[]>([]);
+
+    useEffect(() => {
+        return () => {
+            imagePreviews.forEach(url => {
+                if (url.startsWith("blob:")) URL.revokeObjectURL(url);
+            });
+        };
+    }, [imagePreviews]);
 
     const [form, setForm] = useState({
         name: "",
@@ -46,35 +54,40 @@ export function EditAccommodationPage() {
     });
 
     useEffect(() => {
-        fetchAccommodation();
-    }, [id]);
-
-    const fetchAccommodation = async () => {
-        try {
-            setLoading(true);
-            const data = await api.get(`/accommodation/${id}`);
-            setForm({
-                name: data.name || "",
-                type: data.type || "PG",
-                description: data.description || "",
-                address: data.address || "",
-                phone: data.phone || "",
-                amenities: data.amenities || "",
-                minPrice: data.minPrice || "",
-                maxPrice: data.maxPrice || "",
-                rentRange: data.rentRange || "",
-                location: data.location || "",
-                contact: data.contact || "",
+        if (!id) return;
+        let cancelled = false;
+        setLoading(true);
+        api.get(`/accommodation/${id}`)
+            .then((data) => {
+                if (!cancelled) {
+                    setForm({
+                        name: data.name || "",
+                        type: data.type || "PG",
+                        description: data.description || "",
+                        address: data.address || "",
+                        phone: data.phone || "",
+                        amenities: data.amenities || "",
+                        minPrice: data.minPrice || "",
+                        maxPrice: data.maxPrice || "",
+                        rentRange: data.rentRange || "",
+                        location: data.location || "",
+                        contact: data.contact || "",
+                    });
+                    if (data.images && Array.isArray(data.images)) {
+                        setExistingImages(data.images);
+                    }
+                }
+            })
+            .catch(() => {
+                if (!cancelled) setError("Failed to load accommodation");
+            })
+            .finally(() => {
+                if (!cancelled) setLoading(false);
             });
-            if (data.images && Array.isArray(data.images)) {
-                setExistingImages(data.images);
-            }
-        } catch (err) {
-            setError("Failed to load accommodation");
-        } finally {
-            setLoading(false);
-        }
-    };
+        return () => {
+            cancelled = true;
+        };
+    }, [id]);
 
     const updateField = (field: string, value: string) => {
         setForm((prev) => ({ ...prev, [field]: value }));
@@ -86,8 +99,8 @@ export function EditAccommodationPage() {
             setSaving(true);
             setError(null);
             let newImageUrls: string[] = [];
-            if (imageFiles.length > 0) {
-                newImageUrls = await uploadImages(imageFiles, "accommodation-images");
+            if (imageFilesRef.current.length > 0) {
+                newImageUrls = await uploadImages(imageFilesRef.current, "accommodation-images");
             }
             const allImages = [...existingImages, ...newImageUrls];
             await api.patch(`/accommodation/${id}`, { ...form, images: allImages });
@@ -114,17 +127,17 @@ export function EditAccommodationPage() {
                 <ArrowLeft className="h-4 w-4" /> Back
             </Button>
 
-            <motion.h1
+            <m.h1
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-3xl sm:text-4xl font-black tracking-tight mb-2"
             >
                 <span className="text-brand-navy">EDIT </span>
                 <span className="bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">ACCOMMODATION</span>
-            </motion.h1>
+            </m.h1>
             <p className="text-muted-foreground mb-8">Update accommodation details</p>
 
-            <motion.form
+            <m.form
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 onSubmit={handleSubmit}
@@ -146,7 +159,7 @@ export function EditAccommodationPage() {
                                 key={t}
                                 type="button"
                                 onClick={() => updateField("type", t)}
-                                className={`px-4 py-2 rounded-xl border font-medium text-sm transition-all ${form.type === t ? "bg-brand-navy text-white border-brand-navy" : "bg-background text-muted-foreground border-border"
+                                className={`px-4 py-2 rounded-xl border font-medium text-sm transition-colors ${form.type === t ? "bg-brand-navy text-white border-brand-navy" : "bg-background text-muted-foreground border-border"
                                     }`}
                             >
                                 {t}
@@ -207,26 +220,31 @@ export function EditAccommodationPage() {
                 <div className="space-y-2">
                     <Label>Photos</Label>
                     <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-                        {existingImages.map((url, i) => (
-                            <div key={`existing-${i}`} className="relative aspect-square rounded-xl overflow-hidden border border-border">
+                        {existingImages.map((url) => (
+                            <div key={url} className="relative aspect-square rounded-xl overflow-hidden border border-border">
                                 <img src={url} alt="" className="w-full h-full object-cover" />
                                 <button
                                     type="button"
-                                    onClick={() => setExistingImages(prev => prev.filter((_, idx) => idx !== i))}
+                                    aria-label="Remove photo"
+                                    onClick={() => setExistingImages(prev => prev.filter(img => img !== url))}
                                     className="absolute top-1 right-1 p-1 bg-background/90 rounded-full hover:bg-red-50"
                                 >
                                     <X className="w-3 h-3 text-red-500" />
                                 </button>
                             </div>
                         ))}
-                        {imagePreviews.map((preview, i) => (
-                            <div key={`new-${i}`} className="relative aspect-square rounded-xl overflow-hidden border border-blue-300">
+                        {imagePreviews.map((preview) => (
+                            <div key={preview} className="relative aspect-square rounded-xl overflow-hidden border border-blue-300">
                                 <img src={preview} alt="" className="w-full h-full object-cover" />
                                 <button
                                     type="button"
+                                    aria-label="Remove new photo"
                                     onClick={() => {
-                                        setImageFiles(prev => prev.filter((_, idx) => idx !== i));
-                                        setImagePreviews(prev => prev.filter((_, idx) => idx !== i));
+                                        const idx = imagePreviews.indexOf(preview);
+                                        if (idx !== -1) {
+                                            imageFilesRef.current = imageFilesRef.current.filter((_, i) => i !== idx);
+                                        }
+                                        setImagePreviews(prev => prev.filter(p => p !== preview));
                                     }}
                                     className="absolute top-1 right-1 p-1 bg-background/90 rounded-full hover:bg-red-50"
                                 >
@@ -235,19 +253,28 @@ export function EditAccommodationPage() {
                             </div>
                         ))}
                         {(existingImages.length + imagePreviews.length) < 5 && (
-                            <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-blue-500/50 hover:bg-blue-500/5 transition-all">
+                            <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-blue-500/50 hover:bg-blue-500/5 transition-colors">
                                 <ImagePlus className="w-6 h-6 text-blue-500" />
                                 <p className="text-[10px] text-muted-foreground mt-1">Add</p>
                                 <input
                                     type="file"
                                     accept="image/*"
                                     multiple
+                                    aria-label="Upload accommodation photos"
                                     onChange={(e) => {
                                         const files = Array.from(e.target.files || []);
-                                        const remaining = 5 - existingImages.length - imageFiles.length;
+                                        const remaining = 5 - existingImages.length - imagePreviews.length;
                                         const newFiles = files.slice(0, remaining).filter(f => f.size <= 5 * 1024 * 1024);
-                                        setImageFiles(prev => [...prev, ...newFiles]);
-                                        setImagePreviews(prev => [...prev, ...newFiles.map(f => URL.createObjectURL(f))]);
+                                        imageFilesRef.current = [...imageFilesRef.current, ...newFiles];
+                                        newFiles.forEach(f => {
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                                if (typeof reader.result === "string") {
+                                                    setImagePreviews(prev => [...prev, reader.result as string]);
+                                                }
+                                            };
+                                            reader.readAsDataURL(f);
+                                        });
                                         e.target.value = "";
                                     }}
                                     className="hidden"
@@ -259,21 +286,21 @@ export function EditAccommodationPage() {
 
                 {error && <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">{error}</div>}
                 {success && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-3 rounded-lg bg-green-50 text-green-600 text-sm">
+                    <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-3 rounded-lg bg-green-50 text-green-600 text-sm">
                         Accommodation updated successfully!
-                    </motion.div>
+                    </m.div>
                 )}
 
                 <div className="flex justify-end pt-4">
                     <Button
                         type="submit"
                         disabled={saving}
-                        className="px-8 py-6 rounded-xl bg-gradient-to-r from-brand-navy to-brand-navy/90 hover:from-blue-500 hover:to-indigo-500 font-bold transition-all duration-300"
+                        className="px-8 py-6 rounded-xl bg-gradient-to-r from-brand-navy to-brand-navy/90 hover:from-blue-500 hover:to-indigo-500 font-bold transition-colors duration-300"
                     >
                         {saving ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</>) : (<><Save className="mr-2 h-4 w-4" /> Save Changes</>)}
                     </Button>
                 </div>
-            </motion.form>
+            </m.form>
         </div>
     );
 }

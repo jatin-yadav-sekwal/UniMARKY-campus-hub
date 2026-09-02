@@ -1,4 +1,4 @@
-import { motion, useMotionValue, useTransform, useSpring, useScroll } from "motion/react";
+import { m, useMotionValue, useTransform, useSpring, useScroll } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { PlayCircle, ArrowDown, Sparkles, Zap, Shield, Users } from "lucide-react";
 import { useEffect, useRef } from "react";
@@ -90,7 +90,7 @@ function FloatingObject({ obj, mouseX, mouseY }: FloatingObjectProps) {
     };
 
     return (
-        <motion.div
+        <m.div
             className="absolute"
             style={{
                 left: obj.x,
@@ -108,7 +108,7 @@ function FloatingObject({ obj, mouseX, mouseY }: FloatingObjectProps) {
                 scale: { duration: 1, delay: obj.id * 0.08 },
             }}
         >
-            <motion.div
+            <m.div
                 animate={{
                     y: [0, -10, 0],
                     rotate: [0, obj.rotate ? 5 : 0, 0],
@@ -120,10 +120,17 @@ function FloatingObject({ obj, mouseX, mouseY }: FloatingObjectProps) {
                 }}
             >
                 {renderShape()}
-            </motion.div>
-        </motion.div>
+            </m.div>
+        </m.div>
     );
 }
+
+const scrollToEcosystem = () => {
+    const ecosystem = document.getElementById("ecosystem");
+    if (ecosystem) {
+        ecosystem.scrollIntoView({ behavior: "smooth" });
+    }
+};
 
 export function HeroSection() {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -156,12 +163,6 @@ export function HeroSection() {
         return () => window.removeEventListener("mousemove", handleMouseMove);
     }, [mouseXRaw, mouseYRaw]);
 
-    const scrollToEcosystem = () => {
-        const ecosystem = document.getElementById("ecosystem");
-        if (ecosystem) {
-            ecosystem.scrollIntoView({ behavior: "smooth" });
-        }
-    };
 
     return (
         <section
@@ -184,27 +185,27 @@ export function HeroSection() {
             </div>
 
             {/* Gradient Orbs Background with scroll parallax */}
-            <motion.div
+            <m.div
                 className="absolute top-1/4 -left-40 w-[500px] h-[500px] bg-gradient-to-br from-brand-yellow/20 via-brand-orange/10 to-transparent rounded-full blur-3xl"
                 style={{
                     x: useTransform(mouseX, (v) => v * 0.015),
                     y: backgroundY,
                 }}
             />
-            <motion.div
+            <m.div
                 className="absolute bottom-1/4 -right-40 w-[600px] h-[600px] bg-gradient-to-bl from-brand-orange/15 via-brand-yellow/10 to-transparent rounded-full blur-3xl"
                 style={{
                     x: useTransform(mouseX, (v) => v * 0.02),
                     y: useTransform(backgroundY, (v) => -v * 0.5),
                 }}
             />
-            <motion.div
+            <m.div
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-brand-navy/5 to-transparent rounded-full blur-3xl"
             />
 
             <div className="container px-4 mx-auto text-center z-10 relative flex-1 flex flex-col justify-center">
                 {/* Badge */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
@@ -214,36 +215,36 @@ export function HeroSection() {
                         <Sparkles className="w-4 h-4 text-brand-orange" />
                         Trusted by 10,000+ students across 50+ universities
                     </span>
-                </motion.div>
+                </m.div>
 
                 {/* Main Heading */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
                 >
                     <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-black tracking-tighter leading-[0.85]">
-                        <motion.span
+                        <m.span
                             className="block text-brand-navy"
                             initial={{ opacity: 0, x: -30 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.8, delay: 0.2 }}
                         >
                             EVERYTHING
-                        </motion.span>
-                        <motion.span
+                        </m.span>
+                        <m.span
                             className="block bg-gradient-to-r from-brand-orange via-brand-orange to-brand-yellow bg-clip-text text-transparent"
                             initial={{ opacity: 0, x: 30 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.8, delay: 0.3 }}
                         >
                             UNIVERSITY.
-                        </motion.span>
+                        </m.span>
                     </h1>
-                </motion.div>
+                </m.div>
 
                 {/* Subheading */}
-                <motion.p
+                <m.p
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5, duration: 0.8 }}
@@ -251,23 +252,23 @@ export function HeroSection() {
                 >
                     The <span className="text-brand-navy font-semibold">decentralized ecosystem</span> for students.
                     Buy, sell, connect, and thrive in a <span className="text-brand-orange font-semibold">verifiable campus network</span>.
-                </motion.p>
+                </m.p>
 
                 {/* CTA Buttons */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.7, duration: 0.8 }}
                     className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4"
                 >
-                    <motion.div
+                    <m.div
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.98 }}
                     >
                         <Button
                             size="lg"
                             onClick={scrollToEcosystem}
-                            className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand-navy via-brand-navy to-brand-navy/90 px-10 py-7 text-lg font-bold shadow-xl shadow-brand-navy/25 hover:shadow-2xl hover:shadow-brand-navy/30 transition-all duration-300 group"
+                            className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand-navy via-brand-navy to-brand-navy/90 px-10 py-7 text-lg font-bold shadow-xl shadow-brand-navy/25 hover:shadow-2xl hover:shadow-brand-navy/30 transition-shadow duration-300 group"
                         >
                             <span className="relative z-10 flex items-center gap-2">
                                 Explore Portal
@@ -275,8 +276,8 @@ export function HeroSection() {
                             </span>
                             <div className="absolute inset-0 bg-gradient-to-r from-brand-orange to-brand-yellow opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         </Button>
-                    </motion.div>
-                    <motion.div
+                    </m.div>
+                    <m.div
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.98 }}
                     >
@@ -288,18 +289,18 @@ export function HeroSection() {
                             <PlayCircle className="w-5 h-5 text-brand-orange" />
                             How it works
                         </Button>
-                    </motion.div>
-                </motion.div>
+                    </m.div>
+                </m.div>
 
                 {/* Stats Section */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.9, duration: 0.8 }}
                     className="mt-20 flex flex-wrap items-center justify-center gap-8 md:gap-16"
                 >
                     {stats.map((stat, index) => (
-                        <motion.div
+                        <m.div
                             key={stat.label}
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -313,19 +314,19 @@ export function HeroSection() {
                                 <p className="text-2xl md:text-3xl font-black text-brand-navy tracking-tight">{stat.value}</p>
                                 <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
                             </div>
-                        </motion.div>
+                        </m.div>
                     ))}
-                </motion.div>
+                </m.div>
             </div>
 
             {/* Scroll Indicator */}
-            <motion.div
+            <m.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.5, duration: 1 }}
                 className="absolute bottom-8 left-1/2 -translate-x-1/2"
             >
-                {/* <motion.button
+                {/* <m.button
                     onClick={scrollToEcosystem}
                     animate={{ y: [0, 8, 0] }}
                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
@@ -333,14 +334,14 @@ export function HeroSection() {
                 >
                     <span className="text-xs font-medium tracking-widest uppercase">Scroll to explore</span>
                     <div className="w-6 h-10 rounded-full border-2 border-current flex items-start justify-center p-1.5">
-                        <motion.div
+                        <m.div
                             animate={{ y: [0, 12, 0] }}
                             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                             className="w-1.5 h-3 bg-current rounded-full"
                         />
                     </div>
-                </motion.button> */}
-            </motion.div>
+                </m.button> */}
+            </m.div>
         </section>
     );
 }

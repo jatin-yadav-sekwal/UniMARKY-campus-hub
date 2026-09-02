@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { PostCard } from "@/features/campus/components/PostCard";
@@ -51,7 +51,7 @@ export function PostDetailPage() {
 
     return (
         <div className="max-w-2xl mx-auto px-4 py-6">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 <Button
                     variant="ghost"
                     size="sm"
@@ -68,7 +68,7 @@ export function PostDetailPage() {
                     onDelete={handleDelete}
                     defaultShowComments={true}
                 />
-            </motion.div>
+            </m.div>
         </div>
     );
 }

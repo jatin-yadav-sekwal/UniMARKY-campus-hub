@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { FileText } from "lucide-react";
@@ -17,7 +17,7 @@ export function TermsPage() {
 
             <section className="pt-32 pb-20">
                 <div className="container px-4 mx-auto max-w-3xl">
-                    <motion.div {...fadeUp} className="mb-10 text-center">
+                    <m.div {...fadeUp} className="mb-10 text-center">
                         <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 text-indigo-600 text-sm font-semibold mb-4">
                             <FileText className="w-4 h-4" /> Legal
                         </span>
@@ -25,9 +25,9 @@ export function TermsPage() {
                             Terms of Service
                         </h1>
                         <p className="text-muted-foreground">Last updated: February 12, 2026</p>
-                    </motion.div>
+                    </m.div>
 
-                    <motion.div {...fadeUp} className="prose prose-neutral max-w-none text-muted-foreground space-y-8">
+                    <m.div {...fadeUp} className="prose prose-neutral max-w-none text-muted-foreground space-y-8">
                         <Section title="1. Acceptance of Terms">
                             <p>By accessing or using UniMARKY ("the Platform"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Platform.</p>
                         </Section>
@@ -73,7 +73,7 @@ export function TermsPage() {
                         <Section title="10. Contact">
                             <p>For questions about these Terms, please contact us at <a href="mailto:jatinyadavsekwal88@gmail.com" className="text-brand-orange hover:underline">jatinyadavsekwal88@gmail.com</a>.</p>
                         </Section>
-                    </motion.div>
+                    </m.div>
                 </div>
             </section>
 
