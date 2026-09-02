@@ -17,12 +17,14 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { GlassSurface, LiquidGlassPill } from "@/components/ui/liquid-glass";
 import file from "@/components/layout/file.svg";
 
 const navLinks = [
     { name: "ECOSYSTEM", href: "#ecosystem" },
+    { name: "EXPERIENCE", href: "#experience" },
+    { name: "NETWORK", href: "#network" },
     { name: "COMMUNITY", href: "#community" },
-    { name: "SUPPORT", href: "#support" },
 ];
 
 const appRoutes = [
@@ -53,24 +55,24 @@ const menuVariants = {
         opacity: 0,
         x: "-100%",
         transition: {
-            staggerChildren: 0.05,
+            staggerChildren: 0.04,
             staggerDirection: -1,
-            type: "spring" as const, stiffness: 300, damping: 30
+            type: "spring" as const, stiffness: 350, damping: 32
         }
     },
     open: {
         opacity: 1,
         x: 0,
         transition: {
-            staggerChildren: 0.1,
-            delayChildren: 0.2,
-            type: "spring" as const, stiffness: 300, damping: 30
+            staggerChildren: 0.06,
+            delayChildren: 0.1,
+            type: "spring" as const, stiffness: 350, damping: 32
         }
     },
 };
 
 const itemVariants = {
-    closed: { opacity: 0, x: -20 },
+    closed: { opacity: 0, x: -16 },
     open: { opacity: 1, x: 0 },
 };
 
@@ -87,67 +89,64 @@ function NavUserDropdown({ firstName, onLogout }: UserDropdownProps) {
                 <m.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="flex items-center gap-3 px-3 py-2 rounded-xl bg-gradient-to-r from-muted/50 to-muted/30 hover:from-muted hover:to-muted/50 transition-[background-color,border-color] duration-300 border border-transparent hover:border-border/50"
+                    className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/80 hover:bg-white text-[#24324A] transition-colors duration-200 border border-[#F1E7DF] shadow-2xs"
                 >
                     <div className="relative">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-yellow/30 to-brand-orange/20 flex items-center justify-center border-2 border-brand-yellow/50">
-                            <User className="h-4 w-4 text-brand-navy" />
+                        <div className="h-6 w-6 rounded-full bg-gradient-to-br from-[#FF5A36] to-[#FF713F] flex items-center justify-center font-bold text-[10px] text-white">
+                            <User className="h-3 w-3" />
                         </div>
-                        <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-green-500 rounded-full border-2 border-background" />
+                        <div className="absolute -bottom-0.5 -right-0.5 h-2 w-2 bg-[#20BFA3] rounded-full border border-white" />
                     </div>
-                    <div className="flex flex-col items-start">
-                        <span className="text-sm font-bold text-brand-navy leading-none">
-                            {firstName}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">Online</span>
-                    </div>
-                    <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-xs font-semibold text-[#24324A] leading-none max-w-[90px] truncate">
+                        {firstName}
+                    </span>
+                    <ChevronDown className="h-3 w-3 text-[#71839B]" />
                 </m.button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
                 align="end"
-                className="w-56 p-2 rounded-xl border-border/50 bg-background/95 backdrop-blur-xl shadow-xl"
+                className="w-52 p-1.5 rounded-2xl border border-[#F1E7DF] bg-[#FFFCF8]/95 backdrop-blur-2xl shadow-[0_16px_36px_rgba(36,50,74,0.08)] text-[#24324A]"
             >
-                <DropdownMenuLabel className="text-xs text-muted-foreground font-medium">
+                <DropdownMenuLabel className="text-[11px] text-[#71839B] font-medium px-2 py-1">
                     My Account
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-border/50" />
+                <DropdownMenuSeparator className="bg-[#F1E7DF]" />
                 <DropdownMenuItem
                     onClick={() => navigate('/dashboard')}
-                    className="cursor-pointer rounded-lg gap-3 py-2.5"
+                    className="cursor-pointer rounded-xl gap-2.5 py-1.5 text-xs text-[#24324A] hover:bg-[#FFF7EF] transition-colors"
                 >
-                    <div className="p-1.5 rounded-lg bg-brand-navy/10">
-                        <LayoutDashboard className="h-4 w-4 text-brand-navy" />
+                    <div className="p-1 rounded-lg bg-[#FFF7EF] text-[#FF5A36]">
+                        <LayoutDashboard className="h-3.5 w-3.5" />
                     </div>
-                    <span className="font-medium">Dashboard</span>
+                    <span className="font-semibold">Dashboard</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     onClick={() => navigate('/profile')}
-                    className="cursor-pointer rounded-lg gap-3 py-2.5"
+                    className="cursor-pointer rounded-xl gap-2.5 py-1.5 text-xs text-[#24324A] hover:bg-[#FFF7EF] transition-colors"
                 >
-                    <div className="p-1.5 rounded-lg bg-brand-orange/10">
-                        <UserCircle className="h-4 w-4 text-brand-orange" />
+                    <div className="p-1 rounded-lg bg-emerald-50 text-[#20BFA3]">
+                        <UserCircle className="h-3.5 w-3.5" />
                     </div>
-                    <span className="font-medium">Profile</span>
+                    <span className="font-semibold">Profile</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     onClick={() => navigate('/unimedia/my-content')}
-                    className="cursor-pointer rounded-lg gap-3 py-2.5"
+                    className="cursor-pointer rounded-xl gap-2.5 py-1.5 text-xs text-[#24324A] hover:bg-[#FFF7EF] transition-colors"
                 >
-                    <div className="p-1.5 rounded-lg bg-rose-500/10">
-                        <LayoutGrid className="h-4 w-4 text-rose-500" />
+                    <div className="p-1 rounded-lg bg-purple-50 text-purple-600">
+                        <LayoutGrid className="h-3.5 w-3.5" />
                     </div>
-                    <span className="font-medium">My Content</span>
+                    <span className="font-semibold">My Content</span>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-border/50" />
+                <DropdownMenuSeparator className="bg-[#F1E7DF]" />
                 <DropdownMenuItem
                     onClick={onLogout}
-                    className="cursor-pointer rounded-lg gap-3 py-2.5 text-red-600 focus:text-red-600 focus:bg-red-50"
+                    className="cursor-pointer rounded-xl gap-2.5 py-1.5 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-colors"
                 >
-                    <div className="p-1.5 rounded-lg bg-red-100">
-                        <LogOut className="h-4 w-4" />
+                    <div className="p-1 rounded-lg bg-rose-100 text-rose-600">
+                        <LogOut className="h-3.5 w-3.5" />
                     </div>
-                    <span className="font-medium">Logout</span>
+                    <span className="font-semibold">Logout</span>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
@@ -185,7 +184,7 @@ function MobileNavDrawer({
                         role="button"
                         tabIndex={0}
                         aria-label="Close menu backdrop"
-                        className="fixed inset-0 z-30 bg-background/80 backdrop-blur-md md:hidden"
+                        className="fixed inset-0 z-40 bg-[#24324A]/30 backdrop-blur-xs md:hidden"
                         onClick={onClose}
                         onKeyDown={(e) => {
                             if (e.key === "Enter" || e.key === "Escape" || e.key === " ") {
@@ -201,7 +200,7 @@ function MobileNavDrawer({
                         animate="open"
                         exit="closed"
                         variants={menuVariants}
-                        className="fixed inset-y-0 left-0 z-40 w-[85%] max-w-sm flex flex-col bg-background border-r border-border/50 shadow-2xl pt-24 px-6 md:hidden"
+                        className="fixed inset-y-0 left-0 z-50 w-[80%] max-w-xs flex flex-col bg-[#FFFCF8]/98 backdrop-blur-2xl border-r border-[#F1E7DF] shadow-[0_24px_50px_rgba(36,50,74,0.12)] pt-18 px-5 md:hidden text-[#24324A]"
                     >
                         <div className="flex flex-col h-full">
                             {session ? (
@@ -210,33 +209,29 @@ function MobileNavDrawer({
                                         <Link
                                             to="/profile"
                                             onClick={onClose}
-                                            className="flex items-center gap-4 p-4 mb-6 rounded-2xl bg-gradient-to-br from-muted/50 to-muted/30 border border-border/50 hover:border-border transition-colors"
+                                            className="flex items-center gap-3 p-3 mb-5 rounded-2xl bg-[#FFF7EF] border border-[#F1E7DF]"
                                         >
-                                            <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-brand-yellow/30 to-brand-orange/20 flex items-center justify-center border-2 border-brand-yellow/50">
-                                                <User className="h-7 w-7 text-brand-navy" />
+                                            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#FF5A36] to-[#FF713F] flex items-center justify-center font-bold text-sm text-white">
+                                                <User className="h-5 w-5" />
                                             </div>
                                             <div>
-                                                <p className="font-bold text-lg text-brand-navy">
+                                                <p className="font-bold text-sm text-[#24324A]">
                                                     {firstName}
                                                 </p>
-                                                <p className="text-sm text-muted-foreground">View Profile →</p>
+                                                <p className="text-[11px] text-[#71839B]">View Profile →</p>
                                             </div>
                                         </Link>
                                     </m.div>
 
-                                    <div className="flex-1 space-y-1 overflow-y-auto">
-                                        {appRoutes.map((link, index) => (
-                                            <m.div
-                                                key={link.name}
-                                                variants={itemVariants}
-                                                custom={index}
-                                            >
+                                    <div className="flex-1 space-y-1 overflow-y-auto pr-1">
+                                        {appRoutes.map((link) => (
+                                            <m.div key={link.name} variants={itemVariants}>
                                                 <Link
                                                     to={link.href}
                                                     onClick={onClose}
-                                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold text-brand-navy hover:bg-muted/50 transition-colors"
+                                                    className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-[#24324A] hover:bg-[#FFF7EF] transition-colors"
                                                 >
-                                                    <link.icon className="h-5 w-5 text-muted-foreground" />
+                                                    <link.icon className="h-4 w-4 text-[#FF5A36]" />
                                                     {link.name}
                                                 </Link>
                                             </m.div>
@@ -244,22 +239,18 @@ function MobileNavDrawer({
 
                                         {visibleRoleRoutes.length > 0 && (
                                             <>
-                                                <div className="my-3 border-t border-border/50" />
-                                                <p className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                                                <div className="my-2.5 border-t border-[#F1E7DF]" />
+                                                <p className="px-3 text-[10px] font-bold text-[#71839B] uppercase tracking-wider mb-1">
                                                     Management
                                                 </p>
-                                                {visibleRoleRoutes.map((link, index) => (
-                                                    <m.div
-                                                        key={link.name}
-                                                        variants={itemVariants}
-                                                        custom={appRoutes.length + index}
-                                                    >
+                                                {visibleRoleRoutes.map((link) => (
+                                                    <m.div key={link.name} variants={itemVariants}>
                                                         <Link
                                                             to={link.href}
                                                             onClick={onClose}
-                                                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold text-brand-navy hover:bg-muted/50 transition-colors"
+                                                            className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-[#24324A] hover:bg-[#FFF7EF] transition-colors"
                                                         >
-                                                            <link.icon className="h-5 w-5 text-muted-foreground" />
+                                                            <link.icon className="h-4 w-4 text-[#20BFA3]" />
                                                             {link.name}
                                                         </Link>
                                                     </m.div>
@@ -267,14 +258,14 @@ function MobileNavDrawer({
                                             </>
                                         )}
 
-                                        <div className="my-3 border-t border-border/50" />
+                                        <div className="my-2.5 border-t border-[#F1E7DF]" />
                                         <m.div variants={itemVariants}>
                                             <Link
                                                 to="/profile"
                                                 onClick={onClose}
-                                                className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold text-brand-navy hover:bg-muted/50 transition-colors"
+                                                className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-[#24324A] hover:bg-[#FFF7EF] transition-colors"
                                             >
-                                                <UserCircle className="h-5 w-5 text-muted-foreground" />
+                                                <UserCircle className="h-4 w-4 text-[#20BFA3]" />
                                                 Profile
                                             </Link>
                                         </m.div>
@@ -282,40 +273,38 @@ function MobileNavDrawer({
                                             <Link
                                                 to="/unimedia/my-content"
                                                 onClick={onClose}
-                                                className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold text-brand-navy hover:bg-muted/50 transition-colors"
+                                                className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-[#24324A] hover:bg-[#FFF7EF] transition-colors"
                                             >
-                                                <LayoutGrid className="h-5 w-5 text-muted-foreground" />
+                                                <LayoutGrid className="h-4 w-4 text-[#FF5A36]" />
                                                 My Content
                                             </Link>
                                         </m.div>
                                     </div>
 
-                                    <m.div variants={itemVariants} className="pb-8 pt-4 border-t border-border/50">
+                                    <m.div variants={itemVariants} className="pb-6 pt-3 border-t border-[#F1E7DF]">
                                         <Button
                                             onClick={onLogout}
                                             variant="ghost"
-                                            className="w-full py-6 rounded-xl text-red-600 hover:text-red-700 hover:bg-red-50 font-bold justify-start gap-3"
+                                            className="w-full py-4 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-bold text-xs justify-start gap-2.5"
                                         >
-                                            <div className="p-2 rounded-lg bg-red-100">
-                                                <LogOut className="h-5 w-5" />
-                                            </div>
+                                            <LogOut className="h-4 w-4" />
                                             Log Out
                                         </Button>
                                     </m.div>
                                 </>
                             ) : (
-                                <m.div variants={itemVariants} className="flex flex-col items-center justify-center flex-1 space-y-6 px-4">
-                                    <div className="text-center space-y-2">
-                                        <h3 className="text-2xl font-bold text-brand-navy">Welcome!</h3>
-                                        <p className="text-muted-foreground">
-                                            Join Unmarky to access all features.
+                                <m.div variants={itemVariants} className="flex flex-col items-center justify-center flex-1 space-y-5 px-3">
+                                    <div className="text-center space-y-1.5">
+                                        <h3 className="text-lg font-bold text-[#24324A]">Welcome to UniMARKY</h3>
+                                        <p className="text-xs text-[#71839B]">
+                                            The digital campus for verified students.
                                         </p>
                                     </div>
                                     <Button
                                         onClick={() => { navigate('/auth'); onClose(); }}
-                                        className="w-full text-lg py-7 rounded-xl bg-gradient-to-r from-brand-navy to-brand-navy/90 font-bold shadow-lg"
+                                        className="w-full text-xs py-5 rounded-xl bg-gradient-to-r from-[#FF5A36] to-[#FF713F] font-bold text-white shadow-md"
                                     >
-                                        <Sparkles className="mr-2 h-5 w-5" />
+                                        <Sparkles className="mr-2 h-4 w-4" />
                                         Get Started
                                     </Button>
                                 </m.div>
@@ -336,6 +325,7 @@ export function Navbar({ showScrollLinks = false }: NavbarProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [activeLink, setActiveLink] = useState<string | null>(null);
+    const [hoveredLink, setHoveredLink] = useState<string | null>(null);
     const [userRole, setUserRole] = useState<string>("normal");
     const { session, user, signOut } = useAuth();
     const navigate = useNavigate();
@@ -377,135 +367,149 @@ export function Navbar({ showScrollLinks = false }: NavbarProps) {
     };
 
     const userFirstName = user?.user_metadata?.first_name || "Student";
+    const currentActive = hoveredLink || activeLink;
 
     return (
         <m.header
-            initial={{ y: -100, opacity: 0 }}
+            initial={{ y: -40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className={cn(
-                "fixed top-0 left-0 right-0 z-50 transition-[padding] duration-500",
-                scrolled ? "py-2" : "py-4"
+                "fixed top-0 left-0 right-0 z-50 transition-[padding] duration-300 pointer-events-none",
+                scrolled ? "py-3" : "py-4 sm:py-5"
             )}
         >
-            <div className={cn(
-                "mx-4 sm:mx-6 lg:mx-auto max-w-7xl transition-[background-color,backdrop-filter,border-color,box-shadow] duration-500 rounded-2xl",
-                scrolled
-                    ? "bg-background/70 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
-                    : "bg-transparent"
-            )}>
-                <div className="flex items-center justify-between px-4 sm:px-6 h-16">
-                    {/* LEFT: Mobile Menu + LOGO */}
-                    <div className="flex items-center gap-4">
-                        <m.button
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => setIsOpen(!isOpen)}
-                            className="flex md:hidden z-50 p-2 rounded-xl bg-gradient-to-br from-brand-navy/5 to-brand-orange/5 hover:from-brand-navy/10 hover:to-brand-orange/10 transition-colors duration-300"
-                        >
-                            <AnimatePresence mode="wait">
-                                {isOpen ? (
-                                    <m.div
-                                        key="close"
-                                        initial={{ rotate: -90, opacity: 0 }}
-                                        animate={{ rotate: 0, opacity: 1 }}
-                                        exit={{ rotate: 90, opacity: 0 }}
-                                        transition={{ duration: 0.2 }}
-                                    >
-                                        <X className="h-6 w-6 text-brand-navy" />
-                                    </m.div>
-                                ) : (
-                                    <m.div
-                                        key="menu"
-                                        initial={{ rotate: 90, opacity: 0 }}
-                                        animate={{ rotate: 0, opacity: 1 }}
-                                        exit={{ rotate: -90, opacity: 0 }}
-                                        transition={{ duration: 0.2 }}
-                                    >
-                                        <Menu className="h-6 w-6 text-brand-navy" />
-                                    </m.div>
-                                )}
-                            </AnimatePresence>
-                        </m.button>
-
-                        <Link to="/" className="flex items-center gap-3 group">
-                            <div className="flex flex-col">
-                                <span className="text-2xl tracking-tighter text-brand-navy leading-none">
-                                    <img src={file} alt="App Logo" width={200} height={65} />
-                                </span>
-                            </div>
-                        </Link>
-                    </div>
-
-                    {/* CENTER LINKS (Desktop Only) */}
-                    {showScrollLinks && (
-                        <nav className="hidden items-center justify-center md:flex">
-                            <div className="flex items-center gap-1 p-1.5 rounded-full bg-muted/50 backdrop-blur-sm">
-                                {navLinks.map((link) => (
-                                    <m.button
-                                        key={link.name}
-                                        onClick={() => {
-                                            handleScrollTo(link.href);
-                                            setActiveLink(link.name);
-                                        }}
-                                        onHoverStart={() => setActiveLink(link.name)}
-                                        onHoverEnd={() => setActiveLink(null)}
-                                        className={cn(
-                                            "relative px-5 py-2 text-xs font-bold tracking-widest transition-colors duration-300 rounded-full",
-                                            activeLink === link.name
-                                                ? "text-brand-navy"
-                                                : "text-muted-foreground hover:text-brand-navy"
-                                        )}
-                                    >
-                                        {activeLink === link.name && (
-                                            <m.div
-                                                layoutId="navbar-pill"
-                                                className="absolute inset-0 bg-white dark:bg-white/10 rounded-full shadow-sm"
-                                                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                                            />
-                                        )}
-                                        <span className="relative z-10">{link.name}</span>
-                                    </m.button>
-                                ))}
-                            </div>
-                        </nav>
+            <div className="mx-auto max-w-5xl px-3 sm:px-6">
+                <GlassSurface
+                    variant="capsule"
+                    depth={0.45}
+                    curvature={0.65}
+                    chroma={0.3}
+                    scale={14}
+                    interactiveGlint={true}
+                    tint="warm"
+                    className={cn(
+                        "pointer-events-auto transition-[background-color,box-shadow] duration-300 rounded-full",
+                        "bg-[#FFFCF8]/80 backdrop-blur-2xl backdrop-saturate-[180%]",
+                        "border border-[#F1E7DF]/90",
+                        "shadow-[0_4px_24px_rgba(36,50,74,0.05),inset_0_1.5px_1px_rgba(255,255,255,0.95)]",
+                        scrolled ? "bg-[#FFFCF8]/95 shadow-[0_12px_32px_rgba(36,50,74,0.09)]" : ""
                     )}
-
-                    {/* RIGHT SECTION (Desktop Only) */}
-                    <div className="hidden items-center justify-end gap-3 md:flex">
-                        {session ? (
-                            <NavUserDropdown firstName={userFirstName} onLogout={handleLogout} />
-                        ) : (
-                            <m.div
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
+                >
+                    <div className="flex items-center justify-between px-3 sm:px-5 h-[52px]">
+                        {/* LEFT: Mobile Menu Button + UniMARKY Logo */}
+                        <div className="flex items-center gap-2.5">
+                            <m.button
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => setIsOpen(!isOpen)}
+                                aria-label="Toggle navigation menu"
+                                className="flex md:hidden p-1.5 rounded-full bg-[#FFF7EF] hover:bg-white text-[#24324A] transition-colors border border-[#F1E7DF]"
                             >
+                                <AnimatePresence mode="wait">
+                                    {isOpen ? (
+                                        <m.div
+                                            key="close"
+                                            initial={{ rotate: -90, opacity: 0 }}
+                                            animate={{ rotate: 0, opacity: 1 }}
+                                            exit={{ rotate: 90, opacity: 0 }}
+                                            transition={{ duration: 0.15 }}
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </m.div>
+                                    ) : (
+                                        <m.div
+                                            key="menu"
+                                            initial={{ rotate: 90, opacity: 0 }}
+                                            animate={{ rotate: 0, opacity: 1 }}
+                                            exit={{ rotate: -90, opacity: 0 }}
+                                            transition={{ duration: 0.15 }}
+                                        >
+                                            <Menu className="h-4 w-4" />
+                                        </m.div>
+                                    )}
+                                </AnimatePresence>
+                            </m.button>
+
+                            <Link to="/" className="flex items-center gap-2 group py-1">
+                                <img src={file} alt="UniMARKY Logo" className="h-6 w-auto object-contain" />
+                            </Link>
+                        </div>
+
+                        {/* CENTER: Slidable Liquid Glass Pill Active Navigation Tabs */}
+                        {showScrollLinks && (
+                            <nav className="hidden items-center justify-center md:flex" aria-label="Main Navigation">
+                                <div
+                                    onMouseLeave={() => setHoveredLink(null)}
+                                    className="relative flex items-center gap-1 p-0.5 rounded-full bg-[#FFF7EF]/80 border border-[#F1E7DF]/80 backdrop-blur-md"
+                                >
+                                    {navLinks.map((link) => {
+                                        const isCurrent = currentActive === link.name;
+                                        return (
+                                            <m.button
+                                                key={link.name}
+                                                onClick={() => {
+                                                    handleScrollTo(link.href);
+                                                    setActiveLink(link.name);
+                                                }}
+                                                onMouseEnter={() => setHoveredLink(link.name)}
+                                                className={cn(
+                                                    "relative px-3.5 py-1.5 text-xs font-semibold tracking-wide transition-colors duration-200 rounded-full select-none",
+                                                    isCurrent
+                                                        ? "text-[#FF5A36]"
+                                                        : "text-[#71839B] hover:text-[#24324A]"
+                                                )}
+                                            >
+                                                {isCurrent && (
+                                                    <LiquidGlassPill
+                                                        layoutId="navbar-raycast-lens"
+                                                        className="z-0 bg-white/95 border border-[#F1E7DF] shadow-2xs"
+                                                    />
+                                                )}
+                                                <span className="relative z-10">{link.name}</span>
+                                            </m.button>
+                                        );
+                                    })}
+                                </div>
+                            </nav>
+                        )}
+
+                        {/* RIGHT: User Profile or Compact Primary CTA */}
+                        <div className="hidden items-center justify-end gap-2.5 md:flex">
+                            {session ? (
+                                <NavUserDropdown firstName={userFirstName} onLogout={handleLogout} />
+                            ) : (
+                                <m.div
+                                    whileHover={{ y: -1 }}
+                                    whileTap={{ scale: 0.98 }}
+                                >
+                                    <Button
+                                        size="sm"
+                                        className="relative h-8 px-4 rounded-full bg-gradient-to-r from-[#FF5A36] to-[#FF713F] text-white font-bold text-xs shadow-xs hover:shadow-[0_4px_16px_rgba(255,90,54,0.3)] transition-[box-shadow] duration-200 border border-white/20"
+                                        onClick={() => navigate('/auth')}
+                                    >
+                                        <span className="relative z-10 flex items-center gap-1.5">
+                                            <Sparkles className="h-3 w-3" />
+                                            Get Started
+                                        </span>
+                                    </Button>
+                                </m.div>
+                            )}
+                        </div>
+
+                        {/* Mobile Auth Button */}
+                        {!session && (
+                            <div className="flex md:hidden">
                                 <Button
-                                    className="relative overflow-hidden rounded-xl bg-gradient-to-r from-brand-navy to-brand-navy/90 px-6 py-5 font-bold tracking-wide shadow-lg shadow-brand-navy/20 hover:shadow-xl hover:shadow-brand-navy/30 transition-shadow duration-300 group"
+                                    size="sm"
+                                    className="rounded-full bg-gradient-to-r from-[#FF5A36] to-[#FF713F] text-white font-bold text-xs h-7 px-3 border border-white/20 shadow-2xs"
                                     onClick={() => navigate('/auth')}
                                 >
-                                    <span className="relative z-10 flex items-center gap-2">
-                                        <Sparkles className="h-4 w-4" />
-                                        Get Started
-                                    </span>
-                                    <div className="absolute inset-0 bg-gradient-to-r from-brand-orange to-brand-yellow opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    Sign In
                                 </Button>
-                            </m.div>
+                            </div>
                         )}
                     </div>
-
-                    {/* Mobile Auth Button */}
-                    {!session && (
-                        <div className="flex md:hidden">
-                            <Button
-                                size="sm"
-                                className="rounded-xl bg-brand-navy font-bold"
-                                onClick={() => navigate('/auth')}
-                            >
-                                Sign In
-                            </Button>
-                        </div>
-                    )}
-                </div>
+                </GlassSurface>
             </div>
 
             <MobileNavDrawer

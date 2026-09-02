@@ -51,7 +51,7 @@ function TypeToggle({ currentType, onSelect }: TypeToggleProps) {
                             key={opt.type}
                             type="button"
                             onClick={() => onSelect(opt.type)}
-                            className={`relative p-6 rounded-2xl border-2 transition-all duration-300 ${
+                            className={`relative p-6 rounded-2xl border-2 transition-[border-color,background-color] duration-300 ${
                                 isSelected ? opt.activeBorder : "border-border hover:border-muted-foreground"
                             }`}
                         >
@@ -309,7 +309,7 @@ export function EditLostFoundItemPage() {
                             <Button
                                 type="submit"
                                 disabled={loading}
-                                className={`px-8 py-6 rounded-full font-bold text-lg shadow-lg transition-all gap-2 ${
+                                className={`px-8 py-6 rounded-full font-bold text-lg shadow-lg transition-[box-shadow,opacity] gap-2 ${
                                     formData.type === "lost"
                                         ? "bg-gradient-to-r from-red-500 to-red-600 hover:shadow-red-500/25"
                                         : "bg-gradient-to-r from-green-500 to-emerald-500 hover:shadow-green-500/25"

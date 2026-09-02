@@ -1,245 +1,165 @@
-import { m } from "motion/react";
+import { useRef } from "react";
+import { m, useInView } from "motion/react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Star, ThumbsUp, Laugh, Info, Heart } from "lucide-react";
-
-type ReviewType = "appreciating" | "funny" | "info";
-
-interface Review {
-    name: string;
-    dept: string;
-    text: string;
-    initials: string;
-    type: ReviewType;
-    stars: number;
-}
-
-const typeBadge: Record<ReviewType, { label: string; icon: typeof Star; color: string }> = {
-    appreciating: { label: "Love", icon: Heart, color: "text-pink-500 bg-pink-500/10" },
-    funny: { label: "Funny", icon: Laugh, color: "text-amber-500 bg-amber-500/10" },
-    info: { label: "Helpful", icon: Info, color: "text-blue-500 bg-blue-500/10" },
-};
-
-const reviewsRow1: Review[] = [
-    {
-        name: "Aarav Sharma",
-        dept: "CSE, 3rd Year",
-        text: "Bhai yeh app ne literally meri life easy kar di. Textbooks mili half price mein, aur seller bhi verified tha. No scam vibes! 🔥",
-        initials: "AS",
-        type: "appreciating",
-        stars: 5,
-    },
-    {
-        name: "Priya Verma",
-        dept: "Psychology, 2nd Year",
-        text: "Housing section se PG dhundha and it was actually good. Photos real thi, unlike OLX wale uncle 😂",
-        initials: "PV",
-        type: "funny",
-        stars: 5,
-    },
-    {
-        name: "Rohit Meena",
-        dept: "Electrical Engg, 4th Year",
-        text: "Lost & Found section mein apna calculator post kiya aur 2 din mein mil gaya. Kaafi solid feature hai genuinely.",
-        initials: "RM",
-        type: "info",
-        stars: 4,
-    },
-    {
-        name: "Sneha Gupta",
-        dept: "MBA, 1st Year",
-        text: "Study section is a goldmine yaar! Previous year papers mil gaye department wise. Ab toh exam prep easy ho gayi 📚",
-        initials: "SG",
-        type: "appreciating",
-        stars: 5,
-    },
-    {
-        name: "Vikram Singh",
-        dept: "Biotechnology, 2nd Year",
-        text: "Food section mein jo momos wale bhaiya ka stall mila, uski chutney ke liye main roz jaata hu ab 😋",
-        initials: "VS",
-        type: "funny",
-        stars: 5,
-    },
-    {
-        name: "Ananya Joshi",
-        dept: "English Lit, 3rd Year",
-        text: "Finally ek platform jahan sab kuch ek jagah mil jaata hai. Marketplace, food, housing — sab sorted!",
-        initials: "AJ",
-        type: "appreciating",
-        stars: 5,
-    },
-];
-
-const reviewsRow2: Review[] = [
-    {
-        name: "Kunal Thakur",
-        dept: "Mechanical Engg, 4th Year",
-        text: "Marketplace pe apna purana laptop becha within 3 hours. Buyer bhi college ka hi tha toh trust issue zero 💯",
-        initials: "KT",
-        type: "info",
-        stars: 5,
-    },
-    {
-        name: "Ishita Rani",
-        dept: "Pharmacy, 2nd Year",
-        text: "Yeh app banane wale ko Nobel Prize do yaar 😂 Itna useful platform pehle kyun nahi tha campus ke liye!",
-        initials: "IR",
-        type: "funny",
-        stars: 5,
-    },
-    {
-        name: "Deepak Kumar",
-        dept: "Commerce, 1st Year",
-        text: "Notes section mein sessional ke notes mil gaye woh bhi topper ke. Padhai ka scene set ho gaya boss 🎯",
-        initials: "DK",
-        type: "appreciating",
-        stars: 5,
-    },
-    {
-        name: "Riya Choudhary",
-        dept: "Fine Arts, 3rd Year",
-        text: "Unimedia section mein apne art showcase kiya aur bahut appreciation mili. Real campus social media vibes! 🎨",
-        initials: "RC",
-        type: "appreciating",
-        stars: 4,
-    },
-    {
-        name: "Arjun Patel",
-        dept: "CSE, 2nd Year",
-        text: "Housing mein PG search karte waqt filter options bahut kaam aaye. Location, price sab set kar sakte ho easily.",
-        initials: "AP",
-        type: "info",
-        stars: 4,
-    },
-    {
-        name: "Kavya Reddy",
-        dept: "Law, 1st Year",
-        text: "Mera phone gum ho gaya tha campus mein. Lost & Found pe daala aur kisi ne return kar diya next day. Faith in humanity restored 🙏",
-        initials: "KR",
-        type: "appreciating",
-        stars: 5,
-    },
-];
-
-function ReviewCard({ review }: { review: Review }) {
-    const badge = typeBadge[review.type];
-    const BadgeIcon = badge.icon;
-
-    return (
-        <div className="w-[320px] md:w-[360px] flex-shrink-0 rounded-2xl bg-background border border-border/40 hover:border-border/80 transition-colors duration-300 p-5 group">
-            {/* Header */}
-            <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-gradient-to-br from-brand-navy to-brand-navy/80 text-white text-xs font-bold">
-                            {review.initials}
-                        </AvatarFallback>
-                    </Avatar>
-                    <div>
-                        <p className="font-bold text-sm text-foreground leading-tight">{review.name}</p>
-                        <p className="text-[11px] text-muted-foreground">{review.dept}</p>
-                    </div>
-                </div>
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${badge.color}`}>
-                    <BadgeIcon className="w-3 h-3" />
-                    {badge.label}
-                </span>
-            </div>
-
-            {/* Stars */}
-            <div className="flex gap-0.5 mb-2.5">
-                {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                        key={i}
-                        className={`w-3.5 h-3.5 ${i < review.stars ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
-                    />
-                ))}
-            </div>
-
-            {/* Text */}
-            <p className="text-sm text-muted-foreground leading-relaxed whitespace-normal">
-                "{review.text}"
-            </p>
-        </div>
-    );
-}
-
-function TickerRow({ reviews, direction = "left", duration = 35 }: { reviews: Review[]; direction?: "left" | "right"; duration?: number }) {
-    const tripled = [
-        ...reviews.map(r => ({ ...r, uniqueKey: `c1-${r.name}-${r.dept}` })),
-        ...reviews.map(r => ({ ...r, uniqueKey: `c2-${r.name}-${r.dept}` })),
-        ...reviews.map(r => ({ ...r, uniqueKey: `c3-${r.name}-${r.dept}` }))
-    ];
-    const xStart = direction === "left" ? 0 : -1200;
-    const xEnd = direction === "left" ? -1200 : 0;
-
-    return (
-        <div className="flex relative w-full">
-            <div className="absolute left-0 top-0 bottom-0 w-24 sm:w-32 bg-gradient-to-r from-background to-transparent z-10" />
-            <div className="absolute right-0 top-0 bottom-0 w-24 sm:w-32 bg-gradient-to-l from-background to-transparent z-10" />
-            <m.div
-                className="flex gap-4 whitespace-nowrap"
-                animate={{ x: [xStart, xEnd] }}
-                transition={{ repeat: Infinity, duration, ease: "linear" }}
-            >
-                {tripled.map(review => (
-                    <ReviewCard key={review.uniqueKey} review={review} />
-                ))}
-            </m.div>
-        </div>
-    );
-}
+import { Sparkles, ShieldCheck, Quote } from "lucide-react";
 
 export function CommunitySection() {
+    const sectionRef = useRef<HTMLDivElement>(null);
+    const isInView = useInView(sectionRef, { once: true, margin: "-80px" });
+
     return (
-        <section id="community" className="py-20 overflow-hidden bg-background border-t border-border/40">
-            <div className="container px-4 mx-auto mb-10 text-center">
-                <m.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
-                >
-                    <h4 className="text-sm font-bold tracking-widest text-brand-blue uppercase mb-3">COMMUNITY</h4>
-                    <h2 className="text-3xl md:text-4xl font-black text-brand-navy tracking-tight mb-3">
-                        What Students Are Saying
-                    </h2>
-                    <p className="text-muted-foreground max-w-lg mx-auto text-sm">
-                        Real reviews from real students across the campus. No cap. 💯
-                    </p>
-                </m.div>
+        <section
+            id="community"
+            ref={sectionRef}
+            className="relative py-20 sm:py-28 lg:py-36 overflow-hidden bg-[#FFFCF8] text-[#24324A] border-t border-[#F1E7DF]"
+        >
+            {/* Ambient Background Grid Texture & Diffuse Warm Glow */}
+            <div className="absolute inset-0 bg-[radial-gradient(#24324A04_1px,transparent_1px)] [background-size:32px_32px] pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] sm:w-[850px] h-[450px] bg-gradient-to-b from-[#FFE1D2]/25 via-[#FFF7EF]/20 to-transparent rounded-full blur-[130px] pointer-events-none" />
 
-                {/* Stats */}
-                <m.div
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.2, duration: 0.5 }}
-                    className="flex items-center justify-center gap-6 sm:gap-10 mt-6"
-                >
-                    <div className="text-center">
-                        <p className="text-2xl font-black text-brand-navy">2K+</p>
-                        <p className="text-[11px] text-muted-foreground">Active Users</p>
-                    </div>
-                    <div className="w-px h-8 bg-border" />
-                    <div className="text-center">
-                        <p className="text-2xl font-black text-brand-navy">4.8</p>
-                        <p className="text-[11px] text-muted-foreground flex items-center gap-1 justify-center">
-                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" /> Avg Rating
-                        </p>
-                    </div>
-                    <div className="w-px h-8 bg-border" />
-                    <div className="text-center">
-                        <p className="text-2xl font-black text-brand-navy">500+</p>
-                        <p className="text-[11px] text-muted-foreground">Reviews</p>
-                    </div>
-                </m.div>
-            </div>
+            <div className="container max-w-5xl px-4 sm:px-6 lg:px-8 mx-auto relative z-10">
+                
+                {/* 1. EDITORIAL SECTION HEADER */}
+                <div className="max-w-xl mx-auto text-center mb-10 sm:mb-14 space-y-2.5">
+                    <m.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
+                        transition={{ duration: 0.4 }}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white border border-[#F1E7DF] shadow-2xs mb-0.5"
+                    >
+                        <span className="flex h-1.5 w-1.5 rounded-full bg-[#FF5A36]" />
+                        <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-[#71839B]">
+                            From The Campus
+                        </span>
+                        <Sparkles className="w-3 h-3 text-[#FF713F] opacity-75" />
+                    </m.div>
 
-            {/* Two ticker rows moving in opposite directions */}
-            <div className="space-y-4">
-                <TickerRow reviews={reviewsRow1} direction="left" duration={40} />
-                <TickerRow reviews={reviewsRow2} direction="right" duration={45} />
+                    <m.h2
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                        transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+                        className="text-2xl sm:text-3xl lg:text-[40px] font-black tracking-tight leading-[1.06] text-[#24324A]"
+                    >
+                        Made for students.{" "}
+                        <span className="bg-gradient-to-r from-[#FF5A36] to-[#FF713F] bg-clip-text text-transparent">
+                            Loved by students.
+                        </span>
+                    </m.h2>
+
+                    <m.p
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
+                        transition={{ duration: 0.45, delay: 0.16 }}
+                        className="text-xs sm:text-sm text-[#71839B] max-w-md mx-auto font-normal leading-relaxed"
+                    >
+                        Real peer exchanges happening across university grounds every day.
+                    </m.p>
+                </div>
+
+                {/* 2. ASYMMETRIC COMMUNITY VOICES COMPOSITION */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch">
+                    
+                    {/* PRIMARY SPOTLIGHT VOICE (Col 1-7) */}
+                    <m.div
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+                        transition={{ duration: 0.55, delay: 0.1 }}
+                        className="lg:col-span-7 p-6 sm:p-7 rounded-3xl bg-white border border-[#F1E7DF] shadow-[0_4px_24px_rgba(36,50,74,0.04)] hover:shadow-[0_12px_32px_rgba(36,50,74,0.07)] hover:border-[#FF5A36]/40 hover:-translate-y-0.5 transition-[border-color,box-shadow,transform] duration-200 flex flex-col justify-between group"
+                    >
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FFF5EC] text-[#FF5A36] text-[10px] font-bold border border-[#F1E7DF]">
+                                    <ShieldCheck className="w-3 h-3 text-[#20BFA3]" />
+                                    <span>Verified Peer Trade</span>
+                                </span>
+                                <Quote className="w-5 h-5 text-[#F1E7DF] group-hover:text-[#FF5A36]/30 transition-colors" />
+                            </div>
+
+                            <p className="text-base sm:text-lg lg:text-xl font-bold text-[#24324A] leading-snug">
+                                "Saved ₹4,000 on semester textbooks by buying directly from a senior near Gate 2. Hand-to-hand exchange, zero anxiety."
+                            </p>
+                        </div>
+
+                        <div className="mt-6 pt-4 border-t border-[#F1E7DF] flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <Avatar className="h-9 w-9 border border-[#F1E7DF]">
+                                    <AvatarFallback className="bg-gradient-to-br from-[#FF5A36] to-[#FF713F] text-white font-bold text-xs">
+                                        AS
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div className="text-left">
+                                    <h4 className="text-xs sm:text-sm font-bold text-[#24324A] leading-tight">
+                                        Aarav Sharma
+                                    </h4>
+                                    <p className="text-[11px] text-[#71839B]">CSE · Class of '25</p>
+                                </div>
+                            </div>
+                            <span className="text-[11px] font-bold text-[#FF5A36]">Marketplace</span>
+                        </div>
+                    </m.div>
+
+                    {/* SUPPORTING VOICES (Col 8-12 Stacked) */}
+                    <div className="lg:col-span-5 flex flex-col gap-4 sm:gap-5 justify-between">
+                        
+                        {/* SUPPORTING VOICE 1: HOUSING */}
+                        <m.div
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+                            transition={{ duration: 0.55, delay: 0.18 }}
+                            className="p-5 sm:p-6 rounded-2xl bg-white border border-[#F1E7DF] shadow-[0_4px_20px_rgba(36,50,74,0.03)] hover:shadow-[0_10px_28px_rgba(36,50,74,0.06)] hover:border-[#FF5A36]/40 hover:-translate-y-0.5 transition-[border-color,box-shadow,transform] duration-200 flex flex-col justify-between flex-1 group"
+                        >
+                            <p className="text-xs sm:text-sm font-semibold text-[#24324A] leading-relaxed mb-4 text-left">
+                                "Found my PG room in two days without paying any broker fees. Transparent rent right next to campus."
+                            </p>
+
+                            <div className="pt-3 border-t border-[#F1E7DF] flex items-center justify-between">
+                                <div className="flex items-center gap-2.5">
+                                    <Avatar className="h-7 w-7 border border-[#F1E7DF]">
+                                        <AvatarFallback className="bg-gradient-to-br from-[#FF713F] to-[#FF4F6D] text-white font-bold text-[10px]">
+                                            PV
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div className="text-left">
+                                        <h4 className="text-xs font-bold text-[#24324A] leading-tight">
+                                            Priya Verma
+                                        </h4>
+                                        <p className="text-[10px] text-[#71839B]">Psychology · 2nd Year</p>
+                                    </div>
+                                </div>
+                                <span className="text-[10px] font-bold text-[#71839B]">Housing</span>
+                            </div>
+                        </m.div>
+
+                        {/* SUPPORTING VOICE 2: RECOVERY */}
+                        <m.div
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+                            transition={{ duration: 0.55, delay: 0.24 }}
+                            className="p-5 sm:p-6 rounded-2xl bg-white border border-[#F1E7DF] shadow-[0_4px_20px_rgba(36,50,74,0.03)] hover:shadow-[0_10px_28px_rgba(36,50,74,0.06)] hover:border-[#FF5A36]/40 hover:-translate-y-0.5 transition-[border-color,box-shadow,transform] duration-200 flex flex-col justify-between flex-1 group"
+                        >
+                            <p className="text-xs sm:text-sm font-semibold text-[#24324A] leading-relaxed mb-4 text-left">
+                                "Posted my misplaced calculator and got it back from a junior in Lab 3 within an hour."
+                            </p>
+
+                            <div className="pt-3 border-t border-[#F1E7DF] flex items-center justify-between">
+                                <div className="flex items-center gap-2.5">
+                                    <Avatar className="h-7 w-7 border border-[#F1E7DF]">
+                                        <AvatarFallback className="bg-gradient-to-br from-[#24324A] to-[#71839B] text-white font-bold text-[10px]">
+                                            RM
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div className="text-left">
+                                        <h4 className="text-xs font-bold text-[#24324A] leading-tight">
+                                            Rohit Meena
+                                        </h4>
+                                        <p className="text-[10px] text-[#71839B]">Electrical · 4th Year</p>
+                                    </div>
+                                </div>
+                                <span className="text-[10px] font-bold text-[#71839B]">Lost & Found</span>
+                            </div>
+                        </m.div>
+                    </div>
+                </div>
             </div>
         </section>
     );
