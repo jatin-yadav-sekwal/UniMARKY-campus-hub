@@ -11,12 +11,27 @@ export function ProtectedRoute({ requireOnboarding = true }: { requireOnboarding
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        // Wait for the auth state to resolve before deciding anything; otherwise
+        // a logged-in user can be bounced to /onboarding before /profiles/me has
+        // had a chance to answer.
+        if (loading) return;
+
         if (!user) {
             setIsChecking(false);
             return;
         }
 
         let cancelled = false;
+        // Entering (or re-entering) the gate must not inherit a stale "already
+        // checked" flag: keep the spinner up until the fresh profile check
+        // resolves. Without this the render below sees onboardingComplete === null
+        // while isChecking is false and redirects to /onboarding, which then
+        // bounces an onboarded user back to /dashboard - an endless loop that
+        // renders a blank page.
+        setIsChecking(true);
+        setOnboardingComplete(null);
+        setError(null);
+
         import('@/lib/api').then(({ api }) => {
             api.get('/profiles/me')
                 .then((profile: any) => {
@@ -51,7 +66,7 @@ export function ProtectedRoute({ requireOnboarding = true }: { requireOnboarding
         return () => {
             cancelled = true;
         };
-    }, [user]);
+    }, [user?.id, loading]);
 
     if (loading || (user && isChecking)) {
         return (
