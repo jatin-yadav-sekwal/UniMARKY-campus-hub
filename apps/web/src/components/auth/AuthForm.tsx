@@ -33,6 +33,9 @@ export function AuthForm() {
                         data: {
                             full_name: fullName,
                         },
+                        // Confirmation links return to /auth so the gate can
+                        // route to onboarding on first login.
+                        emailRedirectTo: `${window.location.origin}/auth`,
                     },
                 });
                 if (error) throw error;

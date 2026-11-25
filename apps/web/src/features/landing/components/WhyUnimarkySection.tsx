@@ -165,7 +165,7 @@ export function WhyUnimarkySection() {
     const isInView = useInView(sectionRef, { once: false, margin: "-80px" });
     const prefersReducedMotion = useReducedMotion();
 
-    const currentStep = sequence[stepIndex];
+    const currentStep = sequence[stepIndex]!;
     const currentConfig = commandsData[currentStep.mode];
 
     // Simulated click ripple triggered on each step transition

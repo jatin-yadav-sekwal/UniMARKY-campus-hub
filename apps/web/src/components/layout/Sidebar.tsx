@@ -6,10 +6,10 @@ import {
     LayoutDashboard,
     ShoppingBag,
     MapPin,
-    Newspaper,
     BookOpen,
     Coffee,
     Home,
+    Users,
     Shield,
     ShieldCheck,
     Crown,
@@ -24,9 +24,9 @@ interface NavItem {
 
 const allItems: NavItem[] = [
     { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { title: 'Communities', href: '/communities', icon: Users },
     { title: 'Marketplace', href: '/marketplace', icon: ShoppingBag },
     { title: 'Lost & Found', href: '/lost-found', icon: MapPin },
-    { title: 'Unimedia', href: '/unimedia', icon: Newspaper },
     { title: 'Study', href: '/study', icon: BookOpen },
     { title: 'Food', href: '/food', icon: Coffee },
     { title: 'Housing', href: '/housing', icon: Home },

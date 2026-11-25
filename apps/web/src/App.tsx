@@ -19,15 +19,11 @@ const MyMarketplaceListingsPage = lazy(() => import('@/features/marketplace/MyMa
 const ListItemPage = lazy(() => import('@/features/marketplace/ListItemPage').then(m => ({ default: m.ListItemPage })));
 const EditMarketplaceItemPage = lazy(() => import('@/features/marketplace/EditMarketplaceItemPage').then(m => ({ default: m.EditMarketplaceItemPage })));
 const MarketplaceItemPage = lazy(() => import('@/features/marketplace/MarketplaceItemPage').then(m => ({ default: m.MarketplaceItemPage })));
-const UnimediaPage = lazy(() => import('@/features/campus/pages/UnimediaPage').then(m => ({ default: m.UnimediaPage })));
-const MyContentPage = lazy(() => import('@/features/campus/pages/MyContentPage').then(m => ({ default: m.MyContentPage })));
-const PostDetailPage = lazy(() => import('@/features/campus/pages/PostDetailPage').then(m => ({ default: m.PostDetailPage })));
 const LostFoundPage = lazy(() => import('@/features/campus/pages/LostFoundPage').then(m => ({ default: m.LostFoundPage })));
 const MyLostFoundListingsPage = lazy(() => import('@/features/lostfound/MyLostFoundListingsPage').then(m => ({ default: m.MyLostFoundListingsPage })));
 const ReportItemPage = lazy(() => import('@/features/lostfound/ReportItemPage').then(m => ({ default: m.ReportItemPage })));
 const EditLostFoundItemPage = lazy(() => import('@/features/lostfound/EditLostFoundItemPage').then(m => ({ default: m.EditLostFoundItemPage })));
 const LostFoundItemPage = lazy(() => import('@/features/lostfound/LostFoundItemPage').then(m => ({ default: m.LostFoundItemPage })));
-const AnnouncementsPage = lazy(() => import('@/features/campus/pages/AnnouncementsPage').then(m => ({ default: m.AnnouncementsPage })));
 const FoodPage = lazy(() => import('@/features/lifestyle/pages/FoodPage').then(m => ({ default: m.FoodPage })));
 const RestaurantPage = lazy(() => import('@/features/lifestyle/pages/RestaurantPage').then(m => ({ default: m.RestaurantPage })));
 const MenuItemPage = lazy(() => import('@/features/lifestyle/pages/MenuItemPage').then(m => ({ default: m.MenuItemPage })));
@@ -44,6 +40,10 @@ const EditAccommodationPage = lazy(() => import('@/features/superuser/EditAccomm
 const AddStudyMaterialPage = lazy(() => import('@/features/superuser/AddStudyMaterialPage').then(m => ({ default: m.AddStudyMaterialPage })));
 const AdminDashboard = lazy(() => import('@/features/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
 const RequestRolePage = lazy(() => import('@/features/roles/RequestRolePage').then(m => ({ default: m.RequestRolePage })));
+const CommunitiesPage = lazy(() => import('@/features/communities/CommunitiesPage').then(m => ({ default: m.CommunitiesPage })));
+const CommunityPage = lazy(() => import('@/features/communities/CommunityPage').then(m => ({ default: m.CommunityPage })));
+const CreateCommunityPage = lazy(() => import('@/features/communities/CreateCommunityPage').then(m => ({ default: m.CreateCommunityPage })));
+const ManageCommunityPage = lazy(() => import('@/features/communities/ManageCommunityPage').then(m => ({ default: m.ManageCommunityPage })));
 
 // Public pages (no auth)
 const AboutPage = lazy(() => import('@/features/public/AboutPage').then(m => ({ default: m.AboutPage })));
@@ -96,15 +96,11 @@ export default function App() {
                             <Route path="/marketplace/list" element={<ListItemPage />} />
                             <Route path="/marketplace/edit/:id" element={<EditMarketplaceItemPage />} />
                             <Route path="/marketplace/:id" element={<MarketplaceItemPage />} />
-                            <Route path="/unimedia" element={<UnimediaPage />} />
-                            <Route path="/unimedia/my-content" element={<MyContentPage />} />
-                            <Route path="/unimedia/:id" element={<PostDetailPage />} />
                             <Route path="/lost-found" element={<LostFoundPage />} />
                             <Route path="/lost-found/my-listings" element={<MyLostFoundListingsPage />} />
                             <Route path="/lost-found/report" element={<ReportItemPage />} />
                             <Route path="/lost-found/edit/:id" element={<EditLostFoundItemPage />} />
                             <Route path="/lost-found/:id" element={<LostFoundItemPage />} />
-                            <Route path="/announcements" element={<AnnouncementsPage />} />
                             <Route path="/food" element={<FoodPage />} />
                             <Route path="/food/:id" element={<RestaurantPage />} />
                             <Route path="/food/menu/:id" element={<MenuItemPage />} />
@@ -112,6 +108,10 @@ export default function App() {
                             <Route path="/housing/:id" element={<AccommodationPage />} />
                             <Route path="/profile" element={<ProfilePage />} />
                             <Route path="/study" element={<StudyPage />} />
+                            <Route path="/communities" element={<CommunitiesPage />} />
+                            <Route path="/communities/new" element={<CreateCommunityPage />} />
+                            <Route path="/communities/:id" element={<CommunityPage />} />
+                            <Route path="/communities/:id/manage" element={<ManageCommunityPage />} />
 
                             {/* Role Request */}
                             <Route path="/request-role" element={<RequestRolePage />} />

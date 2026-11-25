@@ -1,67 +1,77 @@
 import { decode } from "hono/jwt";
 
-const SUPABASE_JWKS_URL = "https://bmoxstzvmzzvxbnuqntz.supabase.co/auth/v1/.well-known/jwks.json";
-
-// Cache keys in memory: Kid -> CryptoKey
-const keyCache: Record<string, CryptoKey> = {};
+const JWKS_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 interface JWK {
-    kid: string;
-    kty: string;
-    x: string;
-    y: string;
-    crv: string;
-    alg: string;
-    use: string;
+  kid: string;
+  kty: string;
+  x: string;
+  y: string;
+  crv: string;
+  alg: string;
+  use: string;
 }
 
 interface JWKS {
-    keys: JWK[];
+  keys: JWK[];
+}
+
+let keyCache: Record<string, CryptoKey> = {};
+let cacheFetchedAt = 0;
+
+function jwksUrl(): string {
+  const base = process.env.SUPABASE_URL?.replace(/\/+$/, "");
+  if (!base) {
+    throw new Error("SUPABASE_URL is required to verify Supabase tokens");
+  }
+  return `${base}/auth/v1/.well-known/jwks.json`;
+}
+
+async function fetchKeys(): Promise<Record<string, CryptoKey>> {
+  const response = await fetch(jwksUrl());
+  if (!response.ok) {
+    throw new Error(`Failed to fetch JWKS: ${response.statusText}`);
+  }
+
+  const jwks = (await response.json()) as JWKS;
+  const entries = await Promise.all(
+    jwks.keys.map(async (jwk) => {
+      const key = await crypto.subtle.importKey(
+        "jwk",
+        jwk,
+        { name: "ECDSA", namedCurve: "P-256" },
+        false,
+        ["verify"]
+      );
+      return [jwk.kid, key] as const;
+    })
+  );
+
+  return Object.fromEntries(entries);
 }
 
 export async function getSupabasePublicKey(token: string): Promise<CryptoKey> {
-    // 1. Decode header to find 'kid' (Key ID)
-    const { header } = decode(token);
-    const kid = header.kid;
+  const { header } = decode(token);
+  const kid = header.kid;
 
-    if (!kid) {
-        throw new Error("Token header missing 'kid'");
-    }
+  if (!kid) {
+    throw new Error("Token header missing 'kid'");
+  }
 
-    // 2. Check Cache
-    if (keyCache[kid]) {
-        return keyCache[kid];
-    }
+  const cacheFresh = Date.now() - cacheFetchedAt < JWKS_TTL_MS;
+  if (cacheFresh && keyCache[kid]) {
+    return keyCache[kid];
+  }
 
-    // 3. Fetch JWKS if not in cache
-    console.log("Fetching Supabase JWKS...");
-    const response = await fetch(SUPABASE_JWKS_URL);
-    if (!response.ok) {
-        throw new Error(`Failed to fetch JWKS: ${response.statusText}`);
-    }
-    
-    const jwks: JWKS = await response.json();
-    const jwk = jwks.keys.find(k => k.kid === kid);
+  // Refetch when the cache is stale or the token references an unknown key
+  // (Supabase rotates signing keys).
+  keyCache = await fetchKeys();
+  cacheFetchedAt = Date.now();
 
-    if (!jwk) {
-        throw new Error(`No matching key found in JWKS for kid: ${kid}`);
-    }
+  const key = keyCache[kid];
+  if (!key) {
+    throw new Error(`No matching key found in JWKS for kid: ${kid}`);
+  }
 
-    // 4. Import JWK as CryptoKey (Web Crypto API)
-    // Supabase uses EC (Elliptic Curve) keys for ES256
-    const key = await crypto.subtle.importKey(
-        "jwk",
-        jwk,
-        {
-            name: "ECDSA",
-            namedCurve: "P-256", // ES256 uses P-256
-        },
-        false, // not extractable
-        ["verify"]
-    );
-
-    // 5. Store in cache
-    keyCache[kid] = key;
-
-    return key;
+  return key;
 }

@@ -21,11 +21,12 @@ async function fetchWithAuth(endpoint: string, options: FetchOptions = {}) {
   // Handle potential double slashes
   const url = `${API_BASE}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
 
-  console.log(`Fetching: ${url}`);
-
   const response = await fetch(url, {
     ...options,
     headers,
+    // Auth-sensitive reads must never be served from a stale cache: a cached
+    // /profiles/me would bounce a just-onboarded user back to onboarding.
+    cache: 'no-store',
   });
 
   if (!response.ok) {

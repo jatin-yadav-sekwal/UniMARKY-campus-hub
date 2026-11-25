@@ -5,6 +5,8 @@ import { db } from "../db";
 import { lostFound, profiles } from "../db/schema";
 import { eq, desc, sql, and, or, ilike } from "drizzle-orm";
 import type { Env } from "../middleware/auth";
+import { getPagination } from "../utils/pagination";
+import { canModify } from "../middleware/policies";
 
 const lostFoundApp = new Hono<Env>();
 
@@ -20,12 +22,11 @@ const createReportSchema = z.object({
 // GET / - Filter by University with Pagination
 lostFoundApp.get("/", async (c) => {
   const university = c.get("universityName");
-  const limit = parseInt(c.req.query("limit") || "20");
-  const offset = parseInt(c.req.query("offset") || "0");
+  const { limit, offset } = getPagination(c);
   const type = c.req.query("type"); // "lost" | "found" | undefined
   const q = c.req.query("q");
   const reporterId = c.req.query("userId");
-  
+
   if (!university) {
     return c.json({ items: [], hasMore: false, total: 0 });
   }
@@ -39,38 +40,41 @@ lostFoundApp.get("/", async (c) => {
     conditions.push(eq(lostFound.reporterId, reporterId));
   }
   if (q) {
-    // @ts-ignore
-    conditions.push(or(ilike(lostFound.itemName, `%${q}%`), ilike(lostFound.description!, `%${q}%`)));
+    conditions.push(
+      or(ilike(lostFound.itemName, `%${q}%`), ilike(lostFound.description, `%${q}%`))!
+    );
   }
 
   // Get total count
-  const countResult = await db.select({ count: sql<number>`count(*)` })
+  const countResult = await db
+    .select({ count: sql<number>`count(*)` })
     .from(lostFound)
     .where(and(...conditions));
   const total = Number(countResult[0]?.count || 0);
 
   // Get paginated items with reporter name
-  const items = await db.select({
-    item: lostFound,
-    reporter: {
-      fullName: profiles.fullName,
-    }
-  })
-  .from(lostFound)
-  .leftJoin(profiles, eq(lostFound.reporterId, profiles.id))
-  .where(and(...conditions))
-  .orderBy(desc(lostFound.createdAt))
-  .limit(limit)
-  .offset(offset);
+  const items = await db
+    .select({
+      item: lostFound,
+      reporter: {
+        fullName: profiles.fullName,
+      },
+    })
+    .from(lostFound)
+    .leftJoin(profiles, eq(lostFound.reporterId, profiles.id))
+    .where(and(...conditions))
+    .orderBy(desc(lostFound.createdAt))
+    .limit(limit)
+    .offset(offset);
 
   const hasMore = offset + items.length < total;
-  
+
   // Flatten the response
   const flatItems = items.map(({ item, reporter }) => ({
     ...item,
-    reporterName: reporter?.fullName || "Anonymous"
+    reporterName: reporter?.fullName || "Anonymous",
   }));
-    
+
   return c.json({ items: flatItems, hasMore, total });
 });
 
@@ -84,11 +88,14 @@ lostFoundApp.post("/", zValidator("json", createReportSchema), async (c) => {
     return c.json({ error: "Unauthorized" }, 401);
   }
 
-  const newItem = await db.insert(lostFound).values({
-    ...body,
-    reporterId: userId,
-    universityName: university,
-  }).returning();
+  const newItem = await db
+    .insert(lostFound)
+    .values({
+      ...body,
+      reporterId: userId,
+      universityName: university,
+    })
+    .returning();
 
   return c.json(newItem[0], 201);
 });
@@ -97,95 +104,106 @@ lostFoundApp.post("/", zValidator("json", createReportSchema), async (c) => {
 lostFoundApp.get("/my-listings", async (c) => {
   const userId = c.get("userId");
   const university = c.get("universityName");
-  const limit = parseInt(c.req.query("limit") || "20");
-  const offset = parseInt(c.req.query("offset") || "0");
+  const { limit, offset } = getPagination(c);
 
   if (!userId || !university) {
     return c.json({ items: [], hasMore: false, total: 0 });
   }
 
   // Build where conditions
-  const conditions = [
-    eq(lostFound.universityName, university),
-    eq(lostFound.reporterId, userId)
-  ];
+  const conditions = [eq(lostFound.universityName, university), eq(lostFound.reporterId, userId)];
 
   // Get total count
-  const countResult = await db.select({ count: sql<number>`count(*)` })
+  const countResult = await db
+    .select({ count: sql<number>`count(*)` })
     .from(lostFound)
     .where(and(...conditions));
   const total = Number(countResult[0]?.count || 0);
 
   // Get paginated items
-  const items = await db.select().from(lostFound)
+  const items = await db
+    .select()
+    .from(lostFound)
     .where(and(...conditions))
     .orderBy(desc(lostFound.createdAt))
     .limit(limit)
     .offset(offset);
 
   const hasMore = offset + items.length < total;
-    
+
   return c.json({ items, hasMore, total });
 });
 
-// GET /:id - Item Details with Reporter Info
+// GET /:id - Item Details with Reporter Info (tenant-scoped)
 lostFoundApp.get("/:id", async (c) => {
   const id = c.req.param("id");
-  
-  const result = await db.select({
-    item: lostFound,
-    reporter: {
-      id: profiles.id,
-      fullName: profiles.fullName,
-      mobileNumber: profiles.mobileNumber,
-      department: profiles.department,
-    }
-  })
-  .from(lostFound)
-  .leftJoin(profiles, eq(lostFound.reporterId, profiles.id))
-  .where(eq(lostFound.id, id));
-  
+  const university = c.get("universityName");
+
+  if (!university) {
+    return c.json({ error: "Item not found" }, 404);
+  }
+
+  const result = await db
+    .select({
+      item: lostFound,
+      reporter: {
+        id: profiles.id,
+        fullName: profiles.fullName,
+        mobileNumber: profiles.mobileNumber,
+        department: profiles.department,
+      },
+    })
+    .from(lostFound)
+    .leftJoin(profiles, eq(lostFound.reporterId, profiles.id))
+    .where(and(eq(lostFound.id, id), eq(lostFound.universityName, university)));
+
   const firstResult = result[0];
   if (!firstResult || !firstResult.item) {
     return c.json({ error: "Item not found" }, 404);
   }
-  
+
   return c.json({
     ...firstResult.item,
-    reporter: firstResult.reporter
+    reporter: firstResult.reporter,
   });
 });
 
-// DELETE /:id - Delete listing
+// DELETE /:id - Delete listing (owner or admin, same university)
 lostFoundApp.delete("/:id", async (c) => {
   const id = c.req.param("id");
   const userId = c.get("userId");
+  const role = c.get("userRole");
+  const university = c.get("universityName");
 
   if (!userId) {
     return c.json({ error: "Unauthorized" }, 401);
   }
 
-  // Check ownership
-  const item = await db.select().from(lostFound)
-    .where(eq(lostFound.id, id))
+  const conditions = [eq(lostFound.id, id)];
+  if (university) {
+    conditions.push(eq(lostFound.universityName, university));
+  }
+
+  const item = await db
+    .select()
+    .from(lostFound)
+    .where(and(...conditions))
     .limit(1);
 
   if (item.length === 0) {
     return c.json({ error: "Item not found" }, 404);
   }
 
-  if (item[0] != undefined && item[0].reporterId !== userId) {
+  if (!canModify(role, userId, item[0].reporterId)) {
     return c.json({ error: "Forbidden: You can only delete your own listings" }, 403);
   }
 
-  // Delete the item
-  await db.delete(lostFound)
-    .where(eq(lostFound.id, id));
+  await db.delete(lostFound).where(eq(lostFound.id, id));
 
   return c.json({ message: "Item deleted successfully" });
 });
 
-// PATCH /:id - Update listing
+// PATCH /:id - Update listing (owner only, same university)
 lostFoundApp.patch("/:id", zValidator("json", createReportSchema.partial()), async (c) => {
   const id = c.req.param("id");
   const body = c.req.valid("json");
@@ -196,21 +214,22 @@ lostFoundApp.patch("/:id", zValidator("json", createReportSchema.partial()), asy
     return c.json({ error: "Unauthorized" }, 401);
   }
 
-  // Check ownership
-  const item = await db.select().from(lostFound)
-    .where(eq(lostFound.id, id))
+  const item = await db
+    .select()
+    .from(lostFound)
+    .where(and(eq(lostFound.id, id), eq(lostFound.universityName, university)))
     .limit(1);
 
   if (item.length === 0) {
     return c.json({ error: "Item not found" }, 404);
   }
 
-  if (item[0] != undefined &&item[0].reporterId !== userId) {
+  if (item[0].reporterId !== userId) {
     return c.json({ error: "Forbidden: You can only edit your own listings" }, 403);
   }
 
-  // Update the item
-  const updatedItem = await db.update(lostFound)
+  const updatedItem = await db
+    .update(lostFound)
     .set({
       ...body,
       updatedAt: new Date(),

@@ -1,4 +1,15 @@
-import { pgTable, uuid, text, boolean, numeric, integer, timestamp } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  uuid,
+  text,
+  boolean,
+  numeric,
+  integer,
+  timestamp,
+  index,
+  uniqueIndex,
+  jsonb,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // --- Tables ---
@@ -16,7 +27,9 @@ export const profiles = pgTable("profiles", {
   onboardingCompleted: boolean("onboarding_completed").default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (table) => [
+  index("profiles_university_idx").on(table.universityName),
+]);
 
 export const roleRequests = pgTable("role_requests", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -28,7 +41,50 @@ export const roleRequests = pgTable("role_requests", {
   reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (table) => [
+  index("role_requests_status_created_idx").on(table.status, table.createdAt),
+]);
+
+/**
+ * Scoped capability grants. A row grants `permission` to `userId` either
+ * globally or limited to one university/department. `expires_at` NULL means
+ * no expiry. Admins (`role = userX`) bypass these rows entirely.
+ */
+export const userPermissions = pgTable("user_permissions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  permission: text("permission").notNull(),
+  scopeType: text("scope_type", { enum: ["global", "university", "department"] })
+    .notNull()
+    .default("global"),
+  scopeValue: text("scope_value"),
+  grantedBy: uuid("granted_by").references(() => profiles.id, { onDelete: "set null" }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("user_permissions_lookup_idx").on(table.userId, table.permission),
+  uniqueIndex("user_permissions_grant_idx").on(
+    table.userId,
+    table.permission,
+    table.scopeType,
+    table.scopeValue
+  ),
+]);
+
+/** Append-only trail for privileged actions (approvals, deletes, grants). */
+export const auditLog = pgTable("audit_log", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  actorId: uuid("actor_id").references(() => profiles.id, { onDelete: "set null" }),
+  action: text("action").notNull(),
+  entityType: text("entity_type").notNull(),
+  entityId: text("entity_id"),
+  metadata: jsonb("metadata"),
+  universityName: text("university_name"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("audit_log_created_idx").on(table.createdAt),
+  index("audit_log_entity_idx").on(table.entityType, table.entityId),
+]);
 
 export const marketplaceItems = pgTable("marketplace_items", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -44,7 +100,10 @@ export const marketplaceItems = pgTable("marketplace_items", {
   universityName: text("university_name").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (table) => [
+  index("marketplace_items_university_created_idx").on(table.universityName, table.createdAt),
+  index("marketplace_items_seller_idx").on(table.sellerId),
+]);
 
 export const lostFound = pgTable("lost_found", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -58,7 +117,10 @@ export const lostFound = pgTable("lost_found", {
   universityName: text("university_name").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (table) => [
+  index("lost_found_university_created_idx").on(table.universityName, table.createdAt),
+  index("lost_found_reporter_idx").on(table.reporterId),
+]);
 
 export const announcements = pgTable("announcements", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -66,7 +128,9 @@ export const announcements = pgTable("announcements", {
   content: text("content").notNull(),
   universityName: text("university_name").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (table) => [
+  index("announcements_university_created_idx").on(table.universityName, table.createdAt),
+]);
 
 export const socialPosts = pgTable("social_posts", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -83,14 +147,20 @@ export const socialPosts = pgTable("social_posts", {
   universityName: text("university_name").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (table) => [
+  index("social_posts_university_created_idx").on(table.universityName, table.createdAt),
+  index("social_posts_author_idx").on(table.authorId),
+]);
 
 export const postLikes = pgTable("post_likes", {
   id: uuid("id").defaultRandom().primaryKey(),
   postId: uuid("post_id").notNull().references(() => socialPosts.id, { onDelete: 'cascade' }),
   userId: uuid("user_id").notNull().references(() => profiles.id, { onDelete: 'cascade' }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (table) => [
+  // One like per user per post. Deduplicate existing rows before migrating.
+  uniqueIndex("post_likes_post_user_idx").on(table.postId, table.userId),
+]);
 
 export const comments = pgTable("comments", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -98,7 +168,70 @@ export const comments = pgTable("comments", {
   userId: uuid("user_id").notNull().references(() => profiles.id, { onDelete: 'cascade' }),
   content: text("content").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (table) => [
+  index("comments_post_created_idx").on(table.postId, table.createdAt),
+]);
+
+// --- Communities ---
+
+/**
+ * University-scoped interest groups. Replaces the retired Unimedia feed.
+ * `memberCount` / `postCount` are maintained by the API on join/leave and
+ * post create/delete so listings stay cheap.
+ */
+export const communities = pgTable("communities", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  category: text("category", {
+    enum: ["academic", "tech", "sports", "cultural", "housing", "placement", "other"],
+  }).notNull().default("other"),
+  universityName: text("university_name").notNull(),
+  createdBy: uuid("created_by").references(() => profiles.id, { onDelete: "set null" }),
+  memberCount: integer("member_count").notNull().default(0),
+  postCount: integer("post_count").notNull().default(0),
+  isArchived: boolean("is_archived").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("communities_university_created_idx").on(table.universityName, table.createdAt),
+  index("communities_university_category_idx").on(table.universityName, table.category),
+  index("communities_creator_idx").on(table.createdBy),
+]);
+
+export const communityMembers = pgTable("community_members", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  communityId: uuid("community_id").notNull().references(() => communities.id, { onDelete: "cascade" }),
+  userId: uuid("user_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  role: text("role", { enum: ["member", "moderator"] }).notNull().default("member"),
+  joinedAt: timestamp("joined_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  uniqueIndex("community_members_unique_idx").on(table.communityId, table.userId),
+  index("community_members_user_idx").on(table.userId),
+]);
+
+export const communityPosts = pgTable("community_posts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  communityId: uuid("community_id").notNull().references(() => communities.id, { onDelete: "cascade" }),
+  authorId: uuid("author_id").references(() => profiles.id, { onDelete: "set null" }),
+  content: text("content").notNull(),
+  imageUrl: text("image_url"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("community_posts_community_created_idx").on(table.communityId, table.createdAt),
+  index("community_posts_author_idx").on(table.authorId),
+]);
+
+export const communityComments = pgTable("community_comments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  postId: uuid("post_id").notNull().references(() => communityPosts.id, { onDelete: "cascade" }),
+  authorId: uuid("author_id").references(() => profiles.id, { onDelete: "set null" }),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("community_comments_post_created_idx").on(table.postId, table.createdAt),
+]);
 
 // --- Food & Restaurants ---
 
@@ -119,7 +252,10 @@ export const foodListings = pgTable("food_listings", {
   location: text("location").notNull(),
   universityName: text("university_name").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (table) => [
+  index("food_listings_university_created_idx").on(table.universityName, table.createdAt),
+  index("food_listings_owner_idx").on(table.ownerId),
+]);
 
 export const menuItems = pgTable("menu_items", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -134,7 +270,9 @@ export const menuItems = pgTable("menu_items", {
   rating: numeric("rating").default("0"),
   reviewCount: integer("review_count").default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (table) => [
+  index("menu_items_restaurant_idx").on(table.restaurantId),
+]);
 
 // --- Accommodation ---
 
@@ -157,7 +295,10 @@ export const accommodationListings = pgTable("accommodation_listings", {
   contact: text("contact"),
   universityName: text("university_name").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (table) => [
+  index("accommodation_listings_university_created_idx").on(table.universityName, table.createdAt),
+  index("accommodation_listings_owner_idx").on(table.ownerId),
+]);
 
 // --- Study Materials ---
 
@@ -175,7 +316,14 @@ export const studyMaterials = pgTable("study_materials", {
   uploadedBy: uuid("uploaded_by").references(() => profiles.id, { onDelete: "set null" }),
   universityName: text("university_name").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (table) => [
+  index("study_materials_university_filter_idx").on(
+    table.universityName,
+    table.department,
+    table.year
+  ),
+  index("study_materials_uploader_idx").on(table.uploadedBy),
+]);
 
 // --- Relations ---
 
@@ -189,11 +337,19 @@ export const profilesRelations = relations(profiles, ({ many }) => ({
   foodListings: many(foodListings),
   accommodationListings: many(accommodationListings),
   studyMaterials: many(studyMaterials),
+  permissions: many(userPermissions),
 }));
 
 export const roleRequestsRelations = relations(roleRequests, ({ one }) => ({
   user: one(profiles, {
     fields: [roleRequests.userId],
+    references: [profiles.id],
+  }),
+}));
+
+export const userPermissionsRelations = relations(userPermissions, ({ one }) => ({
+  user: one(profiles, {
+    fields: [userPermissions.userId],
     references: [profiles.id],
   }),
 }));
@@ -268,6 +424,51 @@ export const accommodationListingsRelations = relations(accommodationListings, (
 export const studyMaterialsRelations = relations(studyMaterials, ({ one }) => ({
   uploader: one(profiles, {
     fields: [studyMaterials.uploadedBy],
+    references: [profiles.id],
+  }),
+}));
+
+// --- Communities relations ---
+
+export const communitiesRelations = relations(communities, ({ one, many }) => ({
+  creator: one(profiles, {
+    fields: [communities.createdBy],
+    references: [profiles.id],
+  }),
+  members: many(communityMembers),
+  posts: many(communityPosts),
+}));
+
+export const communityMembersRelations = relations(communityMembers, ({ one }) => ({
+  community: one(communities, {
+    fields: [communityMembers.communityId],
+    references: [communities.id],
+  }),
+  user: one(profiles, {
+    fields: [communityMembers.userId],
+    references: [profiles.id],
+  }),
+}));
+
+export const communityPostsRelations = relations(communityPosts, ({ one, many }) => ({
+  community: one(communities, {
+    fields: [communityPosts.communityId],
+    references: [communities.id],
+  }),
+  author: one(profiles, {
+    fields: [communityPosts.authorId],
+    references: [profiles.id],
+  }),
+  comments: many(communityComments),
+}));
+
+export const communityCommentsRelations = relations(communityComments, ({ one }) => ({
+  post: one(communityPosts, {
+    fields: [communityComments.postId],
+    references: [communityPosts.id],
+  }),
+  author: one(profiles, {
+    fields: [communityComments.authorId],
     references: [profiles.id],
   }),
 }));

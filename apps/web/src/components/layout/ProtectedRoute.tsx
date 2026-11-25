@@ -21,21 +21,25 @@ export function ProtectedRoute({ requireOnboarding = true }: { requireOnboarding
             api.get('/profiles/me')
                 .then((profile: any) => {
                     if (cancelled) return;
-                    if (profile?.onboardingCompleted) {
-                        setOnboardingComplete(true);
-                    } else {
-                        setOnboardingComplete(false);
-                    }
+                    // Single source of truth: the API always answers 200 here.
+                    // Returning users have onboardingCompleted === true.
+                    setOnboardingComplete(profile?.onboardingCompleted === true);
                 })
                 .catch((err) => {
                     if (cancelled) return;
-                    console.error("Failed to check onboarding status:", err);
+                    const message = String(err?.message ?? '');
 
-                    // If it's a network error/CORS, show an error state instead of redirecting or silently failing
-                    if (err.message && (err.message.includes("Network Error") || err.message.includes("Failed to fetch"))) {
+                    // Network/CORS problems deserve their own screen.
+                    if (
+                        message.includes('Network') ||
+                        message.includes('Failed to fetch') ||
+                        message.includes('Connection') ||
+                        message.includes('unreachable')
+                    ) {
                         setError("Connection Error: Unable to reach the server. Please check your connection or try again later.");
                     } else {
-                        // 404/401 -> Onboarding not completed
+                        // Any other failure (e.g. an older API returning 403)
+                        // means we cannot confirm onboarding: send them there.
                         setOnboardingComplete(false);
                     }
                 })

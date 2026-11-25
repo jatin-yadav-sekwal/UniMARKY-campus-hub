@@ -21,14 +21,16 @@
 
 | Module | Description |
 |--------|-------------|
-| **📲 Unimedia** | Social feed with posts, events & announcements. Like, comment, and share campus updates. |
 | **🛒 Marketplace** | Buy and sell items within your university — textbooks, electronics, furniture, and more. |
 | **🔍 Lost & Found** | Report and discover lost or found items on campus with image uploads and status tracking. |
 | **🍔 Food** | Browse nearby restaurants, view menus with prices, ratings, and dietary tags. |
 | **🏠 Housing** | Explore PGs, hostels, and hotels near campus — with amenities, pricing, and reviews. |
 | **📚 Study Materials** | Share and access notes, past papers, and resources for your courses. |
-| **📢 Announcements** | University-wide announcements from admins and superusers. |
 | **👤 Profiles** | User profiles with university verification, role requests, and onboarding flow. |
+
+> The legacy Unimedia feed and Announcements page are retired. Their endpoints
+> now return `410 Gone` for writes and serve the old content read-only as an
+> archive.
 
 ---
 
@@ -43,11 +45,12 @@
 - **React Router v7** — client-side routing with lazy loading
 
 ### Backend (`apps/api`)
-- **Hono** — ultra-fast web framework (runs on Bun)
+- **Hono** — ultra-fast web framework on Node (`@hono/node-server`, run with `tsx`)
 - **Drizzle ORM** — type-safe SQL with PostgreSQL
 - **Supabase** — hosted PostgreSQL database + Auth + Storage
 - **Zod** — request validation
 - **JWT** — Supabase JWKS-based authentication middleware
+- **Policy layer** — scoped permissions (`user_permissions`) + admin (`userX`) checks, with an `audit_log` trail
 
 ---
 
@@ -73,8 +76,9 @@ unmarky/
 │   │   │   │   ├── dashboard.ts    # Dashboard stats
 │   │   │   │   └── roleRequests.ts # Role management
 │   │   │   ├── middleware/
-│   │   │   │   ├── auth.ts         # JWT auth middleware
-│   │   │   │   └── roleGuard.ts    # Role-based access
+│   │   │   │   ├── auth.ts         # JWT auth + onboarding gate
+│   │   │   │   ├── policies.ts     # isAdmin / canModify / hasPermission
+│   │   │   │   └── permission.ts   # requireAdmin / requirePermission
 │   │   │   └── index.ts       # Server entry point
 │   │   └── drizzle/            # Generated migrations
 │   │
@@ -85,7 +89,7 @@ unmarky/
 │           │   ├── ui/         # shadcn/ui primitives
 │           │   └── auth/       # Auth form components
 │           ├── features/
-│           │   ├── campus/     # Unimedia, Announcements, Lost & Found
+│           │   ├── campus/     # Lost & Found (legacy feed is archived)
 │           │   ├── marketplace/ # Marketplace pages
 │           │   ├── lifestyle/  # Food & Housing pages
 │           │   ├── landing/    # Landing page
@@ -106,7 +110,7 @@ unmarky/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- **Bun** (v1.0+) or **Node.js** (v18+)
+- **Node.js** (v18+) and npm (the API is a Node service — there is no Flutter app)
 - **PostgreSQL** database (or a [Supabase](https://supabase.com) project)
 
 ### 1. Clone the repo
@@ -115,41 +119,47 @@ git clone https://github.com/jatin-yadav-sekwal/UniMARKY-campus-hub.git
 cd UniMARKY-campus-hub
 ```
 
-### 2. Set up the backend
+### 2. Install dependencies (from the repo root)
+This is an npm workspaces monorepo — one install covers both web and API.
 ```bash
-cd apps/api
-bun install
-
-# Create .env file
-cp .env.example .env
-# Fill in your DATABASE_URL and SUPABASE_JWT_SECRET
+npm install
 ```
 
-### 3. Run database migrations
+### 3. Configure the backend (`apps/api/.env`)
 ```bash
-bun run db:generate
-bun run db:migrate
-bun run db:seed        # Optional: seed sample data
+cp apps/api/.env.example apps/api/.env
+# Fill in DATABASE_URL and SUPABASE_URL
+```
+- `DATABASE_URL` — Supabase Postgres. Runtime may use the pooled URL (port `6543`).
+- `SUPABASE_URL` — project URL; the API derives the JWKS endpoint from it.
+
+### 4. Run database migrations
+```bash
+# Point DATABASE_URL at the DIRECT connection (port 5432) first.
+# Collapse duplicate post_likes so the new unique index applies:
+psql "$DATABASE_URL" -f apps/api/scripts/pre-migrate.sql
+
+npm run db:generate
+npm run db:migrate
+npm run db:seed --workspace api   # Optional: sample data
 ```
 
-### 4. Set up the frontend
+### 5. Configure the frontend (`apps/web/.env`)
 ```bash
-cd ../web
-bun install
-
-# Create .env file with your Supabase credentials
+cp apps/web/.env.example apps/web/.env
+# VITE_API_URL=/api                       # same-origin; Vite proxies to :3000 in dev
 # VITE_SUPABASE_URL=your_supabase_url
 # VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-# VITE_API_URL=http://localhost:3000/api   (for production, use deployed URL)
+# VITE_WEB_URL=http://localhost:5173
 ```
 
-### 5. Start development servers
+### 6. Start development servers
 ```bash
-# Terminal 1 — Backend
-cd apps/api && bun dev     # Starts on http://localhost:3000
+# Terminal 1 — Backend  → http://localhost:3000
+npm run dev:api
 
-# Terminal 2 — Frontend
-cd apps/web && bun dev     # Starts on http://localhost:5173
+# Terminal 2 — Frontend → http://localhost:5173
+npm run dev:web
 ```
 
 ---
@@ -159,15 +169,18 @@ cd apps/web && bun dev     # Starts on http://localhost:5173
 ### Backend (`apps/api/.env`)
 | Variable | Description |
 |----------|-------------|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `PORT` | Server port (default: `3000`) |
+| `DATABASE_URL` | PostgreSQL connection string (pooled `6543` at runtime; direct `5432` for migrations) |
+| `SUPABASE_URL` | Supabase project URL — used to fetch the JWKS for token verification |
+| `PORT` | Server port (default: `3000`; Render sets this) |
+| `CORS_ORIGINS` | Comma-separated origins allowed to call the API directly (not needed for the same-origin `/api` rewrite) |
 
 ### Frontend (`apps/web/.env`)
 | Variable | Description |
 |----------|-------------|
+| `VITE_API_URL` | API base. Use `/api` (same-origin via the Vercel rewrite / Vite dev proxy) |
 | `VITE_SUPABASE_URL` | Supabase project URL |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anonymous key |
-| `VITE_API_URL` | Backend API URL (default: `http://localhost:3000/api`) |
+| `VITE_WEB_URL` | Public web origin, used for OAuth redirects |
 
 ---
 
@@ -183,11 +196,24 @@ cd apps/web && bun dev     # Starts on http://localhost:5173
 
 ## 🌐 Deployment
 
-| Layer | Recommended (Free) |
-|-------|-------------------|
-| Frontend | [Vercel](https://vercel.com) |
-| Backend | [Render](https://render.com) |
-| Database | [Supabase](https://supabase.com) (already included) |
+| Layer | Platform |
+|-------|----------|
+| Frontend | [Vercel](https://vercel.com) — static SPA |
+| Backend | [Render](https://render.com) — Node web service |
+| Database | [Supabase](https://supabase.com) |
+
+**Frontend (Vercel).** `apps/web/vercel.json` rewrites `/api/:path*` to the
+Render API and falls back to `index.html` for the SPA. The browser therefore
+talks to a single origin and CORS is not exercised. Set the `VITE_*` variables
+in the Vercel project.
+
+**Backend (Render).** `render.yaml` at the repo root defines the service:
+root install, `npm run start --workspace api`, health check `/healthz`. Set
+`DATABASE_URL`, `SUPABASE_URL` and (optionally) `CORS_ORIGINS` in the Render
+dashboard.
+
+**Migrations.** Run `apps/api/scripts/pre-migrate.sql` once against the direct
+`DATABASE_URL`, then `npm run db:migrate` before deploying.
 
 ---
 

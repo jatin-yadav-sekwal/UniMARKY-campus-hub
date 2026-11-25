@@ -1,7 +1,7 @@
 import { m, AnimatePresence } from "motion/react";
 import {
     Menu, X, ChevronDown, User, LogOut, LayoutDashboard, UserCircle, Sparkles,
-    ShoppingBag, MapPin, Newspaper, Coffee, Home, Crown, ShieldCheck, Shield, GraduationCap, LayoutGrid
+    ShoppingBag, MapPin, Coffee, Home, Crown, ShieldCheck, Shield, GraduationCap, Users
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -29,9 +29,9 @@ const navLinks = [
 
 const appRoutes = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Communities", href: "/communities", icon: Users },
     { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
     { name: "Lost & Found", href: "/lost-found", icon: MapPin },
-    { name: "Unimedia", href: "/unimedia", icon: Newspaper },
     { name: "Study", href: "/study", icon: GraduationCap },
     { name: "Food", href: "/food", icon: Coffee },
     { name: "Housing", href: "/housing", icon: Home },
@@ -128,15 +128,6 @@ function NavUserDropdown({ firstName, onLogout }: UserDropdownProps) {
                         <UserCircle className="h-3.5 w-3.5" />
                     </div>
                     <span className="font-semibold">Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                    onClick={() => navigate('/unimedia/my-content')}
-                    className="cursor-pointer rounded-xl gap-2.5 py-1.5 text-xs text-[#24324A] hover:bg-[#FFF7EF] transition-colors"
-                >
-                    <div className="p-1 rounded-lg bg-purple-50 text-purple-600">
-                        <LayoutGrid className="h-3.5 w-3.5" />
-                    </div>
-                    <span className="font-semibold">My Content</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-[#F1E7DF]" />
                 <DropdownMenuItem
@@ -267,16 +258,6 @@ function MobileNavDrawer({
                                             >
                                                 <UserCircle className="h-4 w-4 text-[#20BFA3]" />
                                                 Profile
-                                            </Link>
-                                        </m.div>
-                                        <m.div variants={itemVariants}>
-                                            <Link
-                                                to="/unimedia/my-content"
-                                                onClick={onClose}
-                                                className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-[#24324A] hover:bg-[#FFF7EF] transition-colors"
-                                            >
-                                                <LayoutGrid className="h-4 w-4 text-[#FF5A36]" />
-                                                My Content
                                             </Link>
                                         </m.div>
                                     </div>

@@ -3,30 +3,33 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/node": "^25.2.0",
-    "dotenv": "^17.2.3",
-    "drizzle-kit": "^0.31.8",
-    "tsx": "^4.21.0"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
   "scripts": {
     "dev": "tsx watch server/index.ts",
+    "start": "tsx server/index.ts",
+    "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx server/db/seed.ts"
   },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^25.2.0",
+    "drizzle-kit": "^0.31.8"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
   "dependencies": {
+    "@hono/node-server": "^1.19.9",
     "@hono/zod-validator": "^0.7.6",
     "@lucia-auth/adapter-drizzle": "^1.1.0",
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.3",
+    "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",
     "hono": "^4.11.7",
     "postgres": "^3.4.8",
+    "tsx": "^4.21.0",
     "zod": "^4.3.6"
   }
 }

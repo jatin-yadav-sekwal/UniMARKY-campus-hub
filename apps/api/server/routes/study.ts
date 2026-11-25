@@ -2,7 +2,9 @@ import { Hono } from "hono";
 import { db } from "../db";
 import { studyMaterials, profiles } from "../db/schema";
 import { eq, and, desc } from "drizzle-orm";
-import { requireRole } from "../middleware/roleGuard";
+import { requirePermission } from "../middleware/permission";
+import { canModify } from "../middleware/policies";
+import { getPagination } from "../utils/pagination";
 import type { Env } from "../middleware/auth";
 
 const studyApp = new Hono<Env>();
@@ -65,14 +67,15 @@ studyApp.get("/departments", (c) => {
 });
 
 // GET /mine — fetch study materials uploaded by the current user
-studyApp.get("/mine", requireRole("superuser", "userX"), async (c) => {
+studyApp.get("/mine", requirePermission("study.manage"), async (c) => {
   const userId = c.get("userId");
 
   const results = await db
     .select()
     .from(studyMaterials)
     .where(eq(studyMaterials.uploadedBy, userId))
-    .orderBy(desc(studyMaterials.createdAt));
+    .orderBy(desc(studyMaterials.createdAt))
+    .limit(200);
 
   return c.json(results);
 });
@@ -83,6 +86,7 @@ studyApp.get("/", async (c) => {
   const year = c.req.query("year");
   const category = c.req.query("category");
   const universityName = c.get("universityName");
+  const { limit, offset } = getPagination(c, 50);
 
   if (!department || !year) {
     return c.json({ error: "department and year query params are required" }, 400);
@@ -115,13 +119,15 @@ studyApp.get("/", async (c) => {
     .from(studyMaterials)
     .leftJoin(profiles, eq(studyMaterials.uploadedBy, profiles.id))
     .where(and(...conditions))
-    .orderBy(desc(studyMaterials.createdAt));
+    .orderBy(desc(studyMaterials.createdAt))
+    .limit(limit)
+    .offset(offset);
 
   return c.json(results);
 });
 
-// POST / — create study material (superuser / userX only)
-studyApp.post("/", requireRole("superuser", "userX"), async (c) => {
+// POST / — create study material (publishers with study.manage)
+studyApp.post("/", requirePermission("study.manage"), async (c) => {
   const userId = c.get("userId");
   const universityName = c.get("universityName");
   const body = await c.req.json();
@@ -165,23 +171,23 @@ studyApp.post("/", requireRole("superuser", "userX"), async (c) => {
   return c.json(created, 201);
 });
 
-// DELETE /:id — delete a study material (owner or userX)
-studyApp.delete("/:id", requireRole("superuser", "userX"), async (c) => {
+// DELETE /:id — delete a study material (owner or admin, same university)
+studyApp.delete("/:id", requirePermission("study.manage"), async (c) => {
   const id = c.req.param("id");
   const userId = c.get("userId");
   const userRole = c.get("userRole");
+  const university = c.get("universityName");
 
   const [material] = await db
     .select()
     .from(studyMaterials)
-    .where(eq(studyMaterials.id, id));
+    .where(and(eq(studyMaterials.id, id), eq(studyMaterials.universityName, university)));
 
   if (!material) {
     return c.json({ error: "Study material not found" }, 404);
   }
 
-  // Only owner or userX can delete
-  if (material.uploadedBy !== userId && userRole !== "userX") {
+  if (!canModify(userRole, userId, material.uploadedBy)) {
     return c.json({ error: "Forbidden — you can only delete your own materials" }, 403);
   }
 

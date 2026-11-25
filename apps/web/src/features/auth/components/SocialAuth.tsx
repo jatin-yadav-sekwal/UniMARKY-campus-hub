@@ -13,8 +13,9 @@ export function SocialAuth() {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    // redirectTo: import.meta.env.VITE_WEB_URL
-                    redirectTo: `${import.meta.env.VITE_WEB_URL}/dashboard`
+                    // Land back on /auth so the shared gate decides between
+                    // onboarding (new user) and the app (returning user).
+                    redirectTo: `${window.location.origin}/auth`,
                 }
             });
             if (error) throw error;

@@ -13,8 +13,8 @@ import {
     ArrowRight,
     TrendingUp,
     Sparkles,
-    Newspaper,
-    Plus
+    Plus,
+    Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -41,14 +41,6 @@ const quickAccessItems = [
         shadowColor: "shadow-emerald-500/20"
     },
     {
-        title: "Unimedia",
-        href: "/unimedia",
-        desc: "Campus social feed",
-        icon: Newspaper,
-        gradient: "from-pink-500 to-rose-600",
-        shadowColor: "shadow-rose-500/20"
-    },
-    {
         title: "Study",
         href: "/study",
         desc: "Academic resources",
@@ -71,6 +63,14 @@ const quickAccessItems = [
         icon: Home,
         gradient: "from-purple-500 to-indigo-600",
         shadowColor: "shadow-purple-500/20"
+    },
+    {
+        title: "Communities",
+        href: "/communities",
+        desc: "Clubs & groups",
+        icon: Users,
+        gradient: "from-rose-500 to-pink-600",
+        shadowColor: "shadow-rose-500/20"
     },
 ];
 

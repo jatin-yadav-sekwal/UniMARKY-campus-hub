@@ -1,0 +1,33 @@
+# Render Blueprint for the UniMARKY API (web service).
+# Docs: https://render.com/docs/blueprint-spec
+#
+# The API is a plain Node service (Hono) started with `tsx`. The web app on
+# Vercel proxies /api/* to this service, so the browser talks to a single
+# origin and CORS is not exercised in the normal flow.
+services:
+  - type: web
+    name: unimarky-campus-hub
+    runtime: node
+    plan: free
+    # Pick the region closest to your Supabase project.
+    region: singapore
+    buildCommand: npm install --no-audit --no-fund
+    startCommand: npm run start --workspace api
+    # Public, unauthenticated liveness probe (see server/index.ts).
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Supabase Postgres. Runtime can use the pooled URL (port 6543,
+      # `prepare:false`). Run migrations separately against the direct URL.
+      - key: DATABASE_URL
+        sync: false
+      # Supabase project URL — the API derives the JWKS endpoint from it.
+      - key: SUPABASE_URL
+        sync: false
+      # Comma-separated browser origins allowed to call the API directly.
+      # Leave empty when the web app only reaches the API through the
+      # Vercel /api rewrite (same-origin requests send no Origin header).
+      - key: CORS_ORIGINS
+        sync: false

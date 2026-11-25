@@ -5,6 +5,8 @@ import { db } from "../db";
 import { marketplaceItems, profiles } from "../db/schema";
 import { eq, desc, sql, and } from "drizzle-orm";
 import type { Env } from "../middleware/auth";
+import { getPagination } from "../utils/pagination";
+import { canModify } from "../middleware/policies";
 
 const marketplaceApp = new Hono<Env>();
 
@@ -23,11 +25,10 @@ const createItemSchema = z.object({
 // GET / - Context-Aware Fetch with Pagination
 marketplaceApp.get("/", async (c) => {
   const university = c.get("universityName");
-  const limit = parseInt(c.req.query("limit") || "20");
-  const offset = parseInt(c.req.query("offset") || "0");
+  const { limit, offset } = getPagination(c);
   const category = c.req.query("category");
   const sellerId = c.req.query("userId");
-  
+
   if (!university) {
     return c.json({ items: [], hasMore: false, total: 0 });
   }
@@ -42,20 +43,23 @@ marketplaceApp.get("/", async (c) => {
   }
 
   // Get total count
-  const countResult = await db.select({ count: sql<number>`count(*)` })
+  const countResult = await db
+    .select({ count: sql<number>`count(*)` })
     .from(marketplaceItems)
     .where(and(...conditions));
   const total = Number(countResult[0]?.count || 0);
 
   // Get paginated items
-  const items = await db.select().from(marketplaceItems)
+  const items = await db
+    .select()
+    .from(marketplaceItems)
     .where(and(...conditions))
     .orderBy(desc(marketplaceItems.createdAt))
     .limit(limit)
     .offset(offset);
 
   const hasMore = offset + items.length < total;
-    
+
   return c.json({ items, hasMore, total });
 });
 
@@ -69,12 +73,15 @@ marketplaceApp.post("/", zValidator("json", createItemSchema), async (c) => {
     return c.json({ error: "Unauthorized or missing profile context" }, 401);
   }
 
-  const newItem = await db.insert(marketplaceItems).values({
-    ...body,
-    sellerId: userId,
-    universityName: university,
-    price: body.price,
-  }).returning();
+  const newItem = await db
+    .insert(marketplaceItems)
+    .values({
+      ...body,
+      sellerId: userId,
+      universityName: university,
+      price: body.price,
+    })
+    .returning();
 
   return c.json(newItem[0], 201);
 });
@@ -83,8 +90,7 @@ marketplaceApp.post("/", zValidator("json", createItemSchema), async (c) => {
 marketplaceApp.get("/my-listings", async (c) => {
   const userId = c.get("userId");
   const university = c.get("universityName");
-  const limit = parseInt(c.req.query("limit") || "20");
-  const offset = parseInt(c.req.query("offset") || "0");
+  const { limit, offset } = getPagination(c);
 
   if (!userId || !university) {
     return c.json({ items: [], hasMore: false, total: 0 });
@@ -93,110 +99,131 @@ marketplaceApp.get("/my-listings", async (c) => {
   // Build where conditions
   const conditions = [
     eq(marketplaceItems.universityName, university),
-    eq(marketplaceItems.sellerId, userId)
+    eq(marketplaceItems.sellerId, userId),
   ];
 
   // Get total count
-  const countResult = await db.select({ count: sql<number>`count(*)` })
+  const countResult = await db
+    .select({ count: sql<number>`count(*)` })
     .from(marketplaceItems)
     .where(and(...conditions));
   const total = Number(countResult[0]?.count || 0);
 
   // Get paginated items
-  const items = await db.select().from(marketplaceItems)
+  const items = await db
+    .select()
+    .from(marketplaceItems)
     .where(and(...conditions))
     .orderBy(desc(marketplaceItems.createdAt))
     .limit(limit)
     .offset(offset);
 
   const hasMore = offset + items.length < total;
-    
+
   return c.json({ items, hasMore, total });
 });
 
-// GET /:id - Item Details with Seller Info
+// GET /:id - Item Details with Seller Info (tenant-scoped)
 marketplaceApp.get("/:id", async (c) => {
   const id = c.req.param("id");
-  
-  // Get item with seller details
-  const result : any = await db.select({
-    item: marketplaceItems,
-    seller: {
-      id: profiles.id,
-      fullName: profiles.fullName,
-      mobileNumber: profiles.mobileNumber,
-      department: profiles.department,
-      isVerified: profiles.isVerified,
-    }
-  })
-  .from(marketplaceItems)
-  .leftJoin(profiles, eq(marketplaceItems.sellerId, profiles.id))
-  .where(eq(marketplaceItems.id, id));
-  
+  const university = c.get("universityName");
+
+  if (!university) {
+    return c.json({ error: "Item not found" }, 404);
+  }
+
+  const result = await db
+    .select({
+      item: marketplaceItems,
+      seller: {
+        id: profiles.id,
+        fullName: profiles.fullName,
+        mobileNumber: profiles.mobileNumber,
+        department: profiles.department,
+        isVerified: profiles.isVerified,
+      },
+    })
+    .from(marketplaceItems)
+    .leftJoin(profiles, eq(marketplaceItems.sellerId, profiles.id))
+    .where(and(eq(marketplaceItems.id, id), eq(marketplaceItems.universityName, university)));
+
   if (result.length === 0) {
     return c.json({ error: "Item not found" }, 404);
   }
-  
+
   return c.json({
     ...result[0].item,
-    seller: result[0].seller
+    seller: result[0].seller,
   });
 });
 
-// DELETE /:id - Delete listing
+// DELETE /:id - Delete listing (owner or admin, same university)
 marketplaceApp.delete("/:id", async (c) => {
   const id = c.req.param("id");
   const userId = c.get("userId");
+  const role = c.get("userRole");
+  const university = c.get("universityName");
 
   if (!userId) {
     return c.json({ error: "Unauthorized" }, 401);
   }
 
-  // Check ownership
-  const item = await db.select().from(marketplaceItems)
-    .where(eq(marketplaceItems.id, id))
+  const conditions = [eq(marketplaceItems.id, id)];
+  if (university) {
+    conditions.push(eq(marketplaceItems.universityName, university));
+  }
+
+  const item = await db
+    .select()
+    .from(marketplaceItems)
+    .where(and(...conditions))
     .limit(1);
 
   if (item.length === 0) {
     return c.json({ error: "Item not found" }, 404);
   }
 
-  if (item[0] != undefined && item[0].sellerId !== userId) {
+  if (!canModify(role, userId, item[0].sellerId)) {
     return c.json({ error: "Forbidden: You can only delete your own listings" }, 403);
   }
 
-  // Delete the item
-  await db.delete(marketplaceItems)
-    .where(eq(marketplaceItems.id, id));
+  await db.delete(marketplaceItems).where(eq(marketplaceItems.id, id));
 
   return c.json({ message: "Item deleted successfully" });
 });
 
-// PATCH /:id - Update listing
+// PATCH /:id - Update listing (owner only, same university)
 marketplaceApp.patch("/:id", zValidator("json", createItemSchema.partial()), async (c) => {
   const id = c.req.param("id");
   const body = c.req.valid("json");
   const userId = c.get("userId");
+  const university = c.get("universityName");
 
   if (!userId) {
     return c.json({ error: "Unauthorized" }, 401);
   }
 
-  // Check ownership
-  const item = await db.select().from(marketplaceItems)
-    .where(eq(marketplaceItems.id, id))
+  const conditions = [eq(marketplaceItems.id, id)];
+  if (university) {
+    conditions.push(eq(marketplaceItems.universityName, university));
+  }
+
+  const item = await db
+    .select()
+    .from(marketplaceItems)
+    .where(and(...conditions))
     .limit(1);
 
   if (item.length === 0) {
     return c.json({ error: "Item not found" }, 404);
   }
 
-  if (item[0] != undefined &&item[0].sellerId !== userId) {
+  if (item[0].sellerId !== userId) {
     return c.json({ error: "Forbidden: You can only edit your own listings" }, 403);
   }
 
-  // Update the item
-  const updatedItem = await db.update(marketplaceItems)
+  const updatedItem = await db
+    .update(marketplaceItems)
     .set({
       ...body,
       updatedAt: new Date(),

@@ -4,6 +4,14 @@
     "apps/web",
     "apps/api"
   ],
+  "scripts": {
+    "dev:web": "npm --workspace web run dev",
+    "dev:api": "npm --workspace api run dev",
+    "build:web": "npm --workspace web run build",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "db:generate": "npm --workspace api run db:generate",
+    "db:migrate": "npm --workspace api run db:migrate"
+  },
   "dependencies": {
     "@supabase-js/source": "supabase/supabase-js",
     "react-doctor": "^0.9.12"
