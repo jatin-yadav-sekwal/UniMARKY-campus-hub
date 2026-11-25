@@ -1,6 +1,11 @@
 import { supabase } from './supabase';
 
-const API_BASE = import.meta.env.VITE_API_URL ;
+// Always call the API on our own origin. In production the Vercel rewrite
+// (apps/web/vercel.json) proxies `/api/*` to the API, and in development the
+// Vite proxy (vite.config.ts) forwards it, so requests never need CORS.
+// A cross-origin absolute VITE_API_URL is deliberately ignored: it broke every
+// authenticated request whenever the API's CORS allowlist was left unset.
+const API_BASE = "/api";
 
 type FetchOptions = Omit<RequestInit, 'headers'> & {
   headers?: Record<string, string>;
