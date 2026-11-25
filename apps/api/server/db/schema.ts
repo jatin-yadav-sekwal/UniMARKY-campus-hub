@@ -43,6 +43,8 @@ export const roleRequests = pgTable("role_requests", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 }, (table) => [
   index("role_requests_status_created_idx").on(table.status, table.createdAt),
+  index("role_requests_user_idx").on(table.userId),
+  index("role_requests_reviewed_by_idx").on(table.reviewedBy),
 ]);
 
 /**
@@ -63,6 +65,7 @@ export const userPermissions = pgTable("user_permissions", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 }, (table) => [
   index("user_permissions_lookup_idx").on(table.userId, table.permission),
+  index("user_permissions_granted_by_idx").on(table.grantedBy),
   uniqueIndex("user_permissions_grant_idx").on(
     table.userId,
     table.permission,
@@ -84,6 +87,7 @@ export const auditLog = pgTable("audit_log", {
 }, (table) => [
   index("audit_log_created_idx").on(table.createdAt),
   index("audit_log_entity_idx").on(table.entityType, table.entityId),
+  index("audit_log_actor_idx").on(table.actorId),
 ]);
 
 export const marketplaceItems = pgTable("marketplace_items", {
@@ -160,6 +164,7 @@ export const postLikes = pgTable("post_likes", {
 }, (table) => [
   // One like per user per post. Deduplicate existing rows before migrating.
   uniqueIndex("post_likes_post_user_idx").on(table.postId, table.userId),
+  index("post_likes_user_idx").on(table.userId),
 ]);
 
 export const comments = pgTable("comments", {
@@ -170,6 +175,7 @@ export const comments = pgTable("comments", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 }, (table) => [
   index("comments_post_created_idx").on(table.postId, table.createdAt),
+  index("comments_user_idx").on(table.userId),
 ]);
 
 // --- Communities ---
@@ -231,6 +237,7 @@ export const communityComments = pgTable("community_comments", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 }, (table) => [
   index("community_comments_post_created_idx").on(table.postId, table.createdAt),
+  index("community_comments_author_idx").on(table.authorId),
 ]);
 
 // --- Food & Restaurants ---

@@ -141,8 +141,13 @@ psql "$DATABASE_URL" -f apps/api/scripts/pre-migrate.sql
 
 npm run db:generate
 npm run db:migrate
+# Lock down RLS + the auth trigger (idempotent):
+psql "$DATABASE_URL" -f apps/api/scripts/security-hardening.sql
 npm run db:seed --workspace api   # Optional: sample data
 ```
+
+**Storage.** Community post images upload to the public `post-images` bucket.
+Create it in Supabase → Storage (public bucket, authenticated INSERT).
 
 ### 5. Configure the frontend (`apps/web/.env`)
 ```bash
@@ -213,7 +218,9 @@ root install, `npm run start --workspace api`, health check `/healthz`. Set
 dashboard.
 
 **Migrations.** Run `apps/api/scripts/pre-migrate.sql` once against the direct
-`DATABASE_URL`, then `npm run db:migrate` before deploying.
+`DATABASE_URL`, then `npm run db:migrate` before deploying. Finally apply the
+idempotent `apps/api/scripts/security-hardening.sql` (RLS + auth trigger) and,
+optionally, `apps/api/scripts/optional-indexes.sql` (pg_trgm fuzzy search).
 
 ---
 

@@ -454,7 +454,7 @@ function Composer({
         setUploading(true);
         onError(null);
         try {
-            const url = await uploadImage(file, 'community-posts');
+            const url = await uploadImage(file, 'post-images');
             setImageUrl(url);
             setImagePreview(url);
         } catch {
