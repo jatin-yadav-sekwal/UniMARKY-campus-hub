@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { m, useInView } from "motion/react";
 import { Link } from "react-router-dom";
 import {
-    ShoppingBag, BookOpen, House, Utensils, Search,
+    ShoppingBag, BookOpen, House, Utensils, Search, Users,
     ArrowUpRight
 } from "lucide-react";
 
@@ -237,6 +237,35 @@ export function ConnectedEcosystemSection() {
                             <div className="hidden sm:flex h-[76px] rounded-2xl border border-[#F1E7DF]/60 bg-white/40 items-center justify-center text-sm font-mono text-[#71839B]/40">
                                 X
                             </div>
+
+                            {/* ROW 5: TILE 6 — COMMUNITIES (full width, the newest pillar) */}
+                            <m.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                                transition={{ duration: 0.45, delay: 0.4 }}
+                                className="col-span-4 sm:col-span-5"
+                            >
+                                <Link
+                                    to="/communities"
+                                    className="group relative p-2.5 xs:p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white border border-[#F1E7DF] hover:border-[#FF5A36]/50 shadow-[0_2px_8px_rgba(36,50,74,0.03),inset_0_1px_1px_rgba(255,255,255,0.9)] hover:shadow-[0_6px_20px_rgba(36,50,74,0.07)] hover:-translate-y-0.5 active:translate-y-0 transition-[border-color,box-shadow,transform] duration-150 flex items-center justify-between h-[68px] sm:h-[76px]"
+                                >
+                                    <div className="flex items-center gap-2.5 sm:gap-3 text-left">
+                                        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-[#FFF5EC] border border-[#F1E7DF] flex items-center justify-center text-[#FF5A36] shrink-0">
+                                            <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                        </div>
+                                        <p className="text-[11px] sm:text-xs font-bold text-[#24324A] group-hover:text-[#FF5A36] transition-colors leading-tight">
+                                            <span className="font-black">Communities.</span>{" "}
+                                            <span className="font-normal text-[#71839B]">Find your people, share and discuss.</span>
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0 ml-1.5">
+                                        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-[#FFF5EC] text-[#FF5A36] border border-[#F1E7DF]">
+                                            New
+                                        </span>
+                                        <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#71839B] group-hover:text-[#FF5A36] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                                    </div>
+                                </Link>
+                            </m.div>
                         </div>
                     </div>
                 </div>

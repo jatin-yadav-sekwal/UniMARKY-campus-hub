@@ -187,7 +187,7 @@ npm run dev:web
 | `VITE_API_URL` | API base. Use `/api` (same-origin via the Vercel rewrite / Vite dev proxy) |
 | `VITE_SUPABASE_URL` | Supabase project URL |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anonymous key |
-| `VITE_WEB_URL` | Public web origin, used for OAuth redirects |
+| `VITE_WEB_URL` | Optional canonical web origin (documentation only; auth redirects use the current origin) |
 
 ---
 
@@ -237,6 +237,13 @@ route). Render and Vercel both build from Git:
 
 Add branch protection on `main` (require the **CI / verify** check) to keep
 unverified commits out of production.
+
+**Auth branding (Google sign-in).** The account chooser currently shows the
+Supabase project ref (`bmoxstzvmzzvxbnuqntz.supabase.co`) because the project
+uses Supabase's shared Google OAuth client. Fix it by adding your own Google
+OAuth credentials and setting the consent-screen app name to **UniMARKY** —
+step-by-step in [`docs/auth-branding.md`](docs/auth-branding.md). That doc also
+covers the Site URL / redirect allow-list used by confirmation emails.
 
 ---
 

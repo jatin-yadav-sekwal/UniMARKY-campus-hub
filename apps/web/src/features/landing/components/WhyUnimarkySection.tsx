@@ -4,7 +4,7 @@ import {
     Search, CornerDownLeft, Sparkles, ShieldCheck
 } from "lucide-react";
 
-type CommandMode = "marketplace" | "study" | "housing" | "food";
+type CommandMode = "communities" | "marketplace" | "study" | "housing" | "food";
 
 interface CommandItem {
     id: string;
@@ -17,6 +17,7 @@ interface CommandItem {
 }
 
 const sequence: Array<{ mode: CommandMode; selectedIndex: number; cursorTarget: "chip" | "row" }> = [
+    { mode: "communities", selectedIndex: 0, cursorTarget: "row" },
     { mode: "marketplace", selectedIndex: 0, cursorTarget: "row" },
     { mode: "study", selectedIndex: 0, cursorTarget: "row" },
     { mode: "housing", selectedIndex: 0, cursorTarget: "row" },
@@ -24,6 +25,39 @@ const sequence: Array<{ mode: CommandMode; selectedIndex: number; cursorTarget: 
 ];
 
 const commandsData: Record<CommandMode, { label: string; placeholder: string; items: CommandItem[] }> = {
+    communities: {
+        label: "Communities",
+        placeholder: "Search interest groups, societies and campus circles...",
+        items: [
+            {
+                id: "item-c1",
+                icon: "👥",
+                title: "CS Society · Algorithms Study Circle",
+                meta: "224 members · Weekly problem sets & mock interviews",
+                badge: "Open",
+                badgeTone: "mint",
+                action: "Join Group",
+            },
+            {
+                id: "item-c2",
+                icon: "🎮",
+                title: "Campus Gaming & Esports Hub",
+                meta: "128 members · Weekend tournaments & LAN nights",
+                badge: "Popular",
+                badgeTone: "orange",
+                action: "Join Group",
+            },
+            {
+                id: "item-c3",
+                icon: "🎨",
+                title: "Designers & Creators Collective",
+                meta: "86 members · Portfolio reviews & design jams",
+                badge: "Active",
+                badgeTone: "slate",
+                action: "Join Group",
+            },
+        ],
+    },
     marketplace: {
         label: "Trade Gear",
         placeholder: "Search laptops, calculators, textbooks near your gate...",
@@ -238,7 +272,7 @@ export function WhyUnimarkySection() {
                         transition={{ duration: 0.5, delay: 0.16 }}
                         className="text-sm sm:text-base text-[#71839B] max-w-md mx-auto font-normal leading-relaxed"
                     >
-                        Search gear, notes, dining, and housing in real-time with instant peer actions.
+                        Search communities, gear, notes, dining, and housing in real-time with instant peer actions.
                     </m.p>
                 </div>
 

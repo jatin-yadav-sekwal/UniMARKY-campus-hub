@@ -64,7 +64,7 @@ export function HeroSection() {
                     transition={{ duration: 0.5, delay: 0.42, ease: "easeOut" }}
                     className="mt-5 xs:mt-7 sm:mt-6 text-xs xs:text-sm sm:text-base md:text-lg text-[#71839B] max-w-[290px] xs:max-w-xs sm:max-w-md lg:max-w-lg mx-auto font-normal leading-relaxed"
                 >
-                    Everything your campus needs, in one place.
+                    Join campus communities, trade gear, and share notes — all in one place.
                 </m.p>
 
                 {/* 4. COMPACT PREMIUM CTA GROUP (500ms entrance) */}

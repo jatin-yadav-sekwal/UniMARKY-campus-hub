@@ -1,7 +1,8 @@
 import { useRef } from "react";
 import { m, useInView } from "motion/react";
+import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Sparkles, ShieldCheck, Quote } from "lucide-react";
+import { Sparkles, ShieldCheck, Quote, ArrowRight, Users } from "lucide-react";
 
 export function CommunitySection() {
     const sectionRef = useRef<HTMLDivElement>(null);
@@ -29,7 +30,7 @@ export function CommunitySection() {
                     >
                         <span className="flex h-1.5 w-1.5 rounded-full bg-[#FF5A36]" />
                         <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-[#71839B]">
-                            From The Campus
+                            Campus Communities
                         </span>
                         <Sparkles className="w-3 h-3 text-[#FF713F] opacity-75" />
                     </m.div>
@@ -40,9 +41,9 @@ export function CommunitySection() {
                         transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
                         className="text-2xl sm:text-3xl lg:text-[40px] font-black tracking-tight leading-[1.06] text-[#24324A]"
                     >
-                        Made for students.{" "}
+                        Find your people.{" "}
                         <span className="bg-gradient-to-r from-[#FF5A36] to-[#FF713F] bg-clip-text text-transparent">
-                            Loved by students.
+                            Build your circle.
                         </span>
                     </m.h2>
 
@@ -52,7 +53,7 @@ export function CommunitySection() {
                         transition={{ duration: 0.45, delay: 0.16 }}
                         className="text-xs sm:text-sm text-[#71839B] max-w-md mx-auto font-normal leading-relaxed"
                     >
-                        Real peer exchanges happening across university grounds every day.
+                        Join societies, study circles and interest groups. Share updates, ask questions and plan meetups — all inside your university.
                     </m.p>
                 </div>
 
@@ -70,13 +71,13 @@ export function CommunitySection() {
                             <div className="flex items-center justify-between">
                                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FFF5EC] text-[#FF5A36] text-[10px] font-bold border border-[#F1E7DF]">
                                     <ShieldCheck className="w-3 h-3 text-[#20BFA3]" />
-                                    <span>Verified Peer Trade</span>
+                                    <span>Verified Members</span>
                                 </span>
                                 <Quote className="w-5 h-5 text-[#F1E7DF] group-hover:text-[#FF5A36]/30 transition-colors" />
                             </div>
 
                             <p className="text-base sm:text-lg lg:text-xl font-bold text-[#24324A] leading-snug">
-                                "Saved ₹4,000 on semester textbooks by buying directly from a senior near Gate 2. Hand-to-hand exchange, zero anxiety."
+                                "Found my algorithms study circle on day one. We meet twice a week, share notes, and prep for placements together."
                             </p>
                         </div>
 
@@ -94,14 +95,17 @@ export function CommunitySection() {
                                     <p className="text-[11px] text-[#71839B]">CSE · Class of '25</p>
                                 </div>
                             </div>
-                            <span className="text-[11px] font-bold text-[#FF5A36]">Marketplace</span>
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#FF5A36]">
+                                <Users className="w-3 h-3" />
+                                Study Circle
+                            </span>
                         </div>
                     </m.div>
 
                     {/* SUPPORTING VOICES (Col 8-12 Stacked) */}
                     <div className="lg:col-span-5 flex flex-col gap-4 sm:gap-5 justify-between">
                         
-                        {/* SUPPORTING VOICE 1: HOUSING */}
+                        {/* SUPPORTING VOICE 1: CREATORS */}
                         <m.div
                             initial={{ opacity: 0, y: 16 }}
                             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
@@ -109,7 +113,7 @@ export function CommunitySection() {
                             className="p-5 sm:p-6 rounded-2xl bg-white border border-[#F1E7DF] shadow-[0_4px_20px_rgba(36,50,74,0.03)] hover:shadow-[0_10px_28px_rgba(36,50,74,0.06)] hover:border-[#FF5A36]/40 hover:-translate-y-0.5 transition-[border-color,box-shadow,transform] duration-200 flex flex-col justify-between flex-1 group"
                         >
                             <p className="text-xs sm:text-sm font-semibold text-[#24324A] leading-relaxed mb-4 text-left">
-                                "Found my PG room in two days without paying any broker fees. Transparent rent right next to campus."
+                                "Posted a design jam in the Creators Collective and 30 students showed up. Easiest way to find collaborators on campus."
                             </p>
 
                             <div className="pt-3 border-t border-[#F1E7DF] flex items-center justify-between">
@@ -123,14 +127,14 @@ export function CommunitySection() {
                                         <h4 className="text-xs font-bold text-[#24324A] leading-tight">
                                             Priya Verma
                                         </h4>
-                                        <p className="text-[10px] text-[#71839B]">Psychology · 2nd Year</p>
+                                        <p className="text-[10px] text-[#71839B]">Design · 2nd Year</p>
                                     </div>
                                 </div>
-                                <span className="text-[10px] font-bold text-[#71839B]">Housing</span>
+                                <span className="text-[10px] font-bold text-[#71839B]">Creators</span>
                             </div>
                         </m.div>
 
-                        {/* SUPPORTING VOICE 2: RECOVERY */}
+                        {/* SUPPORTING VOICE 2: SPORTS */}
                         <m.div
                             initial={{ opacity: 0, y: 16 }}
                             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
@@ -138,7 +142,7 @@ export function CommunitySection() {
                             className="p-5 sm:p-6 rounded-2xl bg-white border border-[#F1E7DF] shadow-[0_4px_20px_rgba(36,50,74,0.03)] hover:shadow-[0_10px_28px_rgba(36,50,74,0.06)] hover:border-[#FF5A36]/40 hover:-translate-y-0.5 transition-[border-color,box-shadow,transform] duration-200 flex flex-col justify-between flex-1 group"
                         >
                             <p className="text-xs sm:text-sm font-semibold text-[#24324A] leading-relaxed mb-4 text-left">
-                                "Posted my misplaced calculator and got it back from a junior in Lab 3 within an hour."
+                                "Our football club plans every practice and match here. No more scattered WhatsApp groups or lost updates."
                             </p>
 
                             <div className="pt-3 border-t border-[#F1E7DF] flex items-center justify-between">
@@ -155,11 +159,27 @@ export function CommunitySection() {
                                         <p className="text-[10px] text-[#71839B]">Electrical · 4th Year</p>
                                     </div>
                                 </div>
-                                <span className="text-[10px] font-bold text-[#71839B]">Lost & Found</span>
+                                <span className="text-[10px] font-bold text-[#71839B]">Sports Club</span>
                             </div>
                         </m.div>
                     </div>
                 </div>
+
+                {/* 3. PRIMARY CTA */}
+                <m.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    className="mt-10 sm:mt-12 flex justify-center"
+                >
+                    <Link
+                        to="/communities"
+                        className="group inline-flex items-center justify-center gap-2 h-11 px-6 rounded-full bg-gradient-to-r from-[#FF5A36] to-[#FF713F] text-white text-sm font-semibold shadow-[0_4px_16px_rgba(255,90,54,0.25)] hover:shadow-[0_8px_28px_rgba(255,90,54,0.38)] active:shadow-none transition-shadow duration-200"
+                    >
+                        Explore Communities
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+                    </Link>
+                </m.div>
             </div>
         </section>
     );

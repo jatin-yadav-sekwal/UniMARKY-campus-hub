@@ -24,7 +24,7 @@ const navLinks = [
     { name: "ECOSYSTEM", href: "#ecosystem" },
     { name: "EXPERIENCE", href: "#experience" },
     { name: "NETWORK", href: "#network" },
-    { name: "COMMUNITY", href: "#community" },
+    { name: "COMMUNITIES", href: "#community" },
 ];
 
 const appRoutes = [

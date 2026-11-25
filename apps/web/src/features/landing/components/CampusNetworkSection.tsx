@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { m, useInView } from "motion/react";
 import { Link } from "react-router-dom";
 import {
-    ShoppingBag, BookOpen, House, Utensils, Search,
+    ShoppingBag, BookOpen, House, Utensils, Search, Users,
     ArrowRight, Sparkles
 } from "lucide-react";
 
@@ -55,6 +55,14 @@ const networkNodes: NetworkNode[] = [
         icon: Search,
         href: "/lost-found",
         position: "top-1/2 -translate-y-1/2 right-1 sm:right-3 lg:right-4",
+    },
+    {
+        id: "communities",
+        title: "Communities",
+        label: "Groups & Circles",
+        icon: Users,
+        href: "/communities",
+        position: "top-1/2 -translate-y-1/2 left-1 sm:left-3 lg:left-4",
     },
 ];
 
@@ -109,7 +117,7 @@ export function CampusNetworkSection() {
                         transition={{ duration: 0.45, delay: 0.16 }}
                         className="text-xs sm:text-sm text-white/80 max-w-md mx-auto font-normal leading-relaxed"
                     >
-                        Trade gear, share notes, find housing, and discover campus life — all in one network.
+                        Join communities, trade gear, share notes, find housing, and discover campus life — all in one network.
                     </m.p>
                 </div>
 
@@ -135,6 +143,7 @@ export function CampusNetworkSection() {
                         <line x1="50%" y1="50%" x2="22%" y2="82%" strokeWidth="1.5" strokeDasharray="3 3" className="animate-pulse" />
                         <line x1="50%" y1="50%" x2="78%" y2="82%" strokeWidth="1.5" strokeDasharray="3 3" className="animate-pulse" />
                         <line x1="50%" y1="50%" x2="88%" y2="50%" strokeWidth="1.5" strokeDasharray="3 3" className="animate-pulse" />
+                        <line x1="50%" y1="50%" x2="12%" y2="50%" strokeWidth="1.5" strokeDasharray="3 3" className="animate-pulse" />
                     </svg>
 
                     {/* Central UniMARKY Core Node */}

@@ -53,6 +53,11 @@ export function Footer() {
                         </h4>
                         <ul className="space-y-2.5 text-xs sm:text-sm text-white/80">
                             <li>
+                                <Link to="/communities" className="hover:text-white hover:translate-x-0.5 transition-[color,transform] duration-150 inline-block">
+                                    Communities
+                                </Link>
+                            </li>
+                            <li>
                                 <Link to="/marketplace" className="hover:text-white hover:translate-x-0.5 transition-[color,transform] duration-150 inline-block">
                                     Marketplace
                                 </Link>
