@@ -1,0 +1,44 @@
+name: Deploy verify
+
+# Runs after CI succeeds on `main`. Render (autoDeployTrigger: checksPass) and
+# Vercel only ship a commit once CI is green, so this checks the API those
+# platforms just rolled out — including that auth is actually enforced.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Smoke-test the deployed API
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    env:
+      API_URL: ${{ vars.API_URL || 'https://unimarky-campus-hub.onrender.com' }}
+
+    steps:
+      - name: Wait for /healthz
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl -fsS "$API_URL/healthz" | grep -q '"ok":true'; then
+              echo "API healthy after ${attempt} attempt(s)"
+              exit 0
+            fi
+            echo "Attempt ${attempt}: not ready yet; retrying in 10s"
+            sleep 10
+          done
+          echo "API did not become healthy within the time budget" >&2
+          exit 1
+
+      - name: Protected routes reject unauthenticated requests
+        run: |
+          status=$(curl -s -o /dev/null -w '%{http_code}' "$API_URL/api/communities")
+          echo "GET /api/communities -> $status"
+          test "$status" = "401"

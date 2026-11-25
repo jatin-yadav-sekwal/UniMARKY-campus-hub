@@ -9,6 +9,7 @@
     "dev:api": "npm --workspace api run dev",
     "build:web": "npm --workspace web run build",
     "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
     "db:generate": "npm --workspace api run db:generate",
     "db:migrate": "npm --workspace api run db:migrate"
   },

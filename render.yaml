@@ -11,11 +11,20 @@ services:
     plan: free
     # Pick the region closest to your Supabase project.
     region: singapore
-    buildCommand: npm install --no-audit --no-fund
+    # Deterministic install from the committed lockfile. `--include=dev` keeps
+    # `tsx` (devDependency) available because it runs the server in production.
+    buildCommand: npm ci --include=dev --no-audit --no-fund
     startCommand: npm run start --workspace api
     # Public, unauthenticated liveness probe (see server/index.ts).
     healthCheckPath: /healthz
-    autoDeploy: true
+    # Deploy only once the GitHub Actions "CI" workflow passes for the commit.
+    autoDeployTrigger: checksPass
+    # Monorepo: skip rebuilds when nothing the API depends on changed.
+    buildFilter:
+      paths:
+        - apps/api/**
+        - package.json
+        - package-lock.json
     envVars:
       - key: NODE_VERSION
         value: "22"
@@ -30,4 +39,8 @@ services:
       # Leave empty when the web app only reaches the API through the
       # Vercel /api rewrite (same-origin requests send no Origin header).
       - key: CORS_ORIGINS
+        sync: false
+      # Optional wildcard origins for preview deploys, e.g.
+      # `https://*.vercel.app` (comma separated). `*` matches any characters.
+      - key: CORS_ORIGIN_PATTERNS
         sync: false

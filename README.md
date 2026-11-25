@@ -178,6 +178,8 @@ npm run dev:web
 | `SUPABASE_URL` | Supabase project URL — used to fetch the JWKS for token verification |
 | `PORT` | Server port (default: `3000`; Render sets this) |
 | `CORS_ORIGINS` | Comma-separated origins allowed to call the API directly (not needed for the same-origin `/api` rewrite) |
+| `CORS_ORIGIN_PATTERNS` | Optional wildcard origins for previews, e.g. `https://*.vercel.app` (`*` matches any characters) |
+| `WEB_URL` | Optional single trusted web origin (alias for one `CORS_ORIGINS` entry) |
 
 ### Frontend (`apps/web/.env`)
 | Variable | Description |
@@ -221,6 +223,20 @@ dashboard.
 `DATABASE_URL`, then `npm run db:migrate` before deploying. Finally apply the
 idempotent `apps/api/scripts/security-hardening.sql` (RLS + auth trigger) and,
 optionally, `apps/api/scripts/optional-indexes.sql` (pg_trgm fuzzy search).
+
+**CI/CD (GitHub Actions).** `.github/workflows/ci.yml` runs on every pull
+request and push to `main`: `npm ci`, typecheck, tests and the web build.
+`.github/workflows/deploy.yml` runs once CI succeeds on `main` and smoke-tests
+the deployed API (`/healthz` plus an unauthenticated `401` on a protected
+route). Render and Vercel both build from Git:
+
+- **Render** uses `autoDeployTrigger: checksPass`, so the API only ships a
+  commit whose CI check is green, and `buildFilter` skips rebuilds when nothing
+  under `apps/api/**` changed.
+- **Vercel** deploys the SPA on push; a failing `vite build` blocks the deploy.
+
+Add branch protection on `main` (require the **CI / verify** check) to keep
+unverified commits out of production.
 
 ---
 

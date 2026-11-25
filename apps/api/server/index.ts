@@ -3,7 +3,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import { allowedOrigins, validateEnv } from "./env";
+import { isOriginAllowed, validateEnv } from "./env";
 import { authMiddleware } from "./middleware/auth";
 import type { Env } from "./middleware/auth";
 
@@ -33,9 +33,7 @@ app.use(
       // don't need CORS headers. Return undefined so nothing is emitted.
       if (!origin) return undefined;
 
-      const allowed = allowedOrigins();
-
-      if (allowed.includes(origin)) {
+      if (isOriginAllowed(origin)) {
         return origin;
       }
 
@@ -45,7 +43,8 @@ app.use(
     allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     exposeHeaders: ["Content-Length"],
-    maxAge: 600,
+    // Cache the preflight for a day to cut round-trips on repeat requests.
+    maxAge: 86400,
     credentials: true,
   })
 );
