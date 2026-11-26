@@ -9,18 +9,14 @@ import {
     UtensilsCrossed,
     DollarSign,
     Tag,
-    FileText,
     ImagePlus,
     Leaf,
     Trash2,
-    Edit,
     X,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
 import { uploadImage } from "@/lib/uploadImage";
+import "./superuser.css";
 
 interface MenuItem {
     id: string;
@@ -179,6 +175,26 @@ export function AddMenuItemPage() {
         dispatch({ type: "SET_FIELD", field, value });
     };
 
+    const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+            alert("Max 5MB");
+            return;
+        }
+        imageFileRef.current = file;
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            dispatch({ type: "SET_IMAGE_PREVIEW", preview: reader.result as string });
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleRemoveImage = () => {
+        dispatch({ type: "SET_IMAGE_PREVIEW", preview: null });
+        imageFileRef.current = null;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!form.name.trim() || !form.price.trim()) {
@@ -214,191 +230,265 @@ export function AddMenuItemPage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto pb-12">
-            <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4 gap-2 text-muted-foreground">
-                <ArrowLeft className="h-4 w-4" /> Back
-            </Button>
-
-            <m.h1
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-3xl sm:text-4xl font-black tracking-tight mb-2"
+        <div className="um-editorial um-superuser su-food">
+            <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="back-link"
             >
-                <span className="text-brand-navy">MENU FOR </span>
-                <span className="bg-gradient-to-r from-brand-orange to-brand-yellow bg-clip-text text-transparent">
-                    {restaurantName || "RESTAURANT"}
-                </span>
-            </m.h1>
-            <p className="text-muted-foreground mb-8">Add and manage menu items</p>
+                <ArrowLeft size={15} /> Back
+            </button>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Add Form */}
+            <header className="page-head">
+                <div>
+                    <p className="section-label">
+                        <span>04</span>/ Menu
+                    </p>
+                    <h1 className="page-title">
+                        Menu for <span>{restaurantName || "restaurant"}.</span>
+                    </h1>
+                    <p className="page-lead">Add and manage menu items.</p>
+                </div>
+            </header>
+
+            <div className="su-menu-layout">
                 <m.form
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                     onSubmit={handleSubmit}
-                    className="bg-background border border-border/50 rounded-2xl p-6 space-y-5 h-fit"
+                    className="su-panel"
                 >
-                    <h2 className="text-lg font-bold text-brand-navy flex items-center gap-2">
-                        <Plus className="h-5 w-5" /> Add Menu Item
-                    </h2>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="name">Item Name *</Label>
-                        <div className="relative">
-                            <UtensilsCrossed className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input id="name" value={form.name} onChange={(e) => updateField("name", e.target.value)} placeholder="e.g., Margherita Pizza" className="pl-10" required />
-                        </div>
+                    <div className="su-panel-head">
+                        <h2>Add menu item</h2>
+                        <Plus size={16} />
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="description">Description</Label>
-                        <textarea
-                            id="description"
-                            value={form.description}
-                            onChange={(e) => updateField("description", e.target.value)}
-                            placeholder="Fresh mozzarella, basil..."
-                            className="w-full p-3 rounded-lg border border-input bg-background text-sm min-h-[80px] resize-y"
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="price">Price (₹) *</Label>
-                            <div className="relative">
-                                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input id="price" value={form.price} onChange={(e) => updateField("price", e.target.value)} placeholder="299" className="pl-10" required />
+                    <div className="form-stack">
+                        <div className="field">
+                            <label className="field-label" htmlFor="su-menu-name">
+                                Item name *
+                            </label>
+                            <div className="su-field">
+                                <UtensilsCrossed size={15} />
+                                <input
+                                    id="su-menu-name"
+                                    value={form.name}
+                                    onChange={(e) => updateField("name", e.target.value)}
+                                    placeholder="e.g., Margherita Pizza"
+                                    className="field-input"
+                                    required
+                                />
                             </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="category">Category</Label>
-                            <div className="relative">
-                                <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input id="category" value={form.category} onChange={(e) => updateField("category", e.target.value)} placeholder="Main Course" className="pl-10" />
+
+                        <div className="field">
+                            <label className="field-label" htmlFor="su-menu-description">
+                                Description
+                            </label>
+                            <textarea
+                                id="su-menu-description"
+                                value={form.description}
+                                onChange={(e) => updateField("description", e.target.value)}
+                                placeholder="Fresh mozzarella, basil..."
+                                rows={3}
+                                className="field-input"
+                            />
+                        </div>
+
+                        <div className="form-grid">
+                            <div className="field">
+                                <label className="field-label" htmlFor="su-menu-price">
+                                    Price (₹) *
+                                </label>
+                                <div className="su-field">
+                                    <DollarSign size={15} />
+                                    <input
+                                        id="su-menu-price"
+                                        value={form.price}
+                                        onChange={(e) => updateField("price", e.target.value)}
+                                        placeholder="299"
+                                        className="field-input"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="field">
+                                <label className="field-label" htmlFor="su-menu-category">
+                                    Category
+                                </label>
+                                <div className="su-field">
+                                    <Tag size={15} />
+                                    <input
+                                        id="su-menu-category"
+                                        value={form.category}
+                                        onChange={(e) => updateField("category", e.target.value)}
+                                        placeholder="Main Course"
+                                        className="field-input"
+                                    />
+                                </div>
                             </div>
                         </div>
+
+                        <div>
+                            <p className="field-label">Item photo</p>
+                            <label className="su-upload" style={{ height: 150 }}>
+                                {imagePreview ? (
+                                    <>
+                                        <img src={imagePreview} alt="Preview" />
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                handleRemoveImage();
+                                            }}
+                                            aria-label="Remove photo"
+                                            className="su-upload-remove"
+                                        >
+                                            <X size={15} />
+                                        </button>
+                                    </>
+                                ) : (
+                                    <span className="su-upload-empty">
+                                        <ImagePlus size={20} strokeWidth={1.5} />
+                                        <strong>Upload photo</strong>
+                                        <small>PNG or JPG, up to 5MB</small>
+                                    </span>
+                                )}
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleUpload}
+                                    aria-label="Item photo"
+                                    className="hidden"
+                                />
+                            </label>
+                        </div>
+
+                        <div className="field">
+                            <p className="field-label" id="su-menu-veg-label">
+                                Diet
+                            </p>
+                            <div
+                                className="su-choices"
+                                role="group"
+                                aria-labelledby="su-menu-veg-label"
+                            >
+                                <button
+                                    type="button"
+                                    aria-pressed={form.isVeg}
+                                    onClick={() => updateField("isVeg", true)}
+                                    className={`su-choice veg${form.isVeg ? " active" : ""}`}
+                                >
+                                    <Leaf size={14} /> Vegetarian
+                                </button>
+                                <button
+                                    type="button"
+                                    aria-pressed={!form.isVeg}
+                                    onClick={() => updateField("isVeg", false)}
+                                    className={`su-choice nonveg${!form.isVeg ? " active" : ""}`}
+                                >
+                                    <UtensilsCrossed size={14} /> Non-vegetarian
+                                </button>
+                            </div>
+                        </div>
+
+                        {error && (
+                            <div className="alert alert-error alert-row" role="alert">
+                                <span>{error}</span>
+                            </div>
+                        )}
+
+                        {success && (
+                            <div className="alert alert-success alert-row" role="status">
+                                <CheckCircle2 size={16} />
+                                <span>Menu item added!</span>
+                            </div>
+                        )}
                     </div>
 
-                    <div className="space-y-2">
-                        <Label>Item Photo</Label>
-                        <label className="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-brand-orange/50 hover:bg-brand-orange/5 transition-colors overflow-hidden">
-                            {imagePreview ? (
+                    <div className="form-actions">
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className="button button-primary button-block"
+                        >
+                            {saving ? (
                                 <>
-                                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            dispatch({ type: "SET_IMAGE_PREVIEW", preview: null });
-                                            imageFileRef.current = null;
-                                        }}
-                                        className="absolute top-2 right-2 p-1.5 bg-background/90 rounded-full hover:bg-red-50"
-                                    >
-                                        <X className="w-4 h-4 text-red-500" />
-                                    </button>
+                                    <Loader2 size={16} className="animate-spin" /> Adding...
                                 </>
                             ) : (
-                                <div className="flex flex-col items-center gap-1 text-muted-foreground">
-                                    <ImagePlus className="w-6 h-6 text-brand-orange" />
-                                    <p className="text-xs">Upload photo</p>
-                                </div>
+                                <>
+                                    <Plus size={16} /> Add item
+                                </>
                             )}
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                        if (file.size > 5 * 1024 * 1024) { alert("Max 5MB"); return; }
-                                        imageFileRef.current = file;
-                                        const reader = new FileReader();
-                                        reader.onloadend = () => {
-                                            dispatch({ type: "SET_IMAGE_PREVIEW", preview: reader.result as string });
-                                        };
-                                        reader.readAsDataURL(file);
-                                    }
-                                }}
-                                className="hidden"
-                            />
-                        </label>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <button
-                            type="button"
-                            onClick={() => updateField("isVeg", !form.isVeg)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${form.isVeg ? "bg-green-50 border-green-300 text-green-700" : "bg-red-50 border-red-300 text-red-700"
-                                }`}
-                        >
-                            <Leaf className="h-4 w-4" />
-                            {form.isVeg ? "Vegetarian" : "Non-Vegetarian"}
                         </button>
                     </div>
-
-                    {error && <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">{error}</div>}
-                    {success && (
-                        <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-3 rounded-lg bg-green-50 text-green-600 text-sm flex items-center gap-2">
-                            <CheckCircle2 className="h-4 w-4" /> Menu item added!
-                        </m.div>
-                    )}
-
-                    <Button
-                        type="submit"
-                        disabled={saving}
-                        className="w-full py-6 rounded-xl bg-gradient-to-r from-brand-orange to-brand-yellow text-white font-bold hover:opacity-90"
-                    >
-                        {saving ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...</>) : (<><Plus className="mr-2 h-4 w-4" /> Add Item</>)}
-                    </Button>
                 </m.form>
 
-                {/* Existing Menu Items */}
-                <m.div
+                <m.section
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
+                    className="su-panel"
                 >
-                    <h2 className="text-lg font-bold text-brand-navy mb-4">
-                        Current Menu ({menuItems.length} items)
-                    </h2>
+                    <div className="su-panel-head">
+                        <h2>Current menu</h2>
+                        <p className="meta-mono">{menuItems.length} items</p>
+                    </div>
 
                     {loadingMenu ? (
-                        <div className="flex justify-center py-12">
-                            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                        <div className="su-loading" style={{ minHeight: 200 }}>
+                            <Loader2 size={20} className="animate-spin" />
                         </div>
                     ) : menuItems.length === 0 ? (
-                        <div className="text-center py-12 bg-muted/20 rounded-2xl border border-dashed border-border">
-                            <UtensilsCrossed className="h-10 w-10 mx-auto text-muted-foreground/40 mb-2" />
-                            <p className="text-muted-foreground text-sm">No menu items yet</p>
+                        <div className="su-empty">
+                            <span className="su-empty-icon">
+                                <UtensilsCrossed size={20} strokeWidth={1.4} />
+                            </span>
+                            <p>No menu items yet.</p>
                         </div>
                     ) : (
-                        <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+                        <div className="su-menu-list">
                             {menuItems.map((item) => (
-                                <div key={item.id} className="bg-background border border-border/50 rounded-xl p-4 flex items-center justify-between">
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2">
-                                            <span className={`w-2.5 h-2.5 rounded-full ${item.isVeg ? "bg-green-500" : "bg-red-500"}`} />
-                                            <h3 className="font-semibold text-sm truncate">{item.name}</h3>
-                                        </div>
-                                        <div className="flex items-center gap-3 mt-1">
-                                            <span className="text-sm font-bold text-brand-orange">₹{item.price}</span>
-                                            {item.category && <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-0.5 rounded">{item.category}</span>}
+                                <div key={item.id} className="su-menu-row">
+                                    <div style={{ minWidth: 0 }}>
+                                        <p className="su-menu-name">
+                                            <i
+                                                className={`su-vegdot${item.isVeg ? "" : " nonveg"}`}
+                                                aria-label={
+                                                    item.isVeg ? "Vegetarian" : "Non-vegetarian"
+                                                }
+                                            />
+                                            <span>{item.name}</span>
+                                        </p>
+                                        <div className="su-menu-meta">
+                                            <span className="su-menu-price">₹{item.price}</span>
+                                            {item.category && (
+                                                <span className="su-menu-cat">{item.category}</span>
+                                            )}
                                         </div>
                                     </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-red-500 hover:bg-red-50"
+
+                                    <button
+                                        type="button"
+                                        className="su-action danger"
                                         onClick={() => handleDelete(item.id)}
                                         disabled={deleting === item.id}
+                                        aria-label={`Delete ${item.name}`}
                                     >
-                                        {deleting === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                                    </Button>
+                                        {deleting === item.id ? (
+                                            <Loader2 size={13} className="animate-spin" />
+                                        ) : (
+                                            <Trash2 size={13} />
+                                        )}
+                                    </button>
                                 </div>
                             ))}
                         </div>
                     )}
-                </m.div>
+                </m.section>
             </div>
         </div>
     );

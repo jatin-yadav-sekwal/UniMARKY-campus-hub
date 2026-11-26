@@ -2,7 +2,6 @@ import { useReducer } from "react";
 import { m } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import {
-    GraduationCap,
     BookOpen,
     FileText,
     Link2,
@@ -11,18 +10,9 @@ import {
     CheckCircle2,
     AlertCircle,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { api } from "@/lib/api";
 import { isValidDriveLink, isDriveUrl } from "@/lib/driveUtils";
+import "./superuser.css";
 
 const CUH_DEPARTMENTS = [
     "Computer Science & Engineering",
@@ -169,209 +159,258 @@ export function AddStudyMaterialPage() {
     };
 
     return (
-        <div className="max-w-3xl mx-auto pb-12">
-            <Button
-                variant="ghost"
-                onClick={() => navigate(-1)}
-                className="mb-4 gap-2 text-muted-foreground"
-            >
-                <ArrowLeft className="h-4 w-4" /> Back
-            </Button>
+        <div className="um-editorial um-superuser su-study">
+            <div className="su-form-wrap">
+                <button
+                    type="button"
+                    onClick={() => navigate(-1)}
+                    className="back-link"
+                >
+                    <ArrowLeft size={15} /> Back
+                </button>
 
-            <m.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-3 mb-2"
-            >
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 shadow-lg shadow-indigo-500/25">
-                    <GraduationCap className="h-6 w-6 text-white" />
-                </div>
-                <h1 className="text-3xl font-bold tracking-tight">
-                    <span className="text-foreground">Add </span>
-                    <span className="bg-gradient-to-r from-indigo-500 to-violet-500 bg-clip-text text-transparent">
-                        Study Material
-                    </span>
-                </h1>
-            </m.div>
-            <p className="text-muted-foreground mb-8 ml-1">
-                Share notes, papers, and resources with your fellow students.
-            </p>
-
-            <m.form
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                onSubmit={handleSubmit}
-                className="bg-card border border-border/50 rounded-2xl p-6 sm:p-8 space-y-6"
-            >
-                {/* Department + Year Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label>Department *</Label>
-                        <Select value={department} onValueChange={(val) => dispatch({ type: "SET_FIELD", field: "department", value: val })}>
-                            <SelectTrigger className="h-11 rounded-xl">
-                                <SelectValue placeholder="Select Department" />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-72">
-                                {CUH_DEPARTMENTS.map((dept) => (
-                                    <SelectItem key={dept} value={dept}>
-                                        {dept}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                <header className="page-head">
+                    <div>
+                        <p className="section-label">
+                            <span>02</span>/ Study materials
+                        </p>
+                        <h1 className="page-title">
+                            Add a <span>study material.</span>
+                        </h1>
+                        <p className="page-lead">
+                            Share notes, papers, and resources with your fellow students.
+                        </p>
                     </div>
+                </header>
 
-                    <div className="space-y-2">
-                        <Label>Year *</Label>
-                        <Select value={year} onValueChange={(val) => dispatch({ type: "SET_FIELD", field: "year", value: val })}>
-                            <SelectTrigger className="h-11 rounded-xl">
-                                <SelectValue placeholder="Select Year" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {YEARS.map((y) => (
-                                    <SelectItem key={y} value={y}>
-                                        {y}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
+                <m.form
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    onSubmit={handleSubmit}
+                    className="form-card"
+                >
+                    <div className="form-stack">
+                        <div className="form-grid">
+                            <div className="field">
+                                <label className="field-label" htmlFor="su-study-department">
+                                    Department *
+                                </label>
+                                <select
+                                    id="su-study-department"
+                                    value={department}
+                                    onChange={(e) =>
+                                        dispatch({
+                                            type: "SET_FIELD",
+                                            field: "department",
+                                            value: e.target.value,
+                                        })
+                                    }
+                                    className="field-input"
+                                    required
+                                >
+                                    <option value="">Select Department</option>
+                                    {CUH_DEPARTMENTS.map((dept) => (
+                                        <option key={dept} value={dept}>
+                                            {dept}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
-                {/* Category + Subject Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label>Category *</Label>
-                        <Select value={category} onValueChange={(val) => dispatch({ type: "SET_FIELD", field: "category", value: val })}>
-                            <SelectTrigger className="h-11 rounded-xl">
-                                <SelectValue placeholder="Select Category" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {CATEGORIES.map((cat) => (
-                                    <SelectItem key={cat.value} value={cat.value}>
-                                        {cat.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
+                            <div className="field">
+                                <label className="field-label" htmlFor="su-study-year">
+                                    Year *
+                                </label>
+                                <select
+                                    id="su-study-year"
+                                    value={year}
+                                    onChange={(e) =>
+                                        dispatch({
+                                            type: "SET_FIELD",
+                                            field: "year",
+                                            value: e.target.value,
+                                        })
+                                    }
+                                    className="field-input"
+                                    required
+                                >
+                                    <option value="">Select Year</option>
+                                    {YEARS.map((y) => (
+                                        <option key={y} value={y}>
+                                            {y}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="subjectName">Subject Name *</Label>
-                        <div className="relative">
-                            <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                id="subjectName"
-                                value={subjectName}
-                                onChange={(e) => dispatch({ type: "SET_FIELD", field: "subjectName", value: e.target.value })}
-                                placeholder="e.g., Data Structures"
-                                className="pl-10 h-11 rounded-xl"
-                                required
+                            <div className="field">
+                                <label className="field-label" htmlFor="su-study-category">
+                                    Category *
+                                </label>
+                                <select
+                                    id="su-study-category"
+                                    value={category}
+                                    onChange={(e) =>
+                                        dispatch({
+                                            type: "SET_FIELD",
+                                            field: "category",
+                                            value: e.target.value,
+                                        })
+                                    }
+                                    className="field-input"
+                                    required
+                                >
+                                    <option value="">Select Category</option>
+                                    {CATEGORIES.map((cat) => (
+                                        <option key={cat.value} value={cat.value}>
+                                            {cat.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="field">
+                                <label className="field-label" htmlFor="su-study-subject">
+                                    Subject name *
+                                </label>
+                                <div className="su-field">
+                                    <BookOpen size={15} />
+                                    <input
+                                        id="su-study-subject"
+                                        value={subjectName}
+                                        onChange={(e) =>
+                                            dispatch({
+                                                type: "SET_FIELD",
+                                                field: "subjectName",
+                                                value: e.target.value,
+                                            })
+                                        }
+                                        placeholder="e.g., Data Structures"
+                                        className="field-input"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="field">
+                            <label className="field-label" htmlFor="su-study-title">
+                                Title *
+                            </label>
+                            <div className="su-field">
+                                <FileText size={15} />
+                                <input
+                                    id="su-study-title"
+                                    value={title}
+                                    onChange={(e) =>
+                                        dispatch({
+                                            type: "SET_FIELD",
+                                            field: "title",
+                                            value: e.target.value,
+                                        })
+                                    }
+                                    placeholder="e.g., DSA Mid-Sem 2024 Paper"
+                                    className="field-input"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="field">
+                            <label className="field-label" htmlFor="su-study-description">
+                                Description (optional)
+                            </label>
+                            <textarea
+                                id="su-study-description"
+                                value={description}
+                                onChange={(e) =>
+                                    dispatch({
+                                        type: "SET_FIELD",
+                                        field: "description",
+                                        value: e.target.value,
+                                    })
+                                }
+                                placeholder="Brief description of the material..."
+                                rows={4}
+                                className="field-input"
                             />
                         </div>
-                    </div>
-                </div>
 
-                {/* Title */}
-                <div className="space-y-2">
-                    <Label htmlFor="title">Title *</Label>
-                    <div className="relative">
-                        <FileText className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            id="title"
-                            value={title}
-                            onChange={(e) => dispatch({ type: "SET_FIELD", field: "title", value: e.target.value })}
-                            placeholder="e.g., DSA Mid-Sem 2024 Paper"
-                            className="pl-10 h-11 rounded-xl"
-                            required
-                        />
-                    </div>
-                </div>
+                        <div className="field">
+                            <label className="field-label" htmlFor="su-study-file">
+                                Google Drive link
+                            </label>
+                            <p className="form-note" style={{ marginTop: -6, marginBottom: 8 }}>
+                                Paste a public Google Drive sharing link. Users will download
+                                directly from Drive.
+                            </p>
+                            <div className="su-field">
+                                <Link2 size={15} />
+                                <input
+                                    id="su-study-file"
+                                    value={fileUrl}
+                                    onChange={(e) =>
+                                        dispatch({
+                                            type: "SET_FIELD",
+                                            field: "fileUrl",
+                                            value: e.target.value,
+                                        })
+                                    }
+                                    placeholder="https://drive.google.com/file/d/.../view?usp=sharing"
+                                    className="field-input"
+                                />
+                            </div>
 
-                {/* Description */}
-                <div className="space-y-2">
-                    <Label htmlFor="description">Description (optional)</Label>
-                    <textarea
-                        id="description"
-                        value={description}
-                        onChange={(e) => dispatch({ type: "SET_FIELD", field: "description", value: e.target.value })}
-                        placeholder="Brief description of the material..."
-                        className="w-full p-3 rounded-xl border border-input bg-background text-sm min-h-[100px] resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                    />
-                </div>
+                            {driveWarning && (
+                                <p className="su-note warn">
+                                    <AlertCircle size={13} />
+                                    {driveWarning}
+                                </p>
+                            )}
 
-                {/* Google Drive Link */}
-                <div className="space-y-2">
-                    <Label htmlFor="fileUrl">
-                        Google Drive Link
-                    </Label>
-                    <p className="text-xs text-muted-foreground -mt-1">
-                        Paste a public Google Drive sharing link. Users will download directly from Drive.
-                    </p>
-                    <div className="relative">
-                        <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            id="fileUrl"
-                            value={fileUrl}
-                            onChange={(e) => dispatch({ type: "SET_FIELD", field: "fileUrl", value: e.target.value })}
-                            placeholder="https://drive.google.com/file/d/.../view?usp=sharing"
-                            className="pl-10 h-11 rounded-xl"
-                        />
-                    </div>
-                    {driveWarning && (
-                        <div className="flex items-center gap-2 text-xs text-amber-600">
-                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                            {driveWarning}
+                            {fileUrl && isValidDriveLink(fileUrl) && (
+                                <p className="su-note ok">
+                                    <CheckCircle2 size={13} />
+                                    Valid Google Drive link detected
+                                </p>
+                            )}
                         </div>
-                    )}
-                    {fileUrl && isValidDriveLink(fileUrl) && (
-                        <div className="flex items-center gap-2 text-xs text-emerald-600">
-                            <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-                            Valid Google Drive link detected
-                        </div>
-                    )}
-                </div>
 
-                {/* Success Message */}
-                {success && (
-                    <m.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm flex items-center gap-2"
-                    >
-                        <CheckCircle2 className="h-4 w-4" />
-                        Study material added successfully!
-                    </m.div>
-                )}
-
-                {/* Error Message */}
-                {error && (
-                    <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4" />
-                        {error}
-                    </div>
-                )}
-
-                {/* Submit */}
-                <div className="flex justify-end pt-4">
-                    <Button
-                        type="submit"
-                        disabled={!canSubmit || saving}
-                        className="px-8 py-6 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white font-bold shadow-lg shadow-indigo-500/25 transition-colors"
-                    >
-                        {saving ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...
-                            </>
-                        ) : (
-                            <>
-                                <CheckCircle2 className="mr-2 h-4 w-4" /> Add Material
-                            </>
+                        {success && (
+                            <div className="alert alert-success alert-row" role="status">
+                                <CheckCircle2 size={16} />
+                                <span>Study material added successfully!</span>
+                            </div>
                         )}
-                    </Button>
-                </div>
-            </m.form>
+
+                        {error && (
+                            <div className="alert alert-error alert-row" role="alert">
+                                <AlertCircle size={16} />
+                                <span>{error}</span>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="form-actions">
+                        <button
+                            type="submit"
+                            disabled={!canSubmit || saving}
+                            className="button button-primary"
+                        >
+                            {saving ? (
+                                <>
+                                    <Loader2 size={16} className="animate-spin" /> Adding...
+                                </>
+                            ) : (
+                                <>
+                                    <CheckCircle2 size={16} /> Add material
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </m.form>
+            </div>
         </div>
     );
 }

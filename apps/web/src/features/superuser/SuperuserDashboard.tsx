@@ -3,7 +3,6 @@ import { m } from "motion/react";
 import { Link } from "react-router-dom";
 import {
     UtensilsCrossed,
-    Building2,
     Plus,
     Edit,
     Trash2,
@@ -16,8 +15,8 @@ import {
     FileText,
     BookOpen,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
+import "./superuser.css";
 
 interface Restaurant {
     id: string;
@@ -50,257 +49,271 @@ interface StudyMaterial {
     fileUrl: string | null;
 }
 
-interface RestaurantSectionProps {
-    restaurants: Restaurant[];
+interface SectionProps {
     deleting: string | null;
     onDelete: (id: string) => void;
 }
 
-function RestaurantListSection({ restaurants, deleting, onDelete }: RestaurantSectionProps) {
+function RestaurantListSection({
+    restaurants,
+    deleting,
+    onDelete,
+}: SectionProps & { restaurants: Restaurant[] }) {
     return (
-        <m.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-10"
-        >
-            <div className="flex items-center gap-3 mb-4">
-                <div className="h-10 w-10 rounded-xl bg-orange-100 flex items-center justify-center">
-                    <ChefHat className="h-5 w-5 text-brand-orange" />
+        <section className="su-section su-food">
+            <header className="su-section-head">
+                <span className="su-section-icon">
+                    <ChefHat size={17} strokeWidth={1.6} />
+                </span>
+                <div className="su-section-title">
+                    <h2>Restaurants</h2>
+                    <p>{restaurants.length} listings</p>
                 </div>
-                <h2 className="text-xl font-bold text-brand-navy">
-                    My Restaurants ({restaurants.length})
-                </h2>
-            </div>
+                <Link to="/superuser/add-restaurant" className="button button-secondary">
+                    <Plus size={14} /> Add restaurant
+                </Link>
+            </header>
 
             {restaurants.length === 0 ? (
-                <div className="text-center py-12 bg-muted/20 rounded-2xl border border-dashed border-border">
-                    <UtensilsCrossed className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
-                    <p className="text-muted-foreground">No restaurants listed yet</p>
-                    <Link to="/superuser/add-restaurant">
-                        <Button variant="outline" className="mt-4 gap-2">
-                            <Plus className="h-4 w-4" /> Add your first restaurant
-                        </Button>
+                <div className="su-empty">
+                    <span className="su-empty-icon">
+                        <UtensilsCrossed size={20} strokeWidth={1.4} />
+                    </span>
+                    <p>No restaurants listed yet.</p>
+                    <Link to="/superuser/add-restaurant" className="button button-primary">
+                        <Plus size={15} /> Add your first restaurant
                     </Link>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="su-grid">
                     {restaurants.map((restaurant) => (
-                        <div
-                            key={restaurant.id}
-                            className="bg-background border border-border/50 rounded-2xl overflow-hidden hover:shadow-md transition-shadow"
-                        >
-                            <div className="h-36 bg-gradient-to-br from-orange-100 to-yellow-50 flex items-center justify-center">
+                        <article key={restaurant.id} className="su-card">
+                            <div className="su-card-media">
                                 {restaurant.imageUrl ? (
-                                    <img src={restaurant.imageUrl} alt={restaurant.name} className="h-full w-full object-cover" />
+                                    <img src={restaurant.imageUrl} alt={restaurant.name} />
                                 ) : (
-                                    <UtensilsCrossed className="h-12 w-12 text-brand-orange/40" />
+                                    <UtensilsCrossed size={30} strokeWidth={1.3} />
                                 )}
                             </div>
-                            <div className="p-4">
-                                <h3 className="font-bold text-brand-navy truncate">{restaurant.name}</h3>
-                                <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                                    <MapPin className="h-3 w-3" /> {restaurant.location}
+
+                            <div className="su-card-body">
+                                <h3 className="su-card-name">{restaurant.name}</h3>
+
+                                <p className="su-card-meta">
+                                    <MapPin size={12} />
+                                    <span>{restaurant.location}</span>
                                 </p>
+
                                 {restaurant.cuisine && (
-                                    <p className="text-xs text-muted-foreground mt-1">{restaurant.cuisine}</p>
+                                    <span className="su-card-tag">{restaurant.cuisine}</span>
                                 )}
-                                <div className="flex items-center gap-1 mt-2">
-                                    <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                                    <span className="text-sm font-medium">{restaurant.rating}</span>
-                                </div>
-                                <div className="flex gap-2 mt-4">
-                                    <Link to={`/superuser/edit-restaurant/${restaurant.id}`} className="flex-1">
-                                        <Button variant="outline" size="sm" className="w-full gap-1">
-                                            <Edit className="h-3 w-3" /> Edit
-                                        </Button>
+
+                                <p className="su-card-meta">
+                                    <Star size={12} fill="currentColor" />
+                                    <span>{restaurant.rating}</span>
+                                </p>
+
+                                <div className="su-card-actions">
+                                    <Link
+                                        to={`/superuser/edit-restaurant/${restaurant.id}`}
+                                        className="su-action"
+                                    >
+                                        <Edit size={12} /> Edit
                                     </Link>
-                                    <Link to={`/superuser/add-menu/${restaurant.id}`} className="flex-1">
-                                        <Button variant="outline" size="sm" className="w-full gap-1">
-                                            <Plus className="h-3 w-3" /> Menu
-                                        </Button>
+                                    <Link
+                                        to={`/superuser/add-menu/${restaurant.id}`}
+                                        className="su-action"
+                                    >
+                                        <Plus size={12} /> Menu
                                     </Link>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="text-red-500 hover:bg-red-50"
+                                    <button
+                                        type="button"
+                                        className="su-action danger"
                                         onClick={() => onDelete(restaurant.id)}
                                         disabled={deleting === restaurant.id}
+                                        aria-label={`Delete ${restaurant.name}`}
                                     >
                                         {deleting === restaurant.id ? (
-                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                            <Loader2 size={12} className="animate-spin" />
                                         ) : (
-                                            <Trash2 className="h-3 w-3" />
-                                        )}
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </m.div>
-    );
-}
-
-interface AccommodationSectionProps {
-    accommodations: Accommodation[];
-    deleting: string | null;
-    onDelete: (id: string) => void;
-}
-
-function AccommodationListSection({ accommodations, deleting, onDelete }: AccommodationSectionProps) {
-    return (
-        <m.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-        >
-            <div className="flex items-center gap-3 mb-4">
-                <div className="h-10 w-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                    <Home className="h-5 w-5 text-blue-600" />
-                </div>
-                <h2 className="text-xl font-bold text-brand-navy">
-                    My Accommodations ({accommodations.length})
-                </h2>
-            </div>
-
-            {accommodations.length === 0 ? (
-                <div className="text-center py-12 bg-muted/20 rounded-2xl border border-dashed border-border">
-                    <Building2 className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
-                    <p className="text-muted-foreground">No accommodations listed yet</p>
-                    <Link to="/superuser/add-accommodation">
-                        <Button variant="outline" className="mt-4 gap-2">
-                            <Plus className="h-4 w-4" /> Add your first accommodation
-                        </Button>
-                    </Link>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {accommodations.map((acc) => (
-                        <div
-                            key={acc.id}
-                            className="bg-background border border-border/50 rounded-2xl overflow-hidden hover:shadow-md transition-shadow"
-                        >
-                            <div className="h-36 bg-gradient-to-br from-blue-100 to-indigo-50 flex items-center justify-center">
-                                <Building2 className="h-12 w-12 text-blue-400/40" />
-                            </div>
-                            <div className="p-4">
-                                <div className="flex items-center gap-2">
-                                    <h3 className="font-bold text-brand-navy truncate">{acc.name}</h3>
-                                    <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium">
-                                        {acc.type}
-                                    </span>
-                                </div>
-                                <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                                    <MapPin className="h-3 w-3" /> {acc.location}
-                                </p>
-                                {acc.rentRange && (
-                                    <p className="text-sm font-semibold text-green-600 mt-1">{acc.rentRange}</p>
-                                )}
-                                <div className="flex gap-2 mt-4">
-                                    <Link to={`/superuser/edit-accommodation/${acc.id}`} className="flex-1">
-                                        <Button variant="outline" size="sm" className="w-full gap-1">
-                                            <Edit className="h-3 w-3" /> Edit
-                                        </Button>
-                                    </Link>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="text-red-500 hover:bg-red-50"
-                                        onClick={() => onDelete(acc.id)}
-                                        disabled={deleting === acc.id}
-                                    >
-                                        {deleting === acc.id ? (
-                                            <Loader2 className="h-3 w-3 animate-spin" />
-                                        ) : (
-                                            <Trash2 className="h-3 w-3" />
-                                        )}
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </m.div>
-    );
-}
-
-interface StudySectionProps {
-    studyMaterials: StudyMaterial[];
-    deleting: string | null;
-    onDelete: (id: string) => void;
-}
-
-function StudyMaterialListSection({ studyMaterials, deleting, onDelete }: StudySectionProps) {
-    return (
-        <m.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="mt-10"
-        >
-            <div className="flex items-center gap-3 mb-4">
-                <div className="h-10 w-10 rounded-xl bg-indigo-100 flex items-center justify-center">
-                    <GraduationCap className="h-5 w-5 text-indigo-600" />
-                </div>
-                <h2 className="text-xl font-bold text-brand-navy">
-                    My Study Materials ({studyMaterials.length})
-                </h2>
-            </div>
-
-            {studyMaterials.length === 0 ? (
-                <div className="text-center py-12 bg-muted/20 rounded-2xl border border-dashed border-border">
-                    <BookOpen className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
-                    <p className="text-muted-foreground">No study materials uploaded yet</p>
-                    <Link to="/superuser/add-study-material">
-                        <Button variant="outline" className="mt-4 gap-2">
-                            <Plus className="h-4 w-4" /> Upload your first material
-                        </Button>
-                    </Link>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {studyMaterials.map((material) => (
-                        <div
-                            key={material.id}
-                            className="bg-background border border-border/50 rounded-2xl overflow-hidden hover:shadow-md transition-shadow"
-                        >
-                            <div className="h-24 bg-gradient-to-br from-indigo-100 to-violet-50 flex items-center justify-center">
-                                <FileText className="h-10 w-10 text-indigo-400/40" />
-                            </div>
-                            <div className="p-4">
-                                <h3 className="font-bold text-brand-navy truncate">{material.title}</h3>
-                                <p className="text-sm text-indigo-500 font-medium mt-0.5">{material.subjectName}</p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    {material.department} · {material.year}
-                                </p>
-                                <span className="inline-block text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium mt-2">
-                                    {material.category.replace(/_/g, " ")}
-                                </span>
-                                <div className="flex gap-2 mt-4">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="flex-1 text-red-500 hover:bg-red-50 gap-1"
-                                        onClick={() => onDelete(material.id)}
-                                        disabled={deleting === material.id}
-                                    >
-                                        {deleting === material.id ? (
-                                            <Loader2 className="h-3 w-3 animate-spin" />
-                                        ) : (
-                                            <Trash2 className="h-3 w-3" />
+                                            <Trash2 size={12} />
                                         )}
                                         Delete
-                                    </Button>
+                                    </button>
                                 </div>
                             </div>
-                        </div>
+                        </article>
                     ))}
                 </div>
             )}
-        </m.div>
+        </section>
+    );
+}
+
+function AccommodationListSection({
+    accommodations,
+    deleting,
+    onDelete,
+}: SectionProps & { accommodations: Accommodation[] }) {
+    return (
+        <section className="su-section su-stay">
+            <header className="su-section-head">
+                <span className="su-section-icon">
+                    <Home size={17} strokeWidth={1.6} />
+                </span>
+                <div className="su-section-title">
+                    <h2>Accommodations</h2>
+                    <p>{accommodations.length} listings</p>
+                </div>
+                <Link to="/superuser/add-accommodation" className="button button-secondary">
+                    <Plus size={14} /> Add accommodation
+                </Link>
+            </header>
+
+            {accommodations.length === 0 ? (
+                <div className="su-empty">
+                    <span className="su-empty-icon">
+                        <Home size={20} strokeWidth={1.4} />
+                    </span>
+                    <p>No accommodations listed yet.</p>
+                    <Link to="/superuser/add-accommodation" className="button button-primary">
+                        <Plus size={15} /> Add your first accommodation
+                    </Link>
+                </div>
+            ) : (
+                <div className="su-grid">
+                    {accommodations.map((acc) => (
+                        <article key={acc.id} className="su-card">
+                            <div className="su-card-media">
+                                <Home size={30} strokeWidth={1.3} />
+                            </div>
+
+                            <div className="su-card-body">
+                                <h3 className="su-card-name">{acc.name}</h3>
+
+                                <p className="su-card-meta">
+                                    <MapPin size={12} />
+                                    <span>{acc.location}</span>
+                                </p>
+
+                                <span className="su-card-tag">{acc.type}</span>
+
+                                {acc.rentRange && (
+                                    <p className="su-card-price">{acc.rentRange}</p>
+                                )}
+
+                                <div className="su-card-actions">
+                                    <Link
+                                        to={`/superuser/edit-accommodation/${acc.id}`}
+                                        className="su-action"
+                                    >
+                                        <Edit size={12} /> Edit
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        className="su-action danger"
+                                        onClick={() => onDelete(acc.id)}
+                                        disabled={deleting === acc.id}
+                                        aria-label={`Delete ${acc.name}`}
+                                    >
+                                        {deleting === acc.id ? (
+                                            <Loader2 size={12} className="animate-spin" />
+                                        ) : (
+                                            <Trash2 size={12} />
+                                        )}
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </article>
+                    ))}
+                </div>
+            )}
+        </section>
+    );
+}
+
+function StudyMaterialListSection({
+    studyMaterials,
+    deleting,
+    onDelete,
+}: SectionProps & { studyMaterials: StudyMaterial[] }) {
+    return (
+        <section className="su-section su-study">
+            <header className="su-section-head">
+                <span className="su-section-icon">
+                    <GraduationCap size={17} strokeWidth={1.6} />
+                </span>
+                <div className="su-section-title">
+                    <h2>Study materials</h2>
+                    <p>{studyMaterials.length} uploads</p>
+                </div>
+                <Link to="/superuser/add-study-material" className="button button-secondary">
+                    <Plus size={14} /> Add material
+                </Link>
+            </header>
+
+            {studyMaterials.length === 0 ? (
+                <div className="su-empty">
+                    <span className="su-empty-icon">
+                        <BookOpen size={20} strokeWidth={1.4} />
+                    </span>
+                    <p>No study materials uploaded yet.</p>
+                    <Link to="/superuser/add-study-material" className="button button-primary">
+                        <Plus size={15} /> Upload your first material
+                    </Link>
+                </div>
+            ) : (
+                <div className="su-grid">
+                    {studyMaterials.map((material) => (
+                        <article key={material.id} className="su-card">
+                            <div className="su-card-media">
+                                <span className="su-doc">
+                                    <FileText size={28} strokeWidth={1.3} />
+                                </span>
+                            </div>
+
+                            <div className="su-card-body">
+                                <h3 className="su-card-name">{material.title}</h3>
+
+                                <p className="su-card-meta">
+                                    <BookOpen size={12} />
+                                    <span>{material.subjectName}</span>
+                                </p>
+
+                                <p className="su-card-meta">
+                                    <GraduationCap size={12} />
+                                    <span>
+                                        {material.department} · {material.year}
+                                    </span>
+                                </p>
+
+                                <span className="su-card-tag">
+                                    {material.category.replace(/_/g, " ")}
+                                </span>
+
+                                <div className="su-card-actions">
+                                    <button
+                                        type="button"
+                                        className="su-action danger"
+                                        onClick={() => onDelete(material.id)}
+                                        disabled={deleting === material.id}
+                                        aria-label={`Delete ${material.title}`}
+                                    >
+                                        {deleting === material.id ? (
+                                            <Loader2 size={12} className="animate-spin" />
+                                        ) : (
+                                            <Trash2 size={12} />
+                                        )}
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </article>
+                    ))}
+                </div>
+            )}
+        </section>
     );
 }
 
@@ -374,78 +387,66 @@ export function SuperuserDashboard() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
-                <Loader2 className="w-8 h-8 animate-spin text-brand-orange" />
+            <div className="um-editorial um-superuser">
+                <div className="su-loading">
+                    <Loader2 size={20} className="animate-spin" />
+                    <span>Loading your listings...</span>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-6xl mx-auto pb-12">
-            <div className="mb-8">
-                <m.h1
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight mb-2"
-                >
-                    <span className="text-brand-navy">SUPERUSER </span>
-                    <span className="bg-gradient-to-r from-brand-orange to-brand-yellow bg-clip-text text-transparent">
-                        DASHBOARD
-                    </span>
-                </m.h1>
-                <m.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className="text-muted-foreground"
-                >
-                    Manage your restaurants, accommodations, and study materials
-                </m.p>
-            </div>
+        <div className="um-editorial um-superuser">
+            <header className="su-head">
+                <div>
+                    <p className="section-label">
+                        <span>01</span>/ Superuser
+                    </p>
+                    <h1 className="page-title">
+                        Your <span>listings.</span>
+                    </h1>
+                    <p className="page-lead">
+                        Manage your restaurants, accommodations, and study materials.
+                    </p>
+                </div>
+
+                <div className="su-head-actions">
+                    <Link to="/superuser/add-restaurant" className="button button-secondary">
+                        <Plus size={15} /> Restaurant
+                    </Link>
+                    <Link to="/superuser/add-accommodation" className="button button-secondary">
+                        <Plus size={15} /> Accommodation
+                    </Link>
+                    <Link to="/superuser/add-study-material" className="button button-primary">
+                        <Plus size={15} /> Study material
+                    </Link>
+                </div>
+            </header>
 
             <m.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
-                className="flex flex-wrap gap-3 mb-8"
+                transition={{ duration: 0.4 }}
             >
-                <Link to="/superuser/add-restaurant">
-                    <Button className="gap-2 bg-gradient-to-r from-brand-orange to-brand-yellow text-white font-bold rounded-xl hover:opacity-90">
-                        <Plus className="h-4 w-4" />
-                        Add Restaurant
-                    </Button>
-                </Link>
-                <Link to="/superuser/add-accommodation">
-                    <Button className="gap-2 bg-gradient-to-r from-brand-navy to-brand-navy/80 text-white font-bold rounded-xl hover:opacity-90">
-                        <Plus className="h-4 w-4" />
-                        Add Accommodation
-                    </Button>
-                </Link>
-                <Link to="/superuser/add-study-material">
-                    <Button className="gap-2 bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-bold rounded-xl hover:opacity-90">
-                        <Plus className="h-4 w-4" />
-                        Add Study Material
-                    </Button>
-                </Link>
+                <RestaurantListSection
+                    restaurants={restaurants}
+                    deleting={deleting}
+                    onDelete={handleDeleteRestaurant}
+                />
+
+                <AccommodationListSection
+                    accommodations={accommodations}
+                    deleting={deleting}
+                    onDelete={handleDeleteAccommodation}
+                />
+
+                <StudyMaterialListSection
+                    studyMaterials={studyMaterials}
+                    deleting={deleting}
+                    onDelete={handleDeleteStudyMaterial}
+                />
             </m.div>
-
-            <RestaurantListSection
-                restaurants={restaurants}
-                deleting={deleting}
-                onDelete={handleDeleteRestaurant}
-            />
-
-            <AccommodationListSection
-                accommodations={accommodations}
-                deleting={deleting}
-                onDelete={handleDeleteAccommodation}
-            />
-
-            <StudyMaterialListSection
-                studyMaterials={studyMaterials}
-                deleting={deleting}
-                onDelete={handleDeleteStudyMaterial}
-            />
         </div>
     );
 }

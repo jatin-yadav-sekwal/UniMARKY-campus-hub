@@ -283,7 +283,9 @@ Radius: the landing uses **4px** for controls. The app’s `--radius` (shadcn) i
 | Profile | `features/profile/ProfilePage.tsx` | `.um-profile` | `features/profile/profile.css` | Done (body only; shell pending) |
 | Onboarding | `features/onboarding/OnboardingPage.tsx` (+ `components/UniversitySelector.tsx`) | `.um-onboarding` | `features/onboarding/onboarding.css` | Done |
 | Request Role | `features/roles/RequestRolePage.tsx` | `.um-roles` | `features/roles/roles.css` | Done (body only; shell pending) |
-| — | — | — | — | Remaining areas (Superuser, Admin) |
+| Superuser | `features/superuser/SuperuserDashboard.tsx` (+ `AddRestaurantPage.tsx`, `EditRestaurantPage.tsx`, `AddMenuItemPage.tsx`, `AddAccommodationPage.tsx`, `EditAccommodationPage.tsx`, `AddStudyMaterialPage.tsx`, `RestaurantFormFields.tsx`, `AccommodationFormFields.tsx`) | `.um-superuser` (+ `.su-food` / `.su-stay` / `.su-study`) | `features/superuser/superuser.css` | Done (body only; shell pending) |
+| Admin | `features/admin/AdminDashboard.tsx` | `.um-admin` | `features/admin/admin.css` | Done (body only; shell pending) |
+| — | — | — | — | Remaining areas (shared protected shell + global tokens — pending approval) |
 
 Notes from the Auth + Dashboard pass:
 
@@ -342,6 +344,16 @@ Notes from the Profile, Onboarding and Request Role pass:
 - **Onboarding** — the shadcn `Card` shell became a single framed card (`.ob-card`) with the shared `.section-label` / `.page-title` treatment, and the shadcn `Select` university picker became a native `select.field-input`. Auth/onboarding API calls unchanged.
 - **Request Role** — the navy gradient "benefits" panel became a hairline list (`.rr-benefits`), request rows became hairline rows with a mono status chip (`.rr-status`), and the yellow pending notice became a bordered inline notice. The gradient submit button became `.button button-primary`.
 - Verified: `tsc -b` clean, `vite build` passes.
+
+Notes from the Superuser + Admin pass:
+
+- **Superuser dashboard** — the three gradient-tinted icon tiles became three hairline sections (`.su-section`) with a per-category accent top-border: food `#b4762a`, accommodation `#2f6bd8`, study `#5751a7`. The accent is carried by a 2px top hairline, a square section icon and a mono chip on each card — no gradients, no coloured shadows.
+- Listing cards are 1px-framed with square corners; the Edit / Menu / Delete affordances became a hairline action row (`.su-action`) instead of three rounded outline buttons. Empty states use the shared dashed `.su-empty` treatment.
+- The three gradient "Add …" buttons became one quiet row of `.button button-secondary` / `.button button-primary` in the page header.
+- **Superuser forms** — the add/edit restaurant and add/edit accommodation forms were factored into shared field components (`RestaurantFormFields.tsx`, `AccommodationFormFields.tsx` + `AccommodationPhotos`) so the paired pages cannot drift. Each page keeps its own submit/load logic unchanged.
+- All shadcn `Button`/`Input`/`Label` were replaced with `.button` / `.field-input` / `.field-label`; the accommodation type selector became square segmented choices (`.su-choice`) with `aria-pressed`; the rounded dashed photo targets became square ones (`.su-upload`, `.su-photos`); the shadcn `Select` on the study-material form became native `select.field-input`.
+- **Admin dashboard** — the purple/pink gradient headline, the coloured status pills and the purple gradient avatar became an editorial page head, an underline status filter (`.ad-filters`, one accent dot per status) and a square accent avatar (`.ad-avatar`). Approve/Reject are now outlined hairline buttons (`.ad-action`) that fill on hover; the approved/rejected states use a mono status chip (`.ad-status`).
+- Verified: `tsc -b` clean, `vite build` passes; all seven superuser/admin routes load without console errors (protected routes still need a live session to render their bodies).
 
 ### Verified state of the landing
 
