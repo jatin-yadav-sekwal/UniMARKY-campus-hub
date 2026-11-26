@@ -279,7 +279,8 @@ Radius: the landing uses **4px** for controls. The app’s `--radius` (shadcn) i
 | Housing | `features/lifestyle/pages/HousingPage.tsx` (+ `AccommodationPage.tsx`) | `.um-housing` / `.um-stay` | `features/lifestyle/pages/lifestyle.css` | Done (body only; shell pending) |
 | Food | `features/lifestyle/pages/FoodPage.tsx` (+ `RestaurantPage.tsx`, `MenuItemPage.tsx`) | `.um-food` / `.um-dish` | `features/lifestyle/pages/lifestyle.css` | Done (body only; shell pending) |
 | Public (About, Contact, Terms, Privacy) | `features/public/AboutPage.tsx` (+ `ContactPage.tsx`, `TermsPage.tsx`, `PrivacyPage.tsx`, `PublicShell.tsx`) | `.um-public` | `features/public/public.css` | Done |
-| — | — | — | — | Remaining areas (Lost & Found, Profile, Onboarding, Request Role, Superuser, Admin) |
+| Lost & Found | `features/campus/pages/LostFoundPage.tsx` (+ `features/lostfound/LostFoundItemPage.tsx`, `MyLostFoundListingsPage.tsx`, `ReportItemPage.tsx`, `EditLostFoundItemPage.tsx`, `LostFoundForm.tsx`) | `.um-lostfound` / `.um-lf-item` | `features/lostfound/lostfound.css` | Done (body only; shell pending) |
+| — | — | — | — | Remaining areas (Profile, Onboarding, Request Role, Superuser, Admin) |
 
 Notes from the Auth + Dashboard pass:
 
@@ -323,6 +324,14 @@ Notes from the Public pages pass:
 - Bodies are editorial: `.page-head` / `.section-label` / `.page-title` / `.page-lead`, a 1px-gap stat grid (`.pub-stats`), a 1px-gap values grid (`.pub-values`), accent-topped contact cards (`.pub-card`) and a framed legal body (`.pub-legal`) with hairline rules between clauses. Rounded-3xl cards, ambient glows and gradient headlines are gone.
 - The landing atmosphere stays visible behind the body (`.um-public-body` is transparent) so the public pages feel continuous with the landing.
 - Verified: `tsc -b` clean, `vite build` passes; `/about`, `/contact`, `/terms`, `/privacy` render with the landing shell, no console errors.
+
+Notes from the Lost & Found pass:
+
+- All five lost & found routes (listing, item detail, my-listings, report, edit) were restyled. The teal/emerald gradient pills, gradient banners and gradient avatars are gone; the report type is now carried by a single accent colour per type (lost → `#b3261e`, found → `#1f8a63`) drawn as a 2px top hairline on cards and a dot on the type chip.
+- The type filter became an underline tab row (`.lf-types`); the detail page became a framed hero (`.lfd-hero`) plus a hairline meta grid (`.lfd-meta`) and a quiet contact panel.
+- The report and edit forms were factored into one shared `LostFoundForm.tsx` (type toggle, dashed photo target, name/location/description fields) so the two pages can no longer drift apart. The type toggle is a pair of square hairline options with `aria-pressed`; the gradient "REPORT AS LOST" submit button became a plain `.button button-primary`.
+- The floating circular "report item" FAB was dropped — the action now lives in the page header (and in the empty state), matching the rest of the editorial pages.
+- Verified: `tsc -b` clean, `vite build` passes.
 
 ### Verified state of the landing
 

@@ -1,0 +1,653 @@
+/* ===========================================================================
+   Lost & Found — editorial pass.
+   Scoped to .um-lostfound (listing, my-listings, report, edit) and
+   .um-lf-item (item detail).
+   =========================================================================== */
+
+.um-editorial.um-lostfound,
+.um-editorial.um-lf-item {
+  background: transparent;
+}
+
+/* Accent per report type — a single colour per category, drawn as a hairline
+   and a chip. Lost uses the system's danger red, Found the success green. */
+.um-lostfound {
+  --lf-lost: #b3261e;
+  --lf-found: #1f8a63;
+}
+
+/* ----------------------------------------------------------- type filters --- */
+.um-lostfound .lf-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(67, 63, 56, .22);
+}
+
+.um-lostfound .lf-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 0 5px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: #6b6760;
+  font: 500 13px 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: color .18s ease, border-color .18s ease;
+}
+
+.um-lostfound .lf-type:hover {
+  color: #252421;
+}
+
+.um-lostfound .lf-type.active {
+  color: #24231f;
+  border-bottom-color: #3157d5;
+}
+
+.um-lostfound .lf-type-dot {
+  width: 7px;
+  height: 7px;
+  background: currentColor;
+}
+
+.um-lostfound .lf-type[data-type='lost'] .lf-type-dot {
+  background: var(--lf-lost);
+}
+
+.um-lostfound .lf-type[data-type='found'] .lf-type-dot {
+  background: var(--lf-found);
+}
+
+/* ---------------------------------------------------------------- toolbar --- */
+.um-lostfound .lf-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 22px 0 30px;
+}
+
+.um-lostfound .lf-search {
+  position: relative;
+  flex: 1;
+  max-width: 360px;
+}
+
+.um-lostfound .lf-search svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a09c94;
+  pointer-events: none;
+}
+
+.um-lostfound .lf-search .field-input {
+  padding-left: 36px;
+}
+
+/* ------------------------------------------------------------------- grid --- */
+.um-lostfound .lf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.um-lostfound .lf-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid #e8e6e1;
+  border-top: 2px solid var(--lf-accent, #6b6760);
+  background: #fff;
+  transition: border-color .18s ease;
+}
+
+.um-lostfound .lf-card:hover {
+  border-color: #dcd9d3;
+  border-top-color: var(--lf-accent, #6b6760);
+}
+
+.um-lostfound .lf-media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #f5f4f1;
+  border-bottom: 1px solid #e8e6e1;
+}
+
+.um-lostfound .lf-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .5s ease;
+}
+
+.um-lostfound .lf-card:hover .lf-media img {
+  transform: scale(1.04);
+}
+
+.um-lostfound .lf-media-empty {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #b7b2aa;
+}
+
+.um-lostfound .lf-chip {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, .94);
+  color: var(--lf-accent, #6b6760);
+  font: 500 9px 'DM Mono', monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.um-lostfound .lf-chip::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: currentColor;
+}
+
+.um-lostfound .lf-status {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 4px 8px;
+  background: rgba(36, 35, 31, .78);
+  color: #fff;
+  font: 400 9px 'DM Mono', monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.um-lostfound .lf-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  padding: 15px 16px 16px;
+}
+
+.um-lostfound .lf-name {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 500 16px 'Space Grotesk', sans-serif;
+  color: #24231f;
+  transition: color .18s ease;
+}
+
+.um-lostfound .lf-card:hover .lf-name {
+  color: #3157d5;
+}
+
+.um-lostfound .lf-loc {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  color: #8f8b83;
+  font-size: 12px;
+}
+
+.um-lostfound .lf-loc span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.um-lostfound .lf-desc {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: #8f8b83;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.um-lostfound .lf-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 11px;
+  border-top: 1px solid rgba(67, 63, 56, .16);
+  color: #8f8b83;
+  font: 400 9px 'DM Mono', monospace;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.um-lostfound .lf-foot span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.um-lostfound .lf-foot .who {
+  color: #4d4a45;
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+}
+
+/* -------------------------------------------------------- loading / paging --- */
+.um-lostfound .lf-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 80px 0;
+  color: #66625c;
+  font-size: 14px;
+}
+
+.um-lostfound .lf-load-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 36px;
+}
+
+.um-lostfound .lf-count {
+  margin: 22px 0 0;
+  text-align: center;
+}
+
+.um-lostfound .lf-skeleton {
+  border: 1px solid #e8e6e1;
+  border-top: 2px solid #e8e6e1;
+  background: #fff;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.um-lostfound .lf-skeleton-line {
+  height: 11px;
+  background: #f0eee9;
+}
+
+.um-lostfound .lf-skeleton-line.short {
+  width: 58%;
+}
+
+.um-lostfound .lf-skeleton-line.tiny {
+  width: 34%;
+}
+
+/* --------------------------------------------------------- action buttons --- */
+.um-lostfound .lf-actions {
+  display: flex;
+  gap: 14px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(67, 63, 56, .16);
+}
+
+.um-lostfound .lf-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: #66625c;
+  font: 400 11px 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: color .18s ease;
+}
+
+.um-lostfound .lf-action:hover {
+  color: #3157d5;
+}
+
+.um-lostfound .lf-action.danger:hover {
+  color: #b3261e;
+}
+
+.um-lostfound .lf-fab {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 50;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #3157d5;
+  border-radius: 4px;
+  background: #3157d5;
+  color: #fff;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease;
+}
+
+.um-lostfound .lf-fab:hover {
+  background: #2446b9;
+  border-color: #2446b9;
+}
+
+/* ------------------------------------------------------------- form pages --- */
+.um-lostfound .lf-form-wrap {
+  max-width: 660px;
+  margin: 0 auto;
+}
+
+.um-lostfound .lf-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.um-lostfound .lf-toggle-opt {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid rgba(67, 63, 56, .22);
+  background: #fff;
+  color: #66625c;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .18s ease, color .18s ease, background .18s ease;
+}
+
+.um-lostfound .lf-toggle-opt:hover {
+  border-color: #8f8b83;
+}
+
+.um-lostfound .lf-toggle-opt.active {
+  border-color: var(--lf-accent, #3157d5);
+  background: rgba(49, 87, 213, .03);
+  color: var(--lf-accent, #3157d5);
+}
+
+.um-lostfound .lf-toggle-opt[data-type='lost'].active {
+  border-color: var(--lf-lost);
+  background: rgba(179, 38, 30, .04);
+  color: var(--lf-lost);
+}
+
+.um-lostfound .lf-toggle-opt[data-type='found'].active {
+  border-color: var(--lf-found);
+  background: rgba(31, 138, 99, .04);
+  color: var(--lf-found);
+}
+
+.um-lostfound .lf-toggle-icon {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid currentColor;
+}
+
+.um-lostfound .lf-toggle-text strong {
+  display: block;
+  color: #24231f;
+  font: 500 14px 'DM Sans', sans-serif;
+}
+
+.um-lostfound .lf-toggle-text small {
+  display: block;
+  margin-top: 2px;
+  color: #8f8b83;
+  font-size: 12px;
+}
+
+.um-lostfound .lf-upload {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 190px;
+  overflow: hidden;
+  border: 1px dashed rgba(71, 65, 58, .35);
+  background: rgba(255, 255, 255, .4);
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease;
+}
+
+.um-lostfound .lf-upload:hover {
+  border-color: #3157d5;
+  background: rgba(49, 87, 213, .03);
+}
+
+.um-lostfound .lf-upload img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.um-lostfound .lf-upload-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+  text-align: center;
+  color: #8f8b83;
+}
+
+.um-lostfound .lf-upload-empty strong {
+  color: #24231f;
+  font-size: 14px;
+}
+
+.um-lostfound .lf-upload-empty small {
+  font-size: 12px;
+}
+
+.um-lostfound .lf-upload-remove {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e8e6e1;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, .92);
+  color: #b3261e;
+  cursor: pointer;
+}
+
+.um-lostfound .lf-field-icon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a09c94;
+  pointer-events: none;
+}
+
+.um-lostfound .lf-field-with-icon .field-input {
+  padding-left: 38px;
+}
+
+/* ----------------------------------------------------------- item detail --- */
+.um-lf-item .lfd-hero {
+  border: 1px solid #e8e6e1;
+  border-top: 2px solid var(--lf-accent, #6b6760);
+  background: #fff;
+  padding: 26px;
+  margin-bottom: 26px;
+}
+
+.um-lf-item .lfd-kicker {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 12px;
+  color: var(--lf-accent, #6b6760);
+  font: 500 9px 'DM Mono', monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.um-lf-item .lfd-kicker::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: currentColor;
+}
+
+.um-lf-item .lfd-title {
+  margin: 0 0 10px;
+  font: 400 clamp(26px, 3vw, 38px)/1.12 'Space Grotesk', sans-serif;
+  letter-spacing: -.045em;
+  color: #24231f;
+}
+
+.um-lf-item .lfd-media {
+  margin-bottom: 26px;
+  border: 1px solid #e8e6e1;
+  background: #f5f4f1;
+  overflow: hidden;
+}
+
+.um-lf-item .lfd-media img {
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+}
+
+.um-lf-item .lfd-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1px;
+  background: #e8e6e1;
+  border: 1px solid #e8e6e1;
+  margin-bottom: 26px;
+}
+
+.um-lf-item .lfd-meta-cell {
+  background: #fff;
+  padding: 18px 20px;
+}
+
+.um-lf-item .lfd-label {
+  margin: 0 0 7px;
+  color: #8f8b83;
+  font: 400 9px 'DM Mono', monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.um-lf-item .lfd-meta-value {
+  margin: 0;
+  color: #24231f;
+  font: 500 15px/1.4 'Space Grotesk', sans-serif;
+}
+
+.um-lf-item .lfd-panel {
+  border: 1px solid #e8e6e1;
+  background: #fff;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.um-lf-item .lfd-panel p {
+  margin: 0;
+  color: #3d3a35;
+  font-size: 14px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+
+.um-lf-item .lfd-contact {
+  border: 1px solid rgba(67, 63, 56, .22);
+  background: rgba(255, 255, 255, .32);
+  padding: 24px;
+}
+
+.um-lf-item .lfd-reporter {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.um-lf-item .lfd-avatar {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--lf-accent, #6b6760);
+  color: var(--lf-accent, #6b6760);
+}
+
+.um-lf-item .lfd-reporter-name {
+  margin: 0;
+  color: #24231f;
+  font: 500 16px 'Space Grotesk', sans-serif;
+}
+
+.um-lf-item .lfd-reporter-dept {
+  margin: 3px 0 0;
+  color: #8f8b83;
+  font-size: 12px;
+}
+
+.um-lf-item .lfd-no-contact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 13px;
+  border: 1px solid rgba(67, 63, 56, .16);
+  color: #8f8b83;
+  font-size: 13px;
+}
+
+@media (max-width: 620px) {
+  .um-lostfound .lf-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .um-lostfound .lf-search {
+    max-width: none;
+  }
+
+  .um-lostfound .lf-toggle {
+    grid-template-columns: 1fr;
+  }
+
+  .um-lf-item .lfd-hero {
+    padding: 20px;
+  }
+
+  .um-lf-item .lfd-panel,
+  .um-lf-item .lfd-contact {
+    padding: 18px;
+  }
+}
