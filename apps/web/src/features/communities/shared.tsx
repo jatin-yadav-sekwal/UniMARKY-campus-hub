@@ -1,4 +1,3 @@
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 /** --- Types (mirror apps/api/server/routes/communities.ts) --- */
@@ -80,15 +79,15 @@ export const CATEGORY_LABELS = Object.fromEntries(
     CATEGORY_OPTIONS.map((o) => [o.value, o.label])
 ) as Record<CommunityCategory, string>;
 
-/** Gradient used for a community's cover strip, keyed by category. */
-export const CATEGORY_GRADIENTS: Record<CommunityCategory, string> = {
-    academic: 'from-indigo-500 to-violet-600',
-    tech: 'from-sky-500 to-blue-600',
-    sports: 'from-emerald-500 to-teal-600',
-    cultural: 'from-pink-500 to-rose-600',
-    housing: 'from-amber-500 to-orange-600',
-    placement: 'from-cyan-500 to-sky-600',
-    other: 'from-slate-500 to-gray-600',
+/** Accent colour used for a community's hairline + label, keyed by category. */
+export const CATEGORY_COLORS: Record<CommunityCategory, string> = {
+    academic: '#4b4fb0',
+    tech: '#2f6bd8',
+    sports: '#1f8a63',
+    cultural: '#c2537a',
+    housing: '#b4762a',
+    placement: '#2b8fa8',
+    other: '#6b6760',
 };
 
 /** --- Helpers --- */
@@ -115,22 +114,17 @@ export function timeAgo(dateStr: string): string {
 
 export function InitialsAvatar({ name, className }: { name?: string | null; className?: string }) {
     return (
-        <div
-            className={cn(
-                'flex items-center justify-center rounded-full bg-brand-navy text-white font-bold shrink-0 select-none',
-                className ?? 'h-9 w-9 text-sm'
-            )}
-            aria-hidden="true"
-        >
+        <div className={cn('cm-avatar', className)} aria-hidden="true">
             {initials(name)}
         </div>
     );
 }
 
 export function CategoryBadge({ category }: { category: CommunityCategory }) {
+    const color = CATEGORY_COLORS[category] ?? CATEGORY_COLORS.other;
     return (
-        <Badge variant="secondary" className="capitalize font-semibold">
+        <span className="cm-badge" style={{ color }}>
             {CATEGORY_LABELS[category] ?? category}
-        </Badge>
+        </span>
     );
 }

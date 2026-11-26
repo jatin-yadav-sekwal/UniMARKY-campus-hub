@@ -274,7 +274,8 @@ Radius: the landing uses **4px** for controls. The app’s `--radius` (shadcn) i
 | Auth | `features/auth/AuthPage.tsx` (+ `components/auth/AuthForm.tsx`, `features/auth/components/SocialAuth.tsx`) | `.um-auth` | `features/auth/auth.css` | Done |
 | Dashboard | `features/dashboard/DashboardPage.tsx` | `.um-dashboard` | `features/dashboard/dashboard.css` | Done (body only; shell pending) |
 | Marketplace | `features/marketplace/MarketplacePage.tsx` (+ `MarketplaceItemPage.tsx`, `MyMarketplaceListingsPage.tsx`, `ListItemPage.tsx`, `EditMarketplaceItemPage.tsx`, `components/MarketplacePhotoUploader.tsx`) | `.um-marketplace` | `features/marketplace/marketplace.css` | Done (body only; shell pending) |
-| Communities, Study, Housing, Food | — | — | — | Next (high-traffic core) |
+| Communities | `features/communities/CommunitiesPage.tsx` (+ `CommunityPage.tsx`, `CreateCommunityPage.tsx`, `ManageCommunityPage.tsx`, `shared.tsx`) | `.um-communities` | `features/communities/communities.css` | Done (body only; shell pending) |
+| Study, Housing, Food | — | — | — | Next (high-traffic core) |
 
 Notes from the Auth + Dashboard pass:
 
@@ -287,6 +288,14 @@ Notes from the Marketplace pass:
 
 - Reusable page structure was promoted into `.um-editorial` so later pages need less bespoke CSS: `.page-head` / `.page-title` / `.page-lead` / `.page-toolbar`, `.card-surface`, `.meta-mono`, `.empty-state` / `.empty-icon`, and form layout `.back-link` / `.form-card` / `.form-stack` / `.form-grid` / `.form-actions` / `.form-note` / `.switch`. Dashboard was updated to use `.page-head` / `.page-title` / `.page-lead` in the same commit.
 - All five marketplace routes (listing, item detail, my-listings, list, edit) plus the photo uploader were restyled: gradients, rounded `Card`s and coloured shadows were replaced with 1px-framed `.mp-card` surfaces, editorial filters, a native `.switch`, hairline action rows and a square list-item affordance. shadcn `Button`/`Input`/`Label`/`Card` were replaced with `.button` / `.field-input` / `.field-label`; ₹ formatting, fetch/pagination/delete/share logic is unchanged.
+- Verified: `tsc -b` clean, `vite build` passes.
+
+Notes from the Communities pass:
+
+- All four community routes (discover, detail, create, manage) plus the shared bits were restyled. Category gradients were replaced with a single accent colour per category (`CATEGORY_COLORS`) drawn as a 2px top hairline on cards/hero and as a dot on the `cm-badge`; the gradient cover strip and coloured monogram block are gone.
+- Replaced the shadcn `Tabs` with a native `.cm-tabs` underline tablist, the shadcn `Select`s with native `select.field-input`, and `Card`/`Button`/`Input`/`Label` with `.cm-*` surfaces and `.button` / `.field-input` / `.field-label`. Feed, membership, role-change, archive and delete logic is unchanged.
+- `shared.tsx` now exports `CATEGORY_COLORS` (replacing `CATEGORY_GRADIENTS`) and renders an editorial square initials avatar and dot badge.
+- Added `.button-ghost` and `.alert-row` (icon + text + dismiss) to `.um-editorial`.
 - Verified: `tsc -b` clean, `vite build` passes.
 
 ### Verified state of the landing

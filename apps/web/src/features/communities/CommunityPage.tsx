@@ -4,10 +4,6 @@ import { m, AnimatePresence } from 'motion/react';
 import { api } from '@/lib/api';
 import { uploadImage } from '@/lib/uploadImage';
 import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Loader2,
     ArrowLeft,
@@ -23,7 +19,7 @@ import {
     Settings,
 } from 'lucide-react';
 import {
-    CATEGORY_GRADIENTS,
+    CATEGORY_COLORS,
     CategoryBadge,
     InitialsAvatar,
     timeAgo,
@@ -32,6 +28,7 @@ import {
     type CommunityComment,
     type CommunityMember,
 } from './shared';
+import './communities.css';
 
 const POSTS_LIMIT = 10;
 
@@ -184,146 +181,149 @@ export function CommunityPage() {
 
     if (loading) {
         return (
-            <div className="flex h-96 items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-brand-blue" />
+            <div className="um-editorial um-communities">
+                <div className="cm-loading">
+                    <Loader2 size={22} className="animate-spin" />
+                    <span>Loading community...</span>
+                </div>
             </div>
         );
     }
 
     if (!community) {
         return (
-            <div className="text-center py-20">
-                <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-                <h2 className="text-xl font-bold text-brand-navy dark:text-white">
-                    {error || 'Community not found'}
-                </h2>
-                <Link to="/communities" className="text-brand-blue hover:underline text-sm mt-2 inline-block">
-                    Back to Communities
-                </Link>
+            <div className="um-editorial um-communities">
+                <div className="empty-state">
+                    <span className="empty-icon">
+                        <AlertCircle size={24} strokeWidth={1.5} />
+                    </span>
+                    <h3>{error || 'Community not found'}</h3>
+                    <Link to="/communities" className="button button-secondary">
+                        Back to communities
+                    </Link>
+                </div>
             </div>
         );
     }
 
-    const gradient = CATEGORY_GRADIENTS[community.category];
+    const accent = CATEGORY_COLORS[community.category] ?? CATEGORY_COLORS.other;
 
     return (
-        <div className="pb-20">
-            <Link
-                to="/communities"
-                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
-            >
-                <ArrowLeft className="w-4 h-4" /> Communities
+        <div className="um-editorial um-communities">
+            <Link to="/communities" className="back-link">
+                <ArrowLeft size={15} /> Communities
             </Link>
 
-            {/* Header */}
-            <Card className="overflow-hidden border border-border/60 shadow-sm mb-6">
-                <div className={`h-24 w-full bg-gradient-to-r ${gradient}`} />
-                <CardContent className="pt-0">
-                    <div className="-mt-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-                        <div className="flex items-end gap-4">
-                            <div
-                                className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${gradient} ring-4 ring-background flex items-center justify-center text-white text-2xl font-black shadow-md`}
-                            >
-                                {community.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div className="pb-1">
-                                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-brand-navy dark:text-white">
-                                    {community.name}
-                                </h1>
-                                <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
-                                    <CategoryBadge category={community.category} />
-                                    <span className="flex items-center gap-1">
-                                        <Users className="w-3.5 h-3.5" /> {community.memberCount} members
-                                    </span>
-                                    <span className="flex items-center gap-1">
-                                        <MessageSquare className="w-3.5 h-3.5" /> {community.postCount} posts
-                                    </span>
-                                </div>
+            <div
+                className="cm-hero"
+                style={{ '--cm-accent': accent } as React.CSSProperties}
+            >
+                <div className="cm-hero-top">
+                    <div className="cm-hero-id">
+                        <div className="cm-monogram">
+                            {community.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <h1 className="cm-hero-name">{community.name}</h1>
+                            <div className="cm-hero-meta">
+                                <CategoryBadge category={community.category} />
+                                <span>
+                                    <Users size={12} /> {community.memberCount} members
+                                </span>
+                                <span>
+                                    <MessageSquare size={12} /> {community.postCount} posts
+                                </span>
                             </div>
                         </div>
+                    </div>
 
-                        <div className="flex items-center gap-2 shrink-0">
-                            {community.canModerate && (
-                                <Link
-                                    to={`/communities/${community.id}/manage`}
-                                    className="inline-flex items-center gap-1.5 rounded-full border border-input px-3 h-9 text-sm font-medium hover:bg-accent transition-colors"
-                                >
-                                    <Settings className="w-4 h-4" /> Manage
-                                </Link>
-                            )}
-                            <Button
-                                onClick={toggleMembership}
-                                disabled={busyMembership}
-                            variant={community.isMember ? 'outline' : 'default'}
+                    <div className="cm-hero-actions">
+                        {community.canModerate && (
+                            <Link
+                                to={`/communities/${community.id}/manage`}
+                                className="button button-secondary"
+                            >
+                                <Settings size={15} /> Manage
+                            </Link>
+                        )}
+                        <button
+                            type="button"
+                            onClick={toggleMembership}
+                            disabled={busyMembership}
                             className={
-                                'rounded-full shrink-0 ' +
-                                (!community.isMember
-                                    ? 'bg-brand-navy hover:bg-brand-navy/90 text-white'
-                                    : '')
+                                community.isMember ? 'button button-secondary' : 'button button-primary'
                             }
                         >
                             {busyMembership ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <Loader2 size={16} className="animate-spin" />
                             ) : community.isMember ? (
                                 'Leave community'
                             ) : (
                                 <>
-                                    <Plus className="w-4 h-4 mr-2" /> Join
+                                    <Plus size={16} /> Join
                                 </>
                             )}
-                            </Button>
-                        </div>
+                        </button>
                     </div>
+                </div>
 
-                    {community.description && (
-                        <p className="text-sm text-muted-foreground mt-4 max-w-2xl">
-                            {community.description}
-                        </p>
-                    )}
-                </CardContent>
-            </Card>
+                {community.description && <p className="cm-hero-desc">{community.description}</p>}
+            </div>
 
             {error && (
-                <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 mb-6">
-                    <AlertCircle className="w-4 h-4 shrink-0" />
-                    <span className="flex-1">{error}</span>
-                    <button onClick={() => setError(null)} aria-label="Dismiss">
-                        <X className="w-4 h-4" />
+                <div className="alert alert-error alert-row" role="alert">
+                    <AlertCircle size={16} />
+                    <span>{error}</span>
+                    <button type="button" onClick={() => setError(null)} aria-label="Dismiss">
+                        <X size={15} />
                     </button>
                 </div>
             )}
 
-            {/* Tabs */}
-            <Tabs value={tab} onValueChange={onTabChange}>
-                <TabsList className="mb-4">
-                    <TabsTrigger value="feed">Feed</TabsTrigger>
-                    <TabsTrigger value="members">Members</TabsTrigger>
-                    <TabsTrigger value="about">About</TabsTrigger>
-                </TabsList>
+            <div className="cm-tabs" role="tablist">
+                {[
+                    { value: 'feed', label: 'Feed' },
+                    { value: 'members', label: 'Members' },
+                    { value: 'about', label: 'About' },
+                ].map((t) => (
+                    <button
+                        key={t.value}
+                        type="button"
+                        role="tab"
+                        aria-selected={tab === t.value}
+                        onClick={() => onTabChange(t.value)}
+                        className={`cm-tab${tab === t.value ? ' active' : ''}`}
+                    >
+                        {t.label}
+                    </button>
+                ))}
+            </div>
 
-                {/* FEED */}
-                <TabsContent value="feed" className="space-y-4">
+            {tab === 'feed' && (
+                <>
                     {canPost ? (
                         <Composer communityId={community.id} onPosted={handlePosted} onError={setError} />
                     ) : (
-                        <div className="text-sm text-muted-foreground bg-muted/50 border border-border/60 rounded-lg px-4 py-3">
+                        <div className="alert alert-info">
                             Join this community to post and comment.
                         </div>
                     )}
 
                     {postsLoading ? (
-                        <div className="flex h-40 items-center justify-center">
-                            <Loader2 className="w-6 h-6 animate-spin text-brand-blue" />
+                        <div className="cm-loading">
+                            <Loader2 size={20} className="animate-spin" />
                         </div>
                     ) : posts.length === 0 ? (
-                        <div className="text-center py-16 border-2 border-dashed border-border/50 rounded-2xl">
-                            <MessageSquare className="w-10 h-10 mx-auto text-muted-foreground/50 mb-2" />
-                            <p className="text-sm text-muted-foreground">
+                        <div className="empty-state">
+                            <span className="empty-icon">
+                                <MessageSquare size={24} strokeWidth={1.5} />
+                            </span>
+                            <p>
                                 No posts yet. {canPost ? 'Start the conversation.' : ''}
                             </p>
                         </div>
                     ) : (
-                        <>
+                        <div className="cm-feed">
                             {posts.map((post) => (
                                 <PostCard
                                     key={post.id}
@@ -338,90 +338,78 @@ export function CommunityPage() {
                                 />
                             ))}
                             {postsHasMore && (
-                                <div className="flex justify-center">
-                                    <Button variant="outline" className="rounded-full" onClick={() => loadPosts(false)}>
+                                <div className="cm-load-more">
+                                    <button
+                                        type="button"
+                                        className="button button-secondary"
+                                        onClick={() => loadPosts(false)}
+                                    >
                                         Load more
-                                    </Button>
+                                    </button>
                                 </div>
                             )}
-                        </>
-                    )}
-                </TabsContent>
-
-                {/* MEMBERS */}
-                <TabsContent value="members">
-                    {membersLoading || members === null ? (
-                        <div className="flex h-40 items-center justify-center">
-                            <Loader2 className="w-6 h-6 animate-spin text-brand-blue" />
                         </div>
-                    ) : (
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            {members.map((m) => (
-                                <div
-                                    key={m.id}
-                                    className="flex items-center gap-3 p-3 rounded-xl border border-border/60 bg-card"
-                                >
-                                    <InitialsAvatar name={m.user.fullName} />
-                                    <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-semibold truncate text-brand-navy dark:text-white">
-                                            {m.user.fullName || 'UniMARKY student'}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground truncate">
-                                            {m.user.department || 'Member'}
-                                        </p>
-                                    </div>
-                                    {m.role === 'moderator' && (
-                                        <span className="text-[10px] font-bold uppercase tracking-wider text-brand-orange">
-                                            Mod
-                                        </span>
-                                    )}
+                    )}
+                </>
+            )}
+
+            {tab === 'members' && (
+                membersLoading || members === null ? (
+                    <div className="cm-loading">
+                        <Loader2 size={20} className="animate-spin" />
+                    </div>
+                ) : (
+                    <div className="cm-members">
+                        {members.map((mem) => (
+                            <div key={mem.id} className="cm-member">
+                                <InitialsAvatar name={mem.user.fullName} />
+                                <div style={{ minWidth: 0, flex: 1 }}>
+                                    <p className="cm-member-name">
+                                        {mem.user.fullName || 'UniMARKY student'}
+                                    </p>
+                                    <p className="cm-member-sub">
+                                        {mem.user.department || 'Member'}
+                                    </p>
                                 </div>
-                            ))}
-                        </div>
-                    )}
-                </TabsContent>
+                                {mem.role === 'moderator' && (
+                                    <span className="cm-member-role">Mod</span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )
+            )}
 
-                {/* ABOUT */}
-                <TabsContent value="about" className="space-y-4">
-                    <Card>
-                        <CardContent className="pt-6 space-y-4">
-                            <div>
-                                <h3 className="text-sm font-bold text-brand-navy dark:text-white mb-1">
-                                    About this community
-                                </h3>
-                                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                                    {community.description || 'No description has been added yet.'}
-                                </p>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Calendar className="w-3.5 h-3.5" />
-                                Created {community.createdAt ? timeAgo(community.createdAt) : 'recently'}
-                            </div>
-                        </CardContent>
-                    </Card>
+            {tab === 'about' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <div className="cm-panel">
+                        <h3>About this community</h3>
+                        <p>{community.description || 'No description has been added yet.'}</p>
+                        <div className="cm-panel-meta">
+                            <Calendar size={12} />
+                            Created{' '}
+                            {community.createdAt ? timeAgo(community.createdAt) : 'recently'}
+                        </div>
+                    </div>
 
                     {community.canDelete && (
-                        <Card className="border-red-500/30">
-                            <CardContent className="pt-6">
-                                <h3 className="text-sm font-bold text-red-600 dark:text-red-400 mb-1">
-                                    Danger zone
-                                </h3>
-                                <p className="text-xs text-muted-foreground mb-3">
-                                    Deleting this community removes all of its posts and comments. This cannot
-                                    be undone.
-                                </p>
-                                <Button
-                                    variant="outline"
-                                    onClick={deleteCommunity}
-                                    className="rounded-full border-red-500/40 text-red-600 hover:bg-red-500/10 dark:text-red-400"
-                                >
-                                    <Trash2 className="w-4 h-4 mr-2" /> Delete community
-                                </Button>
-                            </CardContent>
-                        </Card>
+                        <div className="cm-danger">
+                            <h3>Danger zone</h3>
+                            <p>
+                                Deleting this community removes all of its posts and comments. This
+                                cannot be undone.
+                            </p>
+                            <button
+                                type="button"
+                                onClick={deleteCommunity}
+                                className="button button-secondary cm-btn-danger"
+                            >
+                                <Trash2 size={15} /> Delete community
+                            </button>
+                        </div>
                     )}
-                </TabsContent>
-            </Tabs>
+                </div>
+            )}
         </div>
     );
 }
@@ -491,77 +479,72 @@ function Composer({
     };
 
     return (
-        <Card className="border border-border/60 shadow-sm">
-            <CardContent className="pt-6 space-y-3">
-                <textarea
-                    value={content}
-                    maxLength={5000}
-                    onChange={(e) => setContent(e.target.value)}
-                    rows={3}
-                    placeholder="Share something with the community..."
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-y"
-                />
+        <div className="cm-composer">
+            <textarea
+                value={content}
+                maxLength={5000}
+                onChange={(e) => setContent(e.target.value)}
+                rows={3}
+                placeholder="Share something with the community..."
+                className="cm-textarea"
+            />
 
-                {imagePreview && (
-                    <div className="relative inline-block">
-                        <img
-                            src={imagePreview}
-                            alt="Attachment preview"
-                            className="max-h-48 rounded-lg border border-border/60"
-                        />
-                        <button
-                            onClick={() => {
-                                setImagePreview(null);
-                                setImageUrl(null);
-                            }}
-                            aria-label="Remove image"
-                            className="absolute -top-2 -right-2 bg-background border border-border rounded-full p-1 shadow"
-                        >
-                            <X className="w-3.5 h-3.5" />
-                        </button>
-                    </div>
-                )}
-
-                <div className="flex items-center justify-between">
-                    <input
-                        ref={fileRef}
-                        type="file"
-                        accept="image/*"
-                        hidden
-                        onChange={onPickImage}
-                    />
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => fileRef.current?.click()}
-                        disabled={uploading}
-                        className="text-muted-foreground"
+            {imagePreview && (
+                <div className="cm-attach-preview">
+                    <img src={imagePreview} alt="Attachment preview" />
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setImagePreview(null);
+                            setImageUrl(null);
+                        }}
+                        aria-label="Remove image"
+                        className="cm-attach-remove"
                     >
-                        {uploading ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                            <>
-                                <ImagePlus className="w-4 h-4 mr-2" /> Photo
-                            </>
-                        )}
-                    </Button>
-
-                    <Button
-                        onClick={submit}
-                        disabled={saving || !content.trim()}
-                        className="rounded-full bg-brand-navy hover:bg-brand-navy/90 text-white"
-                    >
-                        {saving ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                            <>
-                                <Send className="w-4 h-4 mr-2" /> Post
-                            </>
-                        )}
-                    </Button>
+                        <X size={14} />
+                    </button>
                 </div>
-            </CardContent>
-        </Card>
+            )}
+
+            <div className="cm-composer-bar">
+                <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={onPickImage}
+                />
+                <button
+                    type="button"
+                    className="cm-ghost"
+                    onClick={() => fileRef.current?.click()}
+                    disabled={uploading}
+                >
+                    {uploading ? (
+                        <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                        <>
+                            <ImagePlus size={16} /> Photo
+                        </>
+                    )}
+                </button>
+
+                <button
+                    type="button"
+                    onClick={submit}
+                    disabled={saving || !content.trim()}
+                    className="button button-primary"
+                >
+                    {saving ? (
+                        <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                        <>
+                            <Send size={15} /> Post
+                        </>
+                    )}
+                </button>
+            </div>
+        </div>
     );
 }
 
@@ -668,146 +651,134 @@ function PostCard({
     };
 
     return (
-        <Card className="border border-border/60 shadow-sm">
-            <CardContent className="pt-6">
-                <div className="flex items-start gap-3">
-                    <InitialsAvatar name={post.author?.fullName} />
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-brand-navy dark:text-white truncate">
-                                {authorName}
-                            </span>
-                            <span className="text-xs text-muted-foreground">· {timeAgo(post.createdAt)}</span>
-                        </div>
-
-                        <p className="text-sm text-foreground/90 mt-2 whitespace-pre-wrap break-words">
-                            {post.content}
-                        </p>
-
-                        {post.imageUrl && (
-                            <img
-                                src={post.imageUrl}
-                                alt="Post attachment"
-                                loading="lazy"
-                                className="mt-3 rounded-lg border border-border/60 max-h-96 w-auto"
-                            />
-                        )}
-
-                        <div className="flex items-center gap-4 mt-3">
-                            <button
-                                onClick={toggleComments}
-                                className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                                <MessageSquare className="w-3.5 h-3.5" />
-                                {count} {count === 1 ? 'comment' : 'comments'}
-                            </button>
-
-                            {(isAuthor || canModerate) && (
-                                <button
-                                    onClick={deletePost}
-                                    disabled={deleting}
-                                    className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-red-600 transition-colors ml-auto"
-                                >
-                                    {deleting ? (
-                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                    ) : (
-                                        <Trash2 className="w-3.5 h-3.5" />
-                                    )}
-                                    Delete
-                                </button>
-                            )}
-                        </div>
-
-                        {/* Comments */}
-                        <AnimatePresence initial={false}>
-                            {commentsOpen && (
-                                <m.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    className="overflow-hidden"
-                                >
-                                    <div className="mt-3 pt-3 border-t border-border/60 space-y-3">
-                                        {loadingComments ? (
-                                            <Loader2 className="w-4 h-4 animate-spin text-brand-blue" />
-                                        ) : comments && comments.length > 0 ? (
-                                            comments.map((c) => (
-                                                <div key={c.id} className="flex items-start gap-2.5">
-                                                    <InitialsAvatar
-                                                        name={c.author?.fullName}
-                                                        className="h-7 w-7 text-[11px]"
-                                                    />
-                                                    <div className="flex-1 min-w-0 bg-muted/50 rounded-lg px-3 py-2">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-xs font-semibold text-brand-navy dark:text-white">
-                                                                {c.author?.fullName || 'UniMARKY student'}
-                                                            </span>
-                                                            <span className="text-[10px] text-muted-foreground">
-                                                                {timeAgo(c.createdAt)}
-                                                            </span>
-                                                            {(canModerate ||
-                                                                (currentUserId && c.authorId === currentUserId)) && (
-                                                                <button
-                                                                    onClick={() => deleteComment(c.id)}
-                                                                    aria-label="Delete comment"
-                                                                    className="ml-auto text-muted-foreground hover:text-red-600"
-                                                                >
-                                                                    <Trash2 className="w-3 h-3" />
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                        <p className="text-xs text-foreground/90 mt-0.5 whitespace-pre-wrap break-words">
-                                                            {c.content}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <p className="text-xs text-muted-foreground">
-                                                No comments yet.
-                                            </p>
-                                        )}
-
-                                        {canComment && (
-                                            <div className="flex items-center gap-2">
-                                                <InitialsAvatar
-                                                    name={currentUserName}
-                                                    className="h-7 w-7 text-[11px]"
-                                                />
-                                                <input
-                                                    value={commentText}
-                                                    onChange={(e) => setCommentText(e.target.value)}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                                            e.preventDefault();
-                                                            addComment();
-                                                        }
-                                                    }}
-                                                    maxLength={2000}
-                                                    placeholder="Write a comment..."
-                                                    className="flex-1 rounded-full border border-input bg-background px-3 py-1.5 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                                />
-                                                <Button
-                                                    size="sm"
-                                                    onClick={addComment}
-                                                    disabled={sending || !commentText.trim()}
-                                                    className="rounded-full h-8 w-8 p-0 bg-brand-navy hover:bg-brand-navy/90 text-white"
-                                                >
-                                                    {sending ? (
-                                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                                    ) : (
-                                                        <Send className="w-3.5 h-3.5" />
-                                                    )}
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </div>
-                                </m.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
+        <div className="cm-post">
+            <div className="cm-post-head">
+                <InitialsAvatar name={post.author?.fullName} />
+                <div style={{ minWidth: 0 }}>
+                    <div className="cm-post-author">{authorName}</div>
+                    <div className="cm-post-time">{timeAgo(post.createdAt)}</div>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+
+            <p className="cm-post-body">{post.content}</p>
+
+            {post.imageUrl && (
+                <img
+                    src={post.imageUrl}
+                    alt="Post attachment"
+                    loading="lazy"
+                    className="cm-post-media"
+                />
+            )}
+
+            <div className="cm-post-actions">
+                <button type="button" onClick={toggleComments} className="cm-post-action">
+                    <MessageSquare size={13} />
+                    {count} {count === 1 ? 'comment' : 'comments'}
+                </button>
+
+                {(isAuthor || canModerate) && (
+                    <button
+                        type="button"
+                        onClick={deletePost}
+                        disabled={deleting}
+                        className="cm-post-action danger ml"
+                    >
+                        {deleting ? (
+                            <Loader2 size={13} className="animate-spin" />
+                        ) : (
+                            <Trash2 size={13} />
+                        )}
+                        Delete
+                    </button>
+                )}
+            </div>
+
+            <AnimatePresence initial={false}>
+                {commentsOpen && (
+                    <m.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        style={{ overflow: 'hidden' }}
+                    >
+                        <div className="cm-comments">
+                            {loadingComments ? (
+                                <Loader2 size={16} className="animate-spin" />
+                            ) : comments && comments.length > 0 ? (
+                                comments.map((c) => (
+                                    <div key={c.id} className="cm-comment">
+                                        <InitialsAvatar
+                                            name={c.author?.fullName}
+                                            className="sm"
+                                        />
+                                        <div className="cm-comment-body">
+                                            <div className="cm-comment-head">
+                                                <span className="cm-comment-author">
+                                                    {c.author?.fullName || 'UniMARKY student'}
+                                                </span>
+                                                <span className="cm-comment-time">
+                                                    {timeAgo(c.createdAt)}
+                                                </span>
+                                                {(canModerate ||
+                                                    (currentUserId &&
+                                                        c.authorId === currentUserId)) && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => deleteComment(c.id)}
+                                                        aria-label="Delete comment"
+                                                        className="cm-comment-delete"
+                                                    >
+                                                        <Trash2 size={12} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <p className="cm-comment-text">{c.content}</p>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="cm-comment-time">No comments yet.</p>
+                            )}
+
+                            {canComment && (
+                                <div className="cm-comment-form">
+                                    <InitialsAvatar
+                                        name={currentUserName}
+                                        className="sm"
+                                    />
+                                    <input
+                                        value={commentText}
+                                        onChange={(e) => setCommentText(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();
+                                                addComment();
+                                            }
+                                        }}
+                                        maxLength={2000}
+                                        placeholder="Write a comment..."
+                                        className="cm-comment-input"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={addComment}
+                                        disabled={sending || !commentText.trim()}
+                                        aria-label="Send comment"
+                                        className="cm-comment-send"
+                                    >
+                                        {sending ? (
+                                            <Loader2 size={14} className="animate-spin" />
+                                        ) : (
+                                            <Send size={14} />
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </m.div>
+                )}
+            </AnimatePresence>
+        </div>
     );
 }

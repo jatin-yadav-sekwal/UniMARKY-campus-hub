@@ -1,25 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { m } from 'motion/react';
 import { api } from '@/lib/api';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import { Loader2, Search, Plus, Users, MessageSquare, X, AlertCircle, Settings } from 'lucide-react';
 import {
     CATEGORY_OPTIONS,
-    CATEGORY_GRADIENTS,
+    CATEGORY_COLORS,
     CategoryBadge,
     type Community,
     type CommunityCategory,
 } from './shared';
+import './communities.css';
 
 const LIMIT = 12;
 
@@ -119,103 +110,90 @@ export function CommunitiesPage() {
     };
 
     return (
-        <div className="relative min-h-screen pb-20">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 sm:mb-8">
+        <div className="um-editorial um-communities">
+            <header className="page-head">
                 <div>
-                    <m.h1
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-2 sm:mb-3"
-                    >
-                        <span className="text-brand-navy">COMMUNIT</span>
-                        <span className="bg-gradient-to-r from-brand-blue to-brand-orange bg-clip-text text-transparent">
-                            IES
-                        </span>
-                    </m.h1>
-                    <m.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.1 }}
-                        className="text-muted-foreground text-sm sm:text-base lg:text-lg max-w-xl"
-                    >
-                        Join clubs and groups across your campus, share updates and talk things through.
-                    </m.p>
+                    <p className="section-label">
+                        <span>01</span>/ Communities
+                    </p>
+                    <h1 className="page-title">
+                        Campus <span>communities.</span>
+                    </h1>
+                    <p className="page-lead">
+                        Join clubs and groups across your campus, share updates and talk things
+                        through.
+                    </p>
                 </div>
+                <button
+                    type="button"
+                    className="button button-primary"
+                    onClick={() => navigate('/communities/new')}
+                >
+                    <Plus size={16} /> New community
+                </button>
+            </header>
 
-                <m.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
-                    <Button
-                        onClick={() => navigate('/communities/new')}
-                        className="rounded-full bg-brand-navy hover:bg-brand-navy/90 text-white font-bold"
-                    >
-                        <Plus className="w-4 h-4 mr-2" /> New Community
-                    </Button>
-                </m.div>
-            </div>
-
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-6">
-                <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
+            <div className="cm-filters">
+                <div className="cm-search">
+                    <Search size={16} />
+                    <input
                         ref={searchRef}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search communities…"
-                        className="pl-9"
+                        placeholder="Search communities..."
+                        aria-label="Search communities"
+                        className="field-input"
                     />
                 </div>
 
-                <Select
+                <select
                     value={category}
-                    onValueChange={(v) => setCategory(v as CommunityCategory | 'all')}
+                    onChange={(e) => setCategory(e.target.value as CommunityCategory | 'all')}
+                    aria-label="Filter by category"
+                    className="field-input cm-select"
                 >
-                    <SelectTrigger className="w-full sm:w-48">
-                        <SelectValue placeholder="All categories" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All categories</SelectItem>
-                        {CATEGORY_OPTIONS.map((o) => (
-                            <SelectItem key={o.value} value={o.value}>
-                                {o.label}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                    <option value="all">All categories</option>
+                    {CATEGORY_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                            {o.label}
+                        </option>
+                    ))}
+                </select>
 
-                <div className="flex rounded-full border border-border/60 p-1 shrink-0">
+                <div className="cm-views" role="group" aria-label="Community scope">
                     {(['all', 'mine'] as View[]).map((v) => (
                         <button
                             key={v}
+                            type="button"
                             onClick={() => setView(v)}
-                            className={
-                                'px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ' +
-                                (view === v
-                                    ? 'bg-brand-navy text-white'
-                                    : 'text-muted-foreground hover:text-foreground')
-                            }
+                            aria-pressed={view === v}
+                            className={`cm-view${view === v ? ' active' : ''}`}
                         >
-                            {v === 'all' ? 'Discover' : 'My Communities'}
+                            {v === 'all' ? 'Discover' : 'My communities'}
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* Error */}
             {error && (
-                <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 mb-6">
-                    <AlertCircle className="w-4 h-4 shrink-0" />
-                    <span className="flex-1">{error}</span>
-                    <button onClick={() => setError(null)} aria-label="Dismiss">
-                        <X className="w-4 h-4" />
+                <div className="alert alert-error alert-row" role="alert">
+                    <AlertCircle size={16} />
+                    <span>{error}</span>
+                    <button type="button" onClick={() => setError(null)} aria-label="Dismiss">
+                        <X size={15} />
                     </button>
                 </div>
             )}
 
-            {/* List */}
             {loading ? (
-                <div className="flex h-64 items-center justify-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-brand-blue" />
+                <div className="cm-grid">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="cm-skeleton">
+                            <div className="cm-skeleton-line" />
+                            <div className="cm-skeleton-line short" />
+                            <div className="cm-skeleton-line tiny" />
+                        </div>
+                    ))}
                 </div>
             ) : items.length === 0 ? (
                 <EmptyState view={view} onCreate={() => navigate('/communities/new')} />
@@ -225,7 +203,7 @@ export function CommunitiesPage() {
                         initial="hidden"
                         animate="show"
                         variants={{ hidden: {}, show: { transition: { staggerChildren: 0.05 } } }}
-                        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                        className="cm-grid"
                     >
                         {items.map((community) => (
                             <CommunityCard
@@ -240,15 +218,15 @@ export function CommunitiesPage() {
                     </m.div>
 
                     {hasMore && (
-                        <div className="flex justify-center mt-8">
-                            <Button
-                                variant="outline"
+                        <div className="cm-load-more">
+                            <button
+                                type="button"
+                                className="button button-secondary"
                                 onClick={() => fetchItems(false)}
                                 disabled={loadingMore}
-                                className="rounded-full"
                             >
-                                {loadingMore ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Load more'}
-                            </Button>
+                                {loadingMore ? <Loader2 size={16} className="animate-spin" /> : 'Load more'}
+                            </button>
                         </div>
                     )}
                 </>
@@ -270,94 +248,81 @@ function CommunityCard({
     onManage: () => void;
     onToggle: () => void;
 }) {
+    const accent = CATEGORY_COLORS[community.category] ?? CATEGORY_COLORS.other;
+
     return (
-        <m.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
-            <Card className="h-full overflow-hidden border border-border/60 shadow-sm hover:shadow-md transition-shadow flex flex-col">
-                <div
-                    className={`h-1.5 w-full bg-gradient-to-r ${CATEGORY_GRADIENTS[community.category]}`}
-                />
-                <CardHeader className="pb-2">
-                    <div className="flex items-start justify-between gap-2">
-                        <CardTitle
-                            className="text-lg font-bold text-brand-navy dark:text-white line-clamp-1 cursor-pointer hover:underline"
-                            onClick={onOpen}
-                        >
-                            {community.name}
-                        </CardTitle>
-                        <CategoryBadge category={community.category} />
-                    </div>
-                </CardHeader>
-                <CardContent className="flex flex-col flex-1 gap-4">
-                    <p className="text-sm text-muted-foreground line-clamp-2 flex-1">
-                        {community.description || 'No description yet.'}
-                    </p>
+        <m.div
+            variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
+            className="cm-card"
+            style={{ '--cm-accent': accent } as React.CSSProperties}
+        >
+            <div className="cm-card-top">
+                <h3 className="cm-name" onClick={onOpen}>
+                    {community.name}
+                </h3>
+                <CategoryBadge category={community.category} />
+            </div>
 
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                            <Users className="w-3.5 h-3.5" /> {community.memberCount}
-                        </span>
-                        <span className="flex items-center gap-1">
-                            <MessageSquare className="w-3.5 h-3.5" /> {community.postCount}
-                        </span>
-                    </div>
+            <p className="cm-desc">{community.description || 'No description yet.'}</p>
 
-                    <div className="flex items-center gap-2">
-                        {community.myRole === 'moderator' && (
-                            <Button
-                                onClick={onManage}
-                                variant="outline"
-                                size="icon"
-                                title="Manage community"
-                                aria-label="Manage community"
-                                className="rounded-full shrink-0"
-                            >
-                                <Settings className="w-4 h-4" />
-                            </Button>
-                        )}
-                        <Button onClick={onOpen} variant="outline" className="flex-1 rounded-full">
-                            Open
-                        </Button>
-                        <Button
-                            onClick={onToggle}
-                            disabled={busy}
-                            variant={community.isMember ? 'ghost' : 'default'}
-                            className={
-                                'flex-1 rounded-full ' +
-                                (!community.isMember
-                                    ? 'bg-brand-navy hover:bg-brand-navy/90 text-white'
-                                    : 'text-muted-foreground hover:text-foreground')
-                            }
-                        >
-                            {busy ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : community.isMember ? (
-                                'Leave'
-                            ) : (
-                                'Join'
-                            )}
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
+            <div className="cm-stats">
+                <span>
+                    <Users size={12} /> {community.memberCount} members
+                </span>
+                <span>
+                    <MessageSquare size={12} /> {community.postCount} posts
+                </span>
+            </div>
+
+            <div className="cm-actions">
+                {community.myRole === 'moderator' && (
+                    <button
+                        type="button"
+                        onClick={onManage}
+                        title="Manage community"
+                        aria-label="Manage community"
+                        className="cm-icon-btn"
+                    >
+                        <Settings size={16} />
+                    </button>
+                )}
+                <button type="button" onClick={onOpen} className="button button-secondary">
+                    Open
+                </button>
+                <button
+                    type="button"
+                    onClick={onToggle}
+                    disabled={busy}
+                    className={community.isMember ? 'button button-ghost' : 'button button-primary'}
+                >
+                    {busy ? (
+                        <Loader2 size={16} className="animate-spin" />
+                    ) : community.isMember ? (
+                        'Leave'
+                    ) : (
+                        'Join'
+                    )}
+                </button>
+            </div>
         </m.div>
     );
 }
 
 function EmptyState({ view, onCreate }: { view: View; onCreate: () => void }) {
     return (
-        <div className="text-center py-20 border-2 border-dashed border-border/50 rounded-2xl">
-            <Users className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-            <h3 className="text-lg font-bold text-brand-navy dark:text-white">
-                {view === 'mine' ? "You haven't joined any communities" : 'No communities yet'}
-            </h3>
-            <p className="text-sm text-muted-foreground mt-1 mb-4">
+        <div className="empty-state">
+            <span className="empty-icon">
+                <Users size={24} strokeWidth={1.5} />
+            </span>
+            <h3>{view === 'mine' ? "You haven't joined any communities" : 'No communities yet'}</h3>
+            <p>
                 {view === 'mine'
                     ? 'Discover communities to join, or start your own.'
                     : 'Be the first to start one for your campus.'}
             </p>
-            <Button onClick={onCreate} className="rounded-full bg-brand-navy hover:bg-brand-navy/90 text-white">
-                <Plus className="w-4 h-4 mr-2" /> New Community
-            </Button>
+            <button type="button" className="button button-primary" onClick={onCreate}>
+                <Plus size={16} /> New community
+            </button>
         </div>
     );
 }

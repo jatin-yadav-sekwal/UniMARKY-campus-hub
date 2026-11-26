@@ -1,18 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { m } from 'motion/react';
 import { api } from '@/lib/api';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import {
     ArrowLeft,
     Loader2,
@@ -31,6 +19,7 @@ import {
     type CommunityCategory,
     type CommunityMember,
 } from './shared';
+import './communities.css';
 
 export function ManageCommunityPage() {
     const { id = '' } = useParams();
@@ -172,25 +161,34 @@ export function ManageCommunityPage() {
 
     if (loading) {
         return (
-            <div className="flex h-96 items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-brand-blue" />
+            <div className="um-editorial um-communities">
+                <div className="cm-loading">
+                    <Loader2 size={22} className="animate-spin" />
+                    <span>Loading community...</span>
+                </div>
             </div>
         );
     }
 
     if (!community || !community.canModerate) {
         return (
-            <div className="text-center py-20">
-                <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-                <h2 className="text-xl font-bold text-brand-navy dark:text-white">
-                    {community ? "You don't have permission to manage this community" : error || 'Community not found'}
-                </h2>
-                <Link
-                    to={community ? `/communities/${id}` : '/communities'}
-                    className="text-brand-blue hover:underline text-sm mt-2 inline-block"
-                >
-                    {community ? 'Back to community' : 'Back to Communities'}
-                </Link>
+            <div className="um-editorial um-communities">
+                <div className="empty-state">
+                    <span className="empty-icon">
+                        <AlertCircle size={24} strokeWidth={1.5} />
+                    </span>
+                    <h3>
+                        {community
+                            ? "You don't have permission to manage this community"
+                            : error || 'Community not found'}
+                    </h3>
+                    <Link
+                        to={community ? `/communities/${id}` : '/communities'}
+                        className="button button-secondary"
+                    >
+                        {community ? 'Back to community' : 'Back to communities'}
+                    </Link>
+                </div>
             </div>
         );
     }
@@ -198,244 +196,243 @@ export function ManageCommunityPage() {
     const isOwner = (member: CommunityMember) => member.user.id === community.createdBy;
 
     return (
-        <div className="pb-20 max-w-3xl mx-auto">
-            <Link
-                to={`/communities/${id}`}
-                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
-            >
-                <ArrowLeft className="w-4 h-4" /> Back to community
-            </Link>
+        <div className="um-editorial um-communities">
+            <div className="cm-wide">
+                <Link to={`/communities/${id}`} className="back-link">
+                    <ArrowLeft size={15} /> Back to community
+                </Link>
 
-            <m.h1
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-2xl sm:text-3xl font-black tracking-tight text-brand-navy dark:text-white mb-6"
-            >
-                Manage <span className="text-brand-orange">{community.name}</span>
-            </m.h1>
+                <header className="page-head">
+                    <div>
+                        <p className="section-label">
+                            <span>03</span>/ Manage
+                        </p>
+                        <h1 className="page-title">
+                            Manage <span>{community.name}</span>
+                        </h1>
+                    </div>
+                </header>
 
-            {error && (
-                <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 mb-6">
-                    <AlertCircle className="w-4 h-4 shrink-0" />
-                    <span className="flex-1">{error}</span>
-                </div>
-            )}
+                {error && (
+                    <div className="alert alert-error alert-row" role="alert">
+                        <AlertCircle size={16} />
+                        <span>{error}</span>
+                    </div>
+                )}
 
-            <div className="space-y-6">
-                {/* Details */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-lg">Community details</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={saveDetails} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="name">Name</Label>
-                                <Input
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                    {/* Details */}
+                    <form onSubmit={saveDetails} className="form-card">
+                        <div className="form-stack">
+                            <h2 className="section-label" style={{ margin: 0 }}>
+                                Community details
+                            </h2>
+
+                            <div className="field">
+                                <label className="field-label" htmlFor="name">
+                                    Name
+                                </label>
+                                <input
                                     id="name"
                                     value={name}
                                     maxLength={80}
                                     onChange={(e) => setName(e.target.value)}
+                                    className="field-input"
                                 />
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="category">Category</Label>
-                                <Select
+                            <div className="field">
+                                <label className="field-label" htmlFor="category">
+                                    Category
+                                </label>
+                                <select
+                                    id="category"
                                     value={category}
-                                    onValueChange={(v) => setCategory(v as CommunityCategory)}
+                                    onChange={(e) => setCategory(e.target.value as CommunityCategory)}
+                                    className="field-input"
                                 >
-                                    <SelectTrigger id="category">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {CATEGORY_OPTIONS.map((o) => (
-                                            <SelectItem key={o.value} value={o.value}>
-                                                {o.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                    {CATEGORY_OPTIONS.map((o) => (
+                                        <option key={o.value} value={o.value}>
+                                            {o.label}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="description">Description</Label>
+                            <div className="field">
+                                <label className="field-label" htmlFor="description">
+                                    Description
+                                </label>
                                 <textarea
                                     id="description"
                                     value={description}
                                     maxLength={1000}
                                     onChange={(e) => setDescription(e.target.value)}
                                     rows={4}
-                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-y"
+                                    className="field-input"
                                 />
                             </div>
+                        </div>
 
-                            <div className="flex items-center justify-between gap-3">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={toggleArchive}
-                                    disabled={togglingArchive}
-                                    className="rounded-full"
-                                >
-                                    {togglingArchive ? (
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                    ) : community.isArchived ? (
-                                        <>
-                                            <ArchiveRestore className="w-4 h-4 mr-2" /> Unarchive
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Archive className="w-4 h-4 mr-2" /> Archive
-                                        </>
-                                    )}
-                                </Button>
+                        <div className="form-actions">
+                            <button
+                                type="button"
+                                onClick={toggleArchive}
+                                disabled={togglingArchive}
+                                className="button button-secondary"
+                            >
+                                {togglingArchive ? (
+                                    <Loader2 size={16} className="animate-spin" />
+                                ) : community.isArchived ? (
+                                    <>
+                                        <ArchiveRestore size={15} /> Unarchive
+                                    </>
+                                ) : (
+                                    <>
+                                        <Archive size={15} /> Archive
+                                    </>
+                                )}
+                            </button>
 
-                                <Button
-                                    type="submit"
-                                    disabled={savingDetails}
-                                    className="rounded-full bg-brand-navy hover:bg-brand-navy/90 text-white"
-                                >
-                                    {savingDetails ? (
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                    ) : (
-                                        'Save changes'
-                                    )}
-                                </Button>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
+                            <button
+                                type="submit"
+                                disabled={savingDetails}
+                                className="button button-primary"
+                            >
+                                {savingDetails ? (
+                                    <Loader2 size={16} className="animate-spin" />
+                                ) : (
+                                    'Save changes'
+                                )}
+                            </button>
+                        </div>
+                    </form>
 
-                {/* Members */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-lg">
+                    {/* Members */}
+                    <div className="cm-panel">
+                        <h3>
                             Members{' '}
-                            <span className="text-sm font-normal text-muted-foreground">
-                                ({community.memberCount})
-                            </span>
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
+                            <span className="cm-member-role">({community.memberCount})</span>
+                        </h3>
+
                         {membersLoading || members === null ? (
-                            <div className="flex h-24 items-center justify-center">
-                                <Loader2 className="w-5 h-5 animate-spin text-brand-blue" />
+                            <div className="cm-loading" style={{ padding: '32px 0' }}>
+                                <Loader2 size={18} className="animate-spin" />
                             </div>
                         ) : members.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">No members yet.</p>
+                            <p>No members yet.</p>
                         ) : (
-                            members.map((member) => (
-                                <div
-                                    key={member.id}
-                                    className="flex items-center gap-3 p-3 rounded-xl border border-border/60 bg-card"
-                                >
-                                    <InitialsAvatar name={member.user.fullName} />
-                                    <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-semibold truncate text-brand-navy dark:text-white">
-                                            {member.user.fullName || 'UniMARKY student'}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground truncate">
-                                            {member.user.department || 'Member'}
-                                            {isOwner(member) && ' · Owner'}
-                                        </p>
-                                    </div>
-
-                                    {member.role === 'moderator' && (
-                                        <span className="text-[10px] font-bold uppercase tracking-wider text-brand-orange shrink-0">
-                                            Mod
-                                        </span>
-                                    )}
-
-                                    {memberBusyId === member.id ? (
-                                        <Loader2 className="w-4 h-4 animate-spin text-muted-foreground shrink-0" />
-                                    ) : (
-                                        <div className="flex items-center gap-1 shrink-0">
-                                            {community.canManage && !isOwner(member) && (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => changeRole(member)}
-                                                    title={
-                                                        member.role === 'moderator'
-                                                            ? 'Demote to member'
-                                                            : 'Promote to moderator'
-                                                    }
-                                                    className="h-8 w-8 p-0 text-muted-foreground hover:text-brand-orange"
-                                                >
-                                                    {member.role === 'moderator' ? (
-                                                        <ShieldOff className="w-4 h-4" />
-                                                    ) : (
-                                                        <ShieldCheck className="w-4 h-4" />
-                                                    )}
-                                                </Button>
-                                            )}
-                                            {!isOwner(member) && (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => removeMember(member)}
-                                                    title="Remove from community"
-                                                    className="h-8 w-8 p-0 text-muted-foreground hover:text-red-600"
-                                                >
-                                                    <UserMinus className="w-4 h-4" />
-                                                </Button>
-                                            )}
+                            <div className="cm-member-list">
+                                {members.map((member) => (
+                                    <div key={member.id} className="cm-member">
+                                        <InitialsAvatar name={member.user.fullName} />
+                                        <div style={{ minWidth: 0, flex: 1 }}>
+                                            <p className="cm-member-name">
+                                                {member.user.fullName || 'UniMARKY student'}
+                                            </p>
+                                            <p className="cm-member-sub">
+                                                {member.user.department || 'Member'}
+                                                {isOwner(member) && ' · Owner'}
+                                            </p>
                                         </div>
-                                    )}
-                                </div>
-                            ))
-                        )}
-                    </CardContent>
-                </Card>
 
-                {/* Danger zone */}
-                {community.canDelete && (
-                    <Card className="border-red-500/30">
-                        <CardHeader>
-                            <CardTitle className="text-lg text-red-600 dark:text-red-400">
-                                Danger zone
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-xs text-muted-foreground mb-3">
+                                        {member.role === 'moderator' && (
+                                            <span className="cm-member-role">Mod</span>
+                                        )}
+
+                                        {memberBusyId === member.id ? (
+                                            <Loader2
+                                                size={16}
+                                                className="animate-spin"
+                                                style={{ color: '#8f8b83', flex: 'none' }}
+                                            />
+                                        ) : (
+                                            <div className="cm-member-actions">
+                                                {community.canManage && !isOwner(member) && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => changeRole(member)}
+                                                        title={
+                                                            member.role === 'moderator'
+                                                                ? 'Demote to member'
+                                                                : 'Promote to moderator'
+                                                        }
+                                                        aria-label={
+                                                            member.role === 'moderator'
+                                                                ? 'Demote to member'
+                                                                : 'Promote to moderator'
+                                                        }
+                                                        className="cm-icon-btn sm"
+                                                    >
+                                                        {member.role === 'moderator' ? (
+                                                            <ShieldOff size={15} />
+                                                        ) : (
+                                                            <ShieldCheck size={15} />
+                                                        )}
+                                                    </button>
+                                                )}
+                                                {!isOwner(member) && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeMember(member)}
+                                                        title="Remove from community"
+                                                        aria-label="Remove from community"
+                                                        className="cm-icon-btn sm"
+                                                    >
+                                                        <UserMinus size={15} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Danger zone */}
+                    {community.canDelete && (
+                        <div className="cm-danger">
+                            <h3>Danger zone</h3>
+                            <p>
                                 Deleting this community permanently removes all of its posts and
                                 comments. This cannot be undone.
                             </p>
                             {confirmDelete ? (
-                                <div className="flex items-center gap-2">
-                                    <Button
+                                <div className="cm-danger-actions">
+                                    <button
+                                        type="button"
                                         onClick={deleteCommunity}
                                         disabled={deleting}
-                                        className="rounded-full bg-red-600 hover:bg-red-700 text-white"
+                                        className="button button-primary cm-btn-solid-danger"
                                     >
                                         {deleting ? (
-                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            <Loader2 size={16} className="animate-spin" />
                                         ) : (
                                             'Yes, delete permanently'
                                         )}
-                                    </Button>
-                                    <Button
-                                        variant="outline"
+                                    </button>
+                                    <button
+                                        type="button"
                                         onClick={() => setConfirmDelete(false)}
                                         disabled={deleting}
-                                        className="rounded-full"
+                                        className="button button-secondary"
                                     >
                                         Cancel
-                                    </Button>
+                                    </button>
                                 </div>
                             ) : (
-                                <Button
-                                    variant="outline"
+                                <button
+                                    type="button"
                                     onClick={() => setConfirmDelete(true)}
-                                    className="rounded-full border-red-500/40 text-red-600 hover:bg-red-500/10 dark:text-red-400"
+                                    className="button button-secondary cm-btn-danger"
                                 >
-                                    <Trash2 className="w-4 h-4 mr-2" /> Delete community
-                                </Button>
+                                    <Trash2 size={15} /> Delete community
+                                </button>
                             )}
-                        </CardContent>
-                    </Card>
-                )}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

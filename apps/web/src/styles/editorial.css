@@ -169,6 +169,17 @@
   border-color: #5a5750;
 }
 
+.um-editorial .button-ghost {
+  background: none;
+  border: 1px solid transparent;
+  color: #6b6760;
+}
+
+.um-editorial .button-ghost:hover:not(:disabled) {
+  color: #292824;
+  background: rgba(36, 35, 31, .05);
+}
+
 .um-editorial .button-block {
   width: 100%;
 }
@@ -238,6 +249,32 @@
   color: #3d4a86;
   background: #eef1fb;
   border-color: #dbe2f7;
+}
+
+.um-editorial .alert-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.um-editorial .alert-row > span {
+  flex: 1;
+}
+
+.um-editorial .alert-row > button {
+  flex: none;
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  opacity: .7;
+  cursor: pointer;
+  transition: opacity .18s ease;
+}
+
+.um-editorial .alert-row > button:hover {
+  opacity: 1;
 }
 
 /* -------------------------------------------------------------- surfaces --- */
