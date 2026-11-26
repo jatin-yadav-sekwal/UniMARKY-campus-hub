@@ -278,7 +278,8 @@ Radius: the landing uses **4px** for controls. The app’s `--radius` (shadcn) i
 | Study | `features/study/StudyPage.tsx` | `.um-study` | `features/study/study.css` | Done (body only; shell pending) |
 | Housing | `features/lifestyle/pages/HousingPage.tsx` (+ `AccommodationPage.tsx`) | `.um-housing` / `.um-stay` | `features/lifestyle/pages/lifestyle.css` | Done (body only; shell pending) |
 | Food | `features/lifestyle/pages/FoodPage.tsx` (+ `RestaurantPage.tsx`, `MenuItemPage.tsx`) | `.um-food` / `.um-dish` | `features/lifestyle/pages/lifestyle.css` | Done (body only; shell pending) |
-| — | — | — | — | Remaining areas (Lost & Found, Events, Profile, etc.) |
+| Public (About, Contact, Terms, Privacy) | `features/public/AboutPage.tsx` (+ `ContactPage.tsx`, `TermsPage.tsx`, `PrivacyPage.tsx`, `PublicShell.tsx`) | `.um-public` | `features/public/public.css` | Done |
+| — | — | — | — | Remaining areas (Lost & Found, Profile, Onboarding, Request Role, Superuser, Admin) |
 
 Notes from the Auth + Dashboard pass:
 
@@ -315,6 +316,13 @@ Notes from the Housing + Food pass:
 - Menu item detail (`MenuItemPage`) replaces the gradient order card with a hairline `.dsh-order` panel; the quantity stepper, ₹ totals and availability notice are unchanged in behaviour.
 - Fixed a broken housing detail link (`/lifestyle/housing/:id` → `/housing/:id`).
 - Verified: `tsc -b` clean, `vite build` passes.
+
+Notes from the Public pages pass:
+
+- The four public marketing pages now share the landing shell. `features/public/PublicShell.tsx` composes `SiteNavigation` + `SiteFooter` (the same sidebar nav and footer as `/`) so the public site reads as one system; the old `components/layout/Navbar` + `Footer` (orange glass capsule + gradient footer) are no longer used by any page.
+- Bodies are editorial: `.page-head` / `.section-label` / `.page-title` / `.page-lead`, a 1px-gap stat grid (`.pub-stats`), a 1px-gap values grid (`.pub-values`), accent-topped contact cards (`.pub-card`) and a framed legal body (`.pub-legal`) with hairline rules between clauses. Rounded-3xl cards, ambient glows and gradient headlines are gone.
+- The landing atmosphere stays visible behind the body (`.um-public-body` is transparent) so the public pages feel continuous with the landing.
+- Verified: `tsc -b` clean, `vite build` passes; `/about`, `/contact`, `/terms`, `/privacy` render with the landing shell, no console errors.
 
 ### Verified state of the landing
 
