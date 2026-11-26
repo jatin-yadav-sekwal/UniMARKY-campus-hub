@@ -7,14 +7,20 @@ const DEFAULT_DESCRIPTION =
     'UniMARKY is the digital campus for verified students: communities, marketplace, study resources, accommodation and campus food in one place.';
 
 const PUBLIC_PAGES: Record<string, { title: string; description: string }> = {
-    '/': { title: 'UniMARKY | Everything. University.', description: DEFAULT_DESCRIPTION },
+    '/': {
+        title: 'UniMARKY | Campus Marketplace & Student Communities',
+        description:
+            'Buy and sell on campus, join student communities, find notes, stays and food — one verified student account for your university.',
+    },
     '/about': {
-        title: 'About | UniMARKY',
-        description: 'Why UniMARKY exists: one account for campus marketplace, communities, study, housing and food.',
+        title: 'About UniMARKY — One Account for Campus Life',
+        description:
+            'Why UniMARKY exists: a verified student account for campus marketplace, communities, study material, accommodation and food.',
     },
     '/contact': {
-        title: 'Contact | UniMARKY',
-        description: 'Get in touch with the UniMARKY team for help, feedback or partnership questions.',
+        title: 'Contact UniMARKY',
+        description:
+            'Get in touch with the UniMARKY team for help, feedback or partnership questions.',
     },
     '/terms': {
         title: 'Terms | UniMARKY',

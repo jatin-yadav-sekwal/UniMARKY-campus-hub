@@ -1,0 +1,24 @@
+# UniMARKY
+
+> UniMARKY is a campus platform for verified university students. One student account covers a campus marketplace, communities, study material, accommodation, food and lost & found, scoped to the student's university.
+
+## Product
+
+- Marketplace: buy and sell textbooks, electronics, hostel gear and services with students at the same university.
+- Communities: clubs, batches and campus events, run by students.
+- Study: notes, previous-year papers and course resources by subject and semester.
+- Accommodation: PGs, hostels and flats near campus.
+- Food: campus restaurants, menus and student favourites.
+- Lost & Found: report lost items or return found ones with photos and locations.
+
+## Key pages
+
+- Home: https://unimarky.runs-on.dev/
+- About: https://unimarky.runs-on.dev/about
+- Contact: https://unimarky.runs-on.dev/contact
+- Terms: https://unimarky.runs-on.dev/terms
+- Privacy: https://unimarky.runs-on.dev/privacy
+
+## Notes
+
+Product inventory (listings, community posts, menus) is available to signed-in students and is not public. Public pages describe the platform and link to the app.
