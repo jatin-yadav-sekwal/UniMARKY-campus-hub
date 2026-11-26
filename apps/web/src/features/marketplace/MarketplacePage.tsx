@@ -2,9 +2,8 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { m, AnimatePresence } from 'motion/react';
 import { api } from '@/lib/api';
-import { Loader2, Search, Eye, Plus, ChevronDown, Tag } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Loader2, Search, Plus, ChevronDown, Tag } from 'lucide-react';
+import './marketplace.css';
 
 interface MarketplaceItem {
     id: string;
@@ -102,83 +101,57 @@ export function MarketplacePage() {
     );
 
     return (
-        <div className="relative min-h-screen pb-20">
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 sm:mb-8">
+        <div className="um-editorial um-marketplace">
+            <header className="page-head">
                 <div>
-                    <m.h1
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-2 sm:mb-3"
-                    >
-                        <span className="text-brand-navy">CAMPUS </span>
-                        <span className="bg-gradient-to-r from-brand-orange to-brand-yellow bg-clip-text text-transparent">DEALS</span>
-                    </m.h1>
-                    <m.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.1 }}
-                        className="text-muted-foreground text-sm sm:text-base lg:text-lg max-w-xl"
-                    >
-                        Exclusive marketplace for verified university students. Buy, sell, and swap with your campus peers safely.
-                    </m.p>
+                    <p className="section-label">
+                        <span>01</span>/ Marketplace
+                    </p>
+                    <h1 className="page-title">
+                        Campus <span>deals.</span>
+                    </h1>
+                    <p className="page-lead">
+                        A marketplace for verified students — buy, sell and swap with your campus
+                        peers safely.
+                    </p>
                 </div>
-
-                <m.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 }}
+                <button
+                    type="button"
+                    className="button button-secondary"
+                    onClick={() => navigate("/marketplace/my-listings")}
                 >
-                    <Button
-                        onClick={() => navigate("/marketplace/my-listings")}
-                        variant="outline"
-                        className="rounded-full border-2 border-brand-navy text-brand-navy hover:bg-brand-navy hover:text-white transition-colors font-bold"
+                    My listings
+                </button>
+            </header>
+
+            <div className="mp-filters" role="group" aria-label="Filter by category">
+                {categories.map((cat) => (
+                    <button
+                        key={cat.value}
+                        type="button"
+                        onClick={() => handleCategoryChange(cat.value)}
+                        aria-pressed={activeCategory === cat.value}
+                        className={`mp-cat${activeCategory === cat.value ? ' active' : ''}`}
                     >
-                        My Listings
-                    </Button>
-                </m.div>
+                        {cat.label}
+                    </button>
+                ))}
             </div>
 
-            {/* Filters & Search */}
-            <m.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="flex flex-col gap-4 mb-6 sm:mb-8"
-            >
-                {/* Category Pills - horizontal scroll on mobile */}
-                <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-visible">
-                    <div className="flex items-center gap-2 min-w-max sm:flex-wrap">
-                        {categories.map((cat) => (
-                            <button
-                                key={cat.value}
-                                onClick={() => handleCategoryChange(cat.value)}
-                                className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-colors duration-300 whitespace-nowrap ${activeCategory === cat.value
-                                    ? "bg-brand-navy text-white shadow-lg shadow-brand-navy/20"
-                                    : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
-                                    }`}
-                            >
-                                {cat.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Search */}
-                <div className="relative w-full sm:max-w-xs lg:max-w-sm">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
+            <div className="mp-toolbar">
+                <div className="mp-search">
+                    <Search size={16} />
+                    <input
                         type="text"
-                        placeholder="Search textbooks, tech..."
+                        className="field-input"
+                        placeholder="Search textbooks, tech…"
                         aria-label="Search marketplace items"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-9 sm:pl-10 h-10 sm:h-11 rounded-full border-border/50 bg-muted/30 text-sm"
                     />
                 </div>
-            </m.div>
+            </div>
 
-            {/* Main Content Area */}
             <AnimatePresence mode="wait">
                 {loading ? (
                     <m.div
@@ -186,9 +159,10 @@ export function MarketplacePage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="flex items-center justify-center py-20"
+                        className="mp-spinner"
                     >
-                        <Loader2 className="w-8 h-8 animate-spin text-brand-orange" />
+                        <Loader2 size={20} className="animate-spin" />
+                        <span>Loading items…</span>
                     </m.div>
                 ) : filteredItems.length === 0 ? (
                     <m.div
@@ -196,18 +170,20 @@ export function MarketplacePage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="text-center py-20"
+                        className="empty-state"
                     >
-                        <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-muted/50 flex items-center justify-center">
-                            <Tag className="w-10 h-10 text-muted-foreground/50" />
-                        </div>
-                        <h3 className="text-xl font-bold text-foreground mb-2">No items found</h3>
-                        <p className="text-muted-foreground mb-6">
-                            {searchQuery ? "Try a different search term" : "Be the first to list an item!"}
-                        </p>
-                        <Button onClick={() => navigate("/marketplace/list")} className="rounded-full">
-                            List Your First Item
-                        </Button>
+                        <span className="empty-icon">
+                            <Tag size={24} strokeWidth={1.5} />
+                        </span>
+                        <h3>No items found</h3>
+                        <p>{searchQuery ? "Try a different search term." : "Be the first to list an item."}</p>
+                        <button
+                            type="button"
+                            className="button button-primary"
+                            onClick={() => navigate("/marketplace/list")}
+                        >
+                            List your first item
+                        </button>
                     </m.div>
                 ) : (
                     <m.div
@@ -215,65 +191,37 @@ export function MarketplacePage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                        className="mp-grid"
                     >
                         {filteredItems.map((item, index) => (
                             <m.div
                                 key={item.id}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
-                                transition={{ delay: index * 0.05 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ delay: index * 0.04 }}
                                 layout
                             >
-                                <Link to={`/marketplace/${item.id}`} className="group block">
-                                    <div className="relative overflow-hidden rounded-2xl bg-muted/30 border border-border/50 hover:border-border hover:shadow-xl transition-shadow duration-300">
-                                        {/* Image */}
-                                        <div className="relative aspect-square bg-gradient-to-br from-muted to-muted/50 overflow-hidden">
-                                            {item.imageUrl ? (
-                                                <img
-                                                    src={item.imageUrl}
-                                                    alt={item.title}
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center">
-                                                    <Tag className="w-12 h-12 text-muted-foreground/30" />
-                                                </div>
-                                            )}
+                                <Link to={`/marketplace/${item.id}`} className="mp-card">
+                                    <div className="mp-media">
+                                        {item.imageUrl ? (
+                                            <img src={item.imageUrl} alt={item.title} />
+                                        ) : (
+                                            <span className="mp-media-empty">
+                                                <Tag size={30} strokeWidth={1.4} />
+                                            </span>
+                                        )}
+                                        <span className={`mp-badge${item.isNegotiable ? '' : ' fixed'}`}>
+                                            {item.isNegotiable ? 'Negotiable' : 'Fixed price'}
+                                        </span>
+                                    </div>
 
-                                            {/* Badge */}
-                                            <div className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold ${item.isNegotiable
-                                                ? "bg-brand-orange text-white"
-                                                : "bg-brand-navy text-white"
-                                                }`}>
-                                                {item.isNegotiable ? "NEGOTIABLE" : "FIXED PRICE"}
-                                            </div>
-
-                                            {/* Quick View */}
-                                            <m.button
-                                                initial={{ opacity: 0 }}
-                                                whileHover={{ opacity: 1 }}
-                                                aria-label={`Quick view ${item.title}`}
-                                                className="absolute bottom-3 right-3 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                                            >
-                                                <Eye className="w-4 h-4 text-brand-navy" />
-                                            </m.button>
-                                        </div>
-
-                                        {/* Content */}
-                                        <div className="p-4">
-                                            <h3 className="font-bold text-foreground truncate group-hover:text-brand-orange transition-colors">
-                                                {item.title}
-                                            </h3>
-                                            <p className="text-xl font-extrabold text-brand-orange mt-1">
-                                                ₹{parseFloat(item.price).toLocaleString()}
-                                            </p>
-
-                                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50 text-xs text-muted-foreground">
-                                                <span className="capitalize">{item.category?.replace("-", " ")}</span>
-                                                <span>{conditionLabels[item.condition] || item.condition || "Used"}</span>
-                                            </div>
+                                    <div className="mp-body">
+                                        <h3>{item.title}</h3>
+                                        <p className="mp-price">₹{parseFloat(item.price).toLocaleString()}</p>
+                                        <div className="mp-meta">
+                                            <span>{item.category?.replace("-", " ")}</span>
+                                            <span>{conditionLabels[item.condition] || item.condition || "Used"}</span>
                                         </div>
                                     </div>
                                 </Link>
@@ -283,49 +231,44 @@ export function MarketplacePage() {
                 )}
             </AnimatePresence>
 
-            {/* Load More Button */}
             {hasMore && filteredItems.length > 0 && (
                 <m.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="flex justify-center mt-12"
+                    className="mp-load-more"
                 >
-                    <Button
+                    <button
+                        type="button"
+                        className="button button-secondary"
                         onClick={handleLoadMore}
                         disabled={loadingMore}
-                        variant="outline"
-                        className="px-8 py-6 rounded-full font-bold text-lg border-2 hover:bg-brand-navy hover:text-white hover:border-brand-navy transition-colors gap-2"
                     >
                         {loadingMore ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <Loader2 size={16} className="animate-spin" />
                         ) : (
                             <>
-                                View More Items
-                                <ChevronDown className="w-5 h-5" />
+                                View more items
+                                <ChevronDown size={16} />
                             </>
                         )}
-                    </Button>
+                    </button>
                 </m.div>
             )}
 
-            {/* Results Count */}
             {!loading && total > 0 && (
-                <p className="text-center text-sm text-muted-foreground mt-6">
+                <p className="meta-mono mp-count">
                     Showing {filteredItems.length} of {total} items
                 </p>
             )}
 
-            {/* Floating Add Button */}
-            <m.button
-                initial={{ scale: 0.001 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
+            <button
+                type="button"
                 onClick={() => navigate("/marketplace/list")}
                 aria-label="List an item on marketplace"
-                className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-gradient-to-r from-brand-orange to-brand-yellow text-white shadow-2xl shadow-brand-orange/30 hover:shadow-brand-orange/50 hover:scale-110 transition-transform duration-300 flex items-center justify-center"
+                className="mp-fab"
             >
-                <Plus className="w-8 h-8" strokeWidth={2.5} />
-            </m.button>
+                <Plus size={22} strokeWidth={2} />
+            </button>
         </div>
     );
 }

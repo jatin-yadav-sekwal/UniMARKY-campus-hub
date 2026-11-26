@@ -263,6 +263,88 @@
   margin: 0;
 }
 
+/* ------------------------------------------------------- page structure --- */
+.um-editorial .page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 26px;
+}
+
+.um-editorial .page-title {
+  margin: 14px 0 10px;
+  font: 400 clamp(30px, 3vw, 40px)/1.12 'Space Grotesk', sans-serif;
+  letter-spacing: -.045em;
+  color: #24231f;
+}
+
+.um-editorial .page-title span {
+  color: #716c62;
+}
+
+.um-editorial .page-lead {
+  margin: 0;
+  max-width: 520px;
+  color: #66625c;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.um-editorial .page-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 22px 0 30px;
+}
+
+.um-editorial .card-surface {
+  border: 1px solid #e8e6e1;
+  background: #fff;
+}
+
+.um-editorial .meta-mono {
+  color: #8f8b83;
+  font: 400 9px 'DM Mono', monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.um-editorial .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 64px 24px;
+  border: 1px solid #e8e6e1;
+  background: rgba(255, 255, 255, .5);
+  text-align: center;
+}
+
+.um-editorial .empty-state .empty-icon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  color: #5751a7;
+  border: 1px solid rgba(87, 81, 167, .25);
+}
+
+.um-editorial .empty-state h3 {
+  margin: 0;
+  font: 400 22px/1.2 'Space Grotesk', sans-serif;
+  letter-spacing: -.03em;
+  color: #24231f;
+}
+
+.um-editorial .empty-state p {
+  margin: 0;
+  color: #66625c;
+  font-size: 14px;
+}
+
 /* Full-height vertical page rules, inset from the viewport edges. */
 .um-editorial .page-rules {
   position: absolute;

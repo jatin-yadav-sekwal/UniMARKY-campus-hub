@@ -54,7 +54,7 @@ export function DashboardPage() {
     if (error) {
         return (
             <div className="um-editorial um-dashboard">
-                <div className="dash-head">
+                <div className="page-head">
                     <p className="section-label">
                         <span>01</span>/ Dashboard
                     </p>
@@ -68,17 +68,19 @@ export function DashboardPage() {
 
     return (
         <div className="um-editorial um-dashboard">
-            <header className="dash-head">
-                <p className="section-label">
-                    <span>01</span>/ Dashboard
-                </p>
-                <h1 className="dash-title">
-                    Your campus, <span>in one place.</span>
-                </h1>
-                <p className="dash-lead">
-                    Pick up where you left off — manage your listings, browse campus life and
-                    explore everything Unimarky has to offer.
-                </p>
+            <header className="page-head">
+                <div>
+                    <p className="section-label">
+                        <span>01</span>/ Dashboard
+                    </p>
+                    <h1 className="page-title">
+                        Your campus, <span>in one place.</span>
+                    </h1>
+                    <p className="page-lead">
+                        Pick up where you left off — manage your listings, browse campus life and
+                        explore everything Unimarky has to offer.
+                    </p>
+                </div>
             </header>
 
             <div className="dash-grid">

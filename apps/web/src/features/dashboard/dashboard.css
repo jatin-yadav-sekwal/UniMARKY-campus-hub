@@ -9,29 +9,6 @@
   margin: 0 auto;
 }
 
-.um-dashboard .dash-head {
-  margin-bottom: 34px;
-}
-
-.um-dashboard .dash-title {
-  margin: 14px 0 10px;
-  font: 400 clamp(30px, 3vw, 40px)/1.12 'Space Grotesk', sans-serif;
-  letter-spacing: -.045em;
-  color: #24231f;
-}
-
-.um-dashboard .dash-title span {
-  color: #716c62;
-}
-
-.um-dashboard .dash-lead {
-  margin: 0;
-  max-width: 480px;
-  color: #66625c;
-  font-size: 14px;
-  line-height: 1.7;
-}
-
 .um-dashboard .dash-loading {
   display: flex;
   align-items: center;
