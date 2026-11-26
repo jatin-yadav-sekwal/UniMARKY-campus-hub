@@ -56,6 +56,22 @@
   --font-sora: 'Sora', sans-serif;
   --font-space: 'Space Grotesk', sans-serif;
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* =========================================================================
+     UNIMARKY SITE DESIGN SYSTEM: "Light canvas + campus gradient"
+     Used by the public website shell (sidebar, landing, footer).
+     ========================================================================= */
+  --color-um-ink: #171717;
+  --color-um-ink-2: #737373;
+  --color-um-ink-3: #a3a3a3;
+  --color-um-line: #e5e5e5;
+  --color-um-surface: #ffffff;
+  --color-um-mist: #f7f7f8;
+  --color-um-accent: #f27c32;
+  --color-um-accent-strong: #dd6520;
+  --color-um-accent-soft: #fff2e8;
+  --color-um-navy: #335065;
 
   /* Radius System: Scale reflects component hierarchy */
   --radius-ui: 8px;
@@ -191,5 +207,128 @@
   .surface-peach {
     background-color: var(--color-campus-peach);
     border: 1px solid rgba(255, 90, 54, 0.15);
+  }
+}
+
+/* ===========================================================================
+   PUBLIC SITE SHELL — layout, gradient and typography primitives
+   =========================================================================== */
+
+@layer components {
+  /* Aligned page column: 20px mobile, 32px tablet, 64px desktop. */
+  .um-container {
+    width: 100%;
+    max-width: 1320px;
+    margin-inline: auto;
+    padding-inline: 20px;
+  }
+
+  @media (min-width: 768px) {
+    .um-container {
+      padding-inline: 32px;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .um-container {
+      padding-inline: 64px;
+    }
+  }
+
+  .um-skip-link {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 100;
+    transform: translateY(-200%);
+    border-radius: 8px;
+    background: var(--color-um-ink);
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    transition: transform 150ms ease;
+  }
+
+  .um-skip-link:focus-visible {
+    transform: translateY(0);
+    outline: 2px solid var(--color-um-accent);
+    outline-offset: 2px;
+  }
+
+  /* The gradient is rendered as a viewport-fixed layer. The mask keeps it at
+     full strength to 55% of the viewport, starts easing at 55% and reaches
+     pure white by the bottom edge. */
+  .um-gradient-mask {
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 55%,
+      rgba(0, 0, 0, 0.72) 70%,
+      rgba(0, 0, 0, 0) 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 55%,
+      rgba(0, 0, 0, 0.72) 70%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  }
+
+  /* Static fallback: used before the shader mounts and whenever the visitor
+     prefers reduced motion. Mirrors the shader's colour composition. */
+  .um-gradient-fallback {
+    background-color: #a78bfa;
+    background-image:
+      radial-gradient(900px 720px at 12% 6%, rgba(196, 181, 253, 0.95) 0%, rgba(196, 181, 253, 0) 62%),
+      radial-gradient(1000px 780px at 82% 2%, rgba(147, 197, 253, 0.95) 0%, rgba(147, 197, 253, 0) 64%),
+      radial-gradient(900px 700px at 96% 42%, rgba(251, 113, 133, 0.85) 0%, rgba(251, 113, 133, 0) 60%),
+      radial-gradient(820px 640px at 44% 26%, rgba(103, 232, 249, 0.9) 0%, rgba(103, 232, 249, 0) 62%),
+      radial-gradient(780px 640px at 4% 64%, rgba(253, 186, 116, 0.9) 0%, rgba(253, 186, 116, 0) 64%);
+  }
+
+  /* Soft colour washes layered over the shader so all six palette colours are
+     present without flattening the composition. */
+  .um-gradient-wash {
+    opacity: 0.55;
+    mix-blend-mode: soft-light;
+    background-image:
+      radial-gradient(680px 520px at 88% 14%, rgba(253, 186, 116, 0.75) 0%, rgba(253, 186, 116, 0) 68%),
+      radial-gradient(620px 540px at 16% 46%, rgba(147, 197, 253, 0.65) 0%, rgba(147, 197, 253, 0) 68%),
+      radial-gradient(720px 560px at 54% 4%, rgba(196, 181, 253, 0.7) 0%, rgba(196, 181, 253, 0) 70%);
+  }
+}
+
+@layer utilities {
+  .um-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-um-ink-2);
+  }
+
+  .um-eyebrow::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 9999px;
+    background: var(--color-um-accent);
+  }
+
+  .um-focus:focus-visible {
+    outline: 2px solid var(--color-um-accent);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .um-reveal {
+      opacity: 1 !important;
+      transform: none !important;
+    }
   }
 }

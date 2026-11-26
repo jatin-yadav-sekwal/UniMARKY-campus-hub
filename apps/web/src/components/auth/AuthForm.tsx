@@ -1,11 +1,7 @@
 import { useState } from 'react';
-import { m, AnimatePresence } from 'motion/react';
-import { supabase } from '@/lib/supabase';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Link } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 import { SocialAuth } from '@/features/auth/components/SocialAuth';
 
 export function AuthForm() {
@@ -55,99 +51,118 @@ export function AuthForm() {
     };
 
     return (
-        <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg dark:bg-zinc-900 border border-border/50">
-            <div className="text-center">
-                <h2 className="text-3xl font-bold tracking-tighter text-brand-navy dark:text-white">
-                    {mode === 'login' ? 'Welcome Back' : 'Join Unmarky'}
-                </h2>
-                <p className="mt-2 text-sm text-brand-blue/80">
-                    {mode === 'login'
-                        ? 'Enter your credentials or use social login'
-                        : 'Create an account to get started'}
+        <div className="auth-card">
+            <header className="auth-card-head">
+                <p className="section-label">
+                    <span>{mode === 'login' ? '01' : '02'}</span>/{' '}
+                    {mode === 'login' ? 'Sign in' : 'Create account'}
                 </p>
-            </div>
+                <h2>{mode === 'login' ? 'Welcome back' : 'Join Unimarky'}</h2>
+                <p>
+                    {mode === 'login'
+                        ? 'Sign in to continue to your campus dashboard.'
+                        : 'Create an account to get started.'}
+                </p>
+            </header>
 
             <SocialAuth />
 
-            <Tabs
-                defaultValue="login"
-                onValueChange={(v) => setMode(v as 'login' | 'signup')}
-                className="w-full"
-            >
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                    <TabsTrigger value="login">Login</TabsTrigger>
-                    <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                </TabsList>
+            <div className="auth-divider">
+                <span>or continue with email</span>
+            </div>
 
-                <AnimatePresence mode="wait">
-                    <m.div
-                        key={mode}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.2 }}
-                    >
-                        <form onSubmit={handleAuth} className="space-y-4">
-                            {mode === 'signup' && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="fullName">Full Name</Label>
-                                    <Input
-                                        id="fullName"
-                                        placeholder="John Doe"
-                                        value={fullName}
-                                        onChange={(e) => setFullName(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                            )}
+            <div className="segmented" role="group" aria-label="Authentication mode">
+                <button
+                    type="button"
+                    aria-pressed={mode === 'login'}
+                    onClick={() => setMode('login')}
+                >
+                    Log in
+                </button>
+                <button
+                    type="button"
+                    aria-pressed={mode === 'signup'}
+                    onClick={() => setMode('signup')}
+                >
+                    Sign up
+                </button>
+            </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    placeholder="student@university.edu"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
-                            </div>
+            <form onSubmit={handleAuth} className="auth-form" noValidate={false}>
+                {mode === 'signup' && (
+                    <div className="field">
+                        <label className="field-label" htmlFor="fullName">
+                            Full name
+                        </label>
+                        <input
+                            id="fullName"
+                            className="field-input"
+                            placeholder="John Doe"
+                            autoComplete="name"
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                            required
+                        />
+                    </div>
+                )}
 
-                            <div className="space-y-2">
-                                <Label htmlFor="password">Password</Label>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
-                            </div>
+                <div className="field">
+                    <label className="field-label" htmlFor="email">
+                        Email
+                    </label>
+                    <input
+                        id="email"
+                        type="email"
+                        className="field-input"
+                        placeholder="student@university.edu"
+                        autoComplete="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
+                </div>
 
-                            {error && (
-                                <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md dark:bg-red-900/20">
-                                    {error}
-                                </div>
-                            )}
+                <div className="field">
+                    <label className="field-label" htmlFor="password">
+                        Password
+                    </label>
+                    <input
+                        id="password"
+                        type="password"
+                        className="field-input"
+                        autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                </div>
 
-                            {message && (
-                                <div className="p-3 text-sm text-green-600 bg-green-50 rounded-md dark:bg-green-900/20">
-                                    {message}
-                                </div>
-                            )}
+                {error && (
+                    <div className="alert alert-error" role="alert">
+                        {error}
+                    </div>
+                )}
 
-                            <Button
-                                type="submit"
-                                className="w-full bg-brand-navy hover:bg-brand-navy/90 text-white"
-                                disabled={isLoading}
-                            >
-                                {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                                {mode === 'login' ? 'Sign In' : 'Create Account'}
-                            </Button>
-                        </form>
-                    </m.div>
-                </AnimatePresence>
-            </Tabs>
+                {message && (
+                    <div className="alert alert-success" role="status">
+                        {message}
+                    </div>
+                )}
+
+                <button
+                    type="submit"
+                    className="button button-primary button-block"
+                    disabled={isLoading}
+                >
+                    {isLoading && <Loader2 size={16} className="animate-spin" />}
+                    {mode === 'login' ? 'Sign in' : 'Create account'}
+                </button>
+            </form>
+
+            <p className="auth-legal">
+                By continuing you agree to our <Link to="/terms">Terms</Link> and{' '}
+                <Link to="/privacy">Privacy Policy</Link>.
+            </p>
         </div>
     );
 }

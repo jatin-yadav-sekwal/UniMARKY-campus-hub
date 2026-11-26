@@ -1,0 +1,242 @@
+/* Auth page — editorial pass. Scoped to .um-auth so it only affects /auth. */
+
+.um-auth {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.um-auth .auth-shell {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  max-width: 1328px;
+  margin: 0 auto;
+  padding: 0 64px;
+  display: grid;
+  grid-template-columns: 1.05fr .95fr;
+}
+
+/* ------------------------------------------------------------------ intro --- */
+.um-auth .auth-intro {
+  display: flex;
+  flex-direction: column;
+  padding: 44px 56px 30px 0;
+}
+
+.um-auth .auth-brand {
+  width: fit-content;
+}
+
+.um-auth .auth-brand .brand-logo {
+  height: 27px;
+  width: auto;
+  user-select: none;
+}
+
+.um-auth .auth-intro-body {
+  margin: auto 0;
+  max-width: 470px;
+}
+
+.um-auth .auth-intro-body h1 {
+  margin: 24px 0 20px;
+  font-size: clamp(36px, 3.6vw, 50px);
+}
+
+.um-auth .auth-intro-body h1 span {
+  color: #5751a7;
+}
+
+.um-auth .auth-intro-body .lead {
+  max-width: 400px;
+  margin-bottom: 26px;
+}
+
+.um-auth .auth-points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid rgba(67, 63, 56, .22);
+}
+
+.um-auth .auth-points li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  border-bottom: 1px solid rgba(67, 63, 56, .22);
+  color: #4d4a45;
+  font-size: 13px;
+}
+
+.um-auth .auth-points li svg {
+  flex: none;
+  color: #5751a7;
+}
+
+.um-auth .auth-foot {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid rgba(67, 63, 56, .22);
+  padding-top: 12px;
+  color: #77736b;
+  font: 400 8px 'DM Mono', monospace;
+  letter-spacing: .06em;
+}
+
+/* ------------------------------------------------------------------ panel --- */
+.um-auth .auth-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 44px 0 44px 56px;
+  border-left: 1px solid rgba(67, 63, 56, .22);
+}
+
+.um-auth .auth-card {
+  width: 100%;
+  max-width: 384px;
+}
+
+.um-auth .auth-card-head {
+  margin-bottom: 24px;
+}
+
+.um-auth .auth-card-head h2 {
+  margin: 16px 0 6px;
+  font-size: 27px;
+}
+
+.um-auth .auth-card-head p {
+  margin: 0;
+  color: #66625c;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.um-auth .auth-divider {
+  position: relative;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.um-auth .auth-divider::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: #e8e6e1;
+}
+
+.um-auth .auth-divider span {
+  position: relative;
+  background: #fff;
+  padding: 0 10px;
+  color: #8f8b83;
+  font: 400 9px 'DM Mono', monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+/* Segmented login / sign-up switch (replaces the shadcn Tabs). */
+.um-auth .segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  padding: 3px;
+  margin-bottom: 20px;
+  border: 1px solid #e8e6e1;
+  border-radius: 4px;
+}
+
+.um-auth .segmented button {
+  height: 34px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: #575550;
+  font: 500 12px 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease;
+}
+
+.um-auth .segmented button:hover {
+  color: #252421;
+}
+
+.um-auth .segmented button[aria-pressed="true"] {
+  background: #3157d5;
+  color: #fff;
+}
+
+.um-auth .auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.um-auth .auth-legal {
+  margin: 18px 0 0;
+  color: #8f8b83;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.um-auth .auth-legal a {
+  color: #2949b4;
+}
+
+/* ------------------------------------------------------------ responsive --- */
+@media (max-width: 900px) {
+  .um-auth .auth-shell {
+    grid-template-columns: 1fr;
+    padding: 0 44px;
+  }
+
+  .um-auth .auth-intro {
+    padding: 40px 0 28px;
+  }
+
+  .um-auth .auth-intro-body {
+    margin: 28px 0 32px;
+  }
+
+  .um-auth .auth-intro-body h1 {
+    font-size: 34px;
+  }
+
+  .um-auth .auth-foot {
+    margin-top: 8px;
+  }
+
+  .um-auth .auth-panel {
+    justify-content: flex-start;
+    border-left: 0;
+    border-top: 1px solid rgba(67, 63, 56, .22);
+    padding: 36px 0 56px;
+  }
+
+  .um-auth .auth-card {
+    max-width: 440px;
+  }
+}
+
+@media (max-width: 620px) {
+  .um-auth .auth-shell {
+    padding: 0 20px;
+  }
+
+  .um-auth .auth-intro-body h1 {
+    font-size: 31px;
+  }
+
+  .um-auth .auth-foot {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
