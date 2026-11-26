@@ -1,13 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { m } from "motion/react";
-import { ArrowLeft, Tag, Save, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { ArrowLeft, Loader2, Save } from "lucide-react";
 import { api } from "@/lib/api";
 import { uploadImage } from "@/lib/uploadImage";
 import { MarketplacePhotoUploader } from "./components/MarketplacePhotoUploader";
+import './marketplace.css';
 
 const CATEGORIES = [
     { value: "books", label: "Books & Study Material" },
@@ -40,37 +37,35 @@ function CategoryConditionSelects({
     onChangeCondition,
 }: SelectFieldsProps) {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <Label htmlFor="category" className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
+        <div className="form-grid">
+            <div className="field">
+                <label className="field-label" htmlFor="category">
                     Category
-                </Label>
+                </label>
                 <select
                     id="category"
-                    aria-label="Category"
+                    className="field-input"
                     value={category}
                     onChange={(e) => onChangeCategory(e.target.value)}
-                    className="w-full h-14 px-4 rounded-xl border border-border/50 bg-background text-foreground text-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange"
                     required
                 >
-                    <option value="">Select Category</option>
+                    <option value="">Select category</option>
                     {CATEGORIES.map(cat => (
                         <option key={cat.value} value={cat.value}>{cat.label}</option>
                     ))}
                 </select>
             </div>
-            <div>
-                <Label htmlFor="condition" className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
+            <div className="field">
+                <label className="field-label" htmlFor="condition">
                     Condition
-                </Label>
+                </label>
                 <select
                     id="condition"
-                    aria-label="Condition"
+                    className="field-input"
                     value={condition}
                     onChange={(e) => onChangeCondition(e.target.value)}
-                    className="w-full h-14 px-4 rounded-xl border border-border/50 bg-background text-foreground text-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange"
                 >
-                    <option value="">Select Condition</option>
+                    <option value="">Select condition</option>
                     {CONDITIONS.map(cond => (
                         <option key={cond.value} value={cond.value}>{cond.label}</option>
                     ))}
@@ -94,34 +89,33 @@ function PriceNegotiableField({
     onNegotiableChange,
 }: PriceInputProps) {
     return (
-        <div>
-            <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
+        <div className="field">
+            <label className="field-label" htmlFor="price">
                 Price (₹)
-            </Label>
-            <div className="flex items-center gap-4">
-                <div className="relative flex-1">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-lg">₹</span>
-                    <Input
+            </label>
+            <div className="mp-price-row">
+                <div className="mp-price-input">
+                    <span aria-hidden="true">₹</span>
+                    <input
+                        id="price"
                         type="number"
+                        className="field-input"
                         placeholder="0.00"
                         value={price}
                         onChange={(e) => onPriceChange(e.target.value)}
-                        className="h-14 pl-8 rounded-xl border-border/50 text-lg"
                         required
                     />
                 </div>
-                <label className="flex items-center gap-3 cursor-pointer">
-                    <div className="relative">
-                        <input
-                            type="checkbox"
-                            checked={isNegotiable}
-                            onChange={(e) => onNegotiableChange(e.target.checked)}
-                            className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-muted rounded-full peer-checked:bg-brand-orange transition-colors" />
-                        <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm peer-checked:translate-x-5 transition-transform" />
-                    </div>
-                    <span className="text-sm font-medium whitespace-nowrap">Open to negotiations</span>
+                <label className="switch">
+                    <input
+                        type="checkbox"
+                        checked={isNegotiable}
+                        onChange={(e) => onNegotiableChange(e.target.checked)}
+                    />
+                    <span className="switch-track">
+                        <span className="switch-thumb" />
+                    </span>
+                    <span className="switch-label">Open to negotiations</span>
                 </label>
             </div>
         </div>
@@ -224,53 +218,40 @@ export function EditMarketplaceItemPage() {
 
     if (fetching) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-brand-orange" />
+            <div className="um-editorial um-marketplace">
+                <div className="mp-spinner">
+                    <Loader2 size={20} className="animate-spin" />
+                    <span>Loading listing…</span>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-brand-orange/5 via-background to-brand-yellow/5">
-            <div className="container max-w-3xl mx-auto px-4 py-8">
-                {/* Header */}
-                <m.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-8"
+        <div className="um-editorial um-marketplace">
+            <div className="mp-form-wrap">
+                <button
+                    type="button"
+                    className="back-link"
+                    onClick={() => navigate("/marketplace/my-listings")}
                 >
-                    <button
-                        onClick={() => navigate("/marketplace/my-listings")}
-                        className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        Back to My Listings
-                    </button>
+                    <ArrowLeft size={15} />
+                    Back to My Listings
+                </button>
 
-                    <div className="flex items-center gap-2 text-sm font-semibold text-brand-orange mb-2">
-                        <span className="w-2 h-2 rounded-full bg-brand-orange animate-pulse" />
-                        EDIT LISTING
+                <header className="page-head">
+                    <div>
+                        <p className="section-label">
+                            <span>02</span>/ Edit listing
+                        </p>
+                        <h1 className="page-title">
+                            Update your <span>item.</span>
+                        </h1>
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-black tracking-tight">
-                        <span className="text-brand-navy">UPDATE YOUR </span>
-                        <span className="bg-gradient-to-r from-brand-orange to-brand-yellow bg-clip-text text-transparent">ITEM.</span>
-                    </h1>
-                </m.div>
+                </header>
 
-                {/* Form Card */}
-                <m.form
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    onSubmit={handleSubmit}
-                    className="relative bg-background rounded-3xl border border-border/50 shadow-xl p-6 md:p-10"
-                >
-                    {/* Decorative Tag */}
-                    <div className="absolute -top-3 -right-3 w-16 h-16 bg-brand-orange/10 rounded-2xl rotate-12 flex items-center justify-center">
-                        <Tag className="w-6 h-6 text-brand-orange -rotate-12" />
-                    </div>
-
-                    <div className="space-y-8">
+                <form onSubmit={handleSubmit} className="form-card">
+                    <div className="form-stack">
                         <MarketplacePhotoUploader
                             imagePreview={imagePreview}
                             subtitle="Click to change current image"
@@ -278,16 +259,16 @@ export function EditMarketplaceItemPage() {
                             onRemove={handleRemoveImage}
                         />
 
-                        {/* Product Name */}
-                        <div>
-                            <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
-                                Product Name
-                            </Label>
-                            <Input
-                                placeholder="e.g. Vintage Denim Jacket"
+                        <div className="field">
+                            <label className="field-label" htmlFor="title">
+                                Product name
+                            </label>
+                            <input
+                                id="title"
+                                className="field-input"
+                                placeholder="e.g. Vintage denim jacket"
                                 value={formData.title}
                                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                                className="h-14 rounded-xl border-border/50 text-lg"
                                 required
                             />
                         </div>
@@ -299,19 +280,17 @@ export function EditMarketplaceItemPage() {
                             onChangeCondition={(val) => setFormData(prev => ({ ...prev, condition: val }))}
                         />
 
-                        {/* Description */}
-                        <div>
-                            <Label htmlFor="description" className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-3 block">
+                        <div className="field">
+                            <label className="field-label" htmlFor="description">
                                 Description
-                            </Label>
+                            </label>
                             <textarea
                                 id="description"
-                                aria-label="Description"
-                                placeholder="Tell us about the condition, usage, and why you're selling it..."
+                                className="field-input"
+                                placeholder="Tell us about the condition, usage, and why you're selling it…"
                                 value={formData.description}
                                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                                 rows={4}
-                                className="w-full px-4 py-4 rounded-xl border border-border/50 bg-background text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange"
                             />
                         </div>
 
@@ -323,23 +302,26 @@ export function EditMarketplaceItemPage() {
                         />
                     </div>
 
-                    {/* Footer */}
-                    <div className="mt-10 pt-6 border-t border-border/50 flex flex-col sm:flex-row items-center justify-end gap-4">
-                        <m.div
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
+                    <div className="form-actions">
+                        <button
+                            type="submit"
+                            className="button button-primary"
+                            disabled={loading}
                         >
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                className="px-8 py-6 rounded-full bg-gradient-to-r from-brand-orange to-brand-orange/90 text-white font-bold text-lg shadow-lg shadow-brand-orange/25 hover:shadow-xl transition-shadow gap-2"
-                            >
-                                {loading ? "Updating..." : "SAVE CHANGES"}
-                                <Save className="w-5 h-5" />
-                            </Button>
-                        </m.div>
+                            {loading ? (
+                                <>
+                                    <Loader2 size={16} className="animate-spin" />
+                                    Updating…
+                                </>
+                            ) : (
+                                <>
+                                    Save changes
+                                    <Save size={15} />
+                                </>
+                            )}
+                        </button>
                     </div>
-                </m.form>
+                </form>
             </div>
         </div>
     );

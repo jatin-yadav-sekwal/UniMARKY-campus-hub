@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { m } from 'motion/react';
 import { api } from '@/lib/api';
 import { ArrowLeft, Phone, User, BadgeCheck, Tag, Calendar, MessageCircle, Share2, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import './marketplace.css';
 
 interface SellerInfo {
     id: string;
@@ -50,65 +50,52 @@ function MarketplaceImageCard({
         <m.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative"
+            className="mpd-media-wrap"
         >
-            <div className="aspect-square rounded-3xl overflow-hidden bg-muted/30 border border-border/50">
+            <div className="mpd-media">
                 {imageUrl ? (
-                    <img
-                        src={imageUrl}
-                        alt={title}
-                        className="w-full h-full object-cover"
-                    />
+                    <img src={imageUrl} alt={title} />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                        <Tag className="w-20 h-20 text-muted-foreground/30" />
-                    </div>
+                    <span className="mpd-media-empty">
+                        <Tag size={64} strokeWidth={1.2} />
+                    </span>
                 )}
             </div>
 
-            <div className={`absolute top-4 left-4 px-4 py-2 rounded-full text-sm font-bold ${
-                isNegotiable ? "bg-brand-orange text-white" : "bg-brand-navy text-white"
-            }`}>
-                {isNegotiable ? "NEGOTIABLE" : "FIXED PRICE"}
-            </div>
+            <span className={`mpd-badge${isNegotiable ? '' : ' fixed'}`}>
+                {isNegotiable ? "Negotiable" : "Fixed price"}
+            </span>
 
-            <div className="absolute top-4 right-4 flex gap-2">
-                <button
-                    onClick={onShare}
-                    aria-label="Share listing"
-                    className="p-3 rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white transition-colors text-brand-navy"
-                >
-                    <Share2 className="w-5 h-5" />
-                </button>
-            </div>
+            <button
+                type="button"
+                onClick={onShare}
+                aria-label="Share listing"
+                className="mpd-share"
+            >
+                <Share2 size={18} />
+            </button>
         </m.div>
     );
 }
 
 function MarketplaceSellerCard({ seller }: { seller?: SellerInfo }) {
     return (
-        <div className="p-6 rounded-2xl bg-muted/30 border border-border/50">
-            <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">
-                Contact Seller
-            </h3>
+        <div className="mpd-seller">
+            <h3 className="mpd-desc-label">Contact seller</h3>
 
-            <div className="flex items-center gap-4 mb-4">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-brand-navy to-brand-navy/80 flex items-center justify-center">
-                    <User className="w-7 h-7 text-white" />
-                </div>
+            <div className="mpd-seller-head">
+                <span className="mpd-avatar">
+                    <User size={20} strokeWidth={1.6} />
+                </span>
                 <div>
-                    <div className="flex items-center gap-2">
-                        <p className="font-bold text-lg text-foreground">
-                            {seller?.fullName || "Anonymous Seller"}
-                        </p>
+                    <p className="mpd-seller-name">
+                        {seller?.fullName || "Anonymous Seller"}
                         {seller?.isVerified && (
-                            <BadgeCheck className="w-5 h-5 text-blue-500" />
+                            <BadgeCheck className="verified" size={16} />
                         )}
-                    </div>
+                    </p>
                     {seller?.department && (
-                        <p className="text-sm text-muted-foreground">
-                            {seller.department}
-                        </p>
+                        <p className="mpd-seller-dept">{seller.department}</p>
                     )}
                 </div>
             </div>
@@ -116,14 +103,14 @@ function MarketplaceSellerCard({ seller }: { seller?: SellerInfo }) {
             {seller?.mobileNumber ? (
                 <a
                     href={`tel:${seller.mobileNumber}`}
-                    className="flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-gradient-to-r from-brand-navy to-brand-navy/90 text-white font-bold text-lg hover:shadow-lg hover:shadow-brand-navy/25 transition-shadow"
+                    className="button button-primary button-block"
                 >
-                    <Phone className="w-5 h-5" />
+                    <Phone size={16} />
                     {seller.mobileNumber}
                 </a>
             ) : (
-                <div className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-muted text-muted-foreground">
-                    <MessageCircle className="w-5 h-5" />
+                <div className="mpd-contact-unavailable">
+                    <MessageCircle size={16} />
                     Contact info not available
                 </div>
             )}
@@ -148,19 +135,32 @@ export function MarketplaceItemPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
-                <Loader2 className="w-8 h-8 animate-spin text-brand-orange" />
+            <div className="um-editorial um-marketplace">
+                <div className="mp-spinner">
+                    <Loader2 size={20} className="animate-spin" />
+                    <span>Loading listing...</span>
+                </div>
             </div>
         );
     }
 
     if (error || !item) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-                <p className="text-lg text-muted-foreground">{error || "Item not found"}</p>
-                <Button onClick={() => navigate("/marketplace")} variant="outline">
-                    Back to Marketplace
-                </Button>
+            <div className="um-editorial um-marketplace">
+                <div className="empty-state">
+                    <span className="empty-icon">
+                        <Tag size={24} strokeWidth={1.5} />
+                    </span>
+                    <h3>Item not found</h3>
+                    <p>{error || "This listing may have been removed."}</p>
+                    <button
+                        type="button"
+                        className="button button-secondary"
+                        onClick={() => navigate("/marketplace")}
+                    >
+                        Back to marketplace
+                    </button>
+                </div>
             </div>
         );
     }
@@ -192,18 +192,19 @@ export function MarketplaceItemPage() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto pb-12">
+        <div className="um-editorial um-marketplace">
             <m.button
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
+                type="button"
                 onClick={() => navigate("/marketplace")}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
+                className="back-link"
             >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft size={15} />
                 Back to Marketplace
             </m.button>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="mpd-grid">
                 <MarketplaceImageCard
                     imageUrl={item.imageUrl}
                     title={item.title}
@@ -215,48 +216,39 @@ export function MarketplaceItemPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="flex flex-col"
                 >
-                    <div className="flex items-center gap-2 mb-3">
-                        <span className="px-3 py-1 rounded-full bg-muted text-xs font-bold uppercase tracking-wide">
+                    <div className="mpd-tags">
+                        <span className="mpd-tag">
                             {item.category?.replace("-", " ") || "General"}
                         </span>
                         {item.condition && (
-                            <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold uppercase tracking-wide">
+                            <span className="mpd-tag">
                                 {conditionLabels[item.condition] || item.condition}
                             </span>
                         )}
                     </div>
 
-                    <h1 className="text-3xl md:text-4xl font-black text-foreground mb-2">
-                        {item.title}
-                    </h1>
+                    <h1 className="mpd-title">{item.title}</h1>
 
-                    <p className="text-sm text-muted-foreground flex items-center gap-1 mb-6">
-                        <Calendar className="w-4 h-4" />
+                    <p className="mpd-date">
+                        <Calendar size={13} />
                         Listed on {formattedDate}
                     </p>
 
-                    <div className="p-6 rounded-2xl bg-gradient-to-br from-brand-orange/10 to-brand-yellow/5 border border-brand-orange/20 mb-6">
-                        <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Expected Price</p>
-                        <p className="text-4xl font-black text-brand-navy">
+                    <div className="mpd-price">
+                        <p className="mpd-price-label">Expected price</p>
+                        <p className="mpd-price-value">
                             ₹{parseFloat(item.price).toLocaleString()}
                         </p>
                         {item.isNegotiable && (
-                            <p className="text-sm text-brand-orange mt-1 font-medium">
-                                Open to negotiations
-                            </p>
+                            <p className="mpd-negotiable">Open to negotiations</p>
                         )}
                     </div>
 
                     {item.description && (
-                        <div className="mb-6">
-                            <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-2">
-                                Description
-                            </h3>
-                            <p className="text-foreground leading-relaxed">
-                                {item.description}
-                            </p>
+                        <div className="mpd-desc">
+                            <h3>Description</h3>
+                            <p>{item.description}</p>
                         </div>
                     )}
 

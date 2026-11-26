@@ -273,7 +273,8 @@ Radius: the landing uses **4px** for controls. The app’s `--radius` (shadcn) i
 | Landing | `features/landing/LandingPage.tsx` | `.um-landing` | `features/landing/landing.css` | Done (reference) |
 | Auth | `features/auth/AuthPage.tsx` (+ `components/auth/AuthForm.tsx`, `features/auth/components/SocialAuth.tsx`) | `.um-auth` | `features/auth/auth.css` | Done |
 | Dashboard | `features/dashboard/DashboardPage.tsx` | `.um-dashboard` | `features/dashboard/dashboard.css` | Done (body only; shell pending) |
-| Marketplace, Communities, Study, Housing, Food | — | — | — | Next (high-traffic core) |
+| Marketplace | `features/marketplace/MarketplacePage.tsx` (+ `MarketplaceItemPage.tsx`, `MyMarketplaceListingsPage.tsx`, `ListItemPage.tsx`, `EditMarketplaceItemPage.tsx`, `components/MarketplacePhotoUploader.tsx`) | `.um-marketplace` | `features/marketplace/marketplace.css` | Done (body only; shell pending) |
+| Communities, Study, Housing, Food | — | — | — | Next (high-traffic core) |
 
 Notes from the Auth + Dashboard pass:
 
@@ -281,6 +282,12 @@ Notes from the Auth + Dashboard pass:
 - Auth replaced the shadcn `Tabs` with a native segmented control and the shadcn `Button`/`Input`/`Label` with `.button` / `.field-input` / `.field-label`; all Supabase calls and redirect logic are unchanged.
 - Dashboard dropped motion, gradients and shadcn `Card` for framed surfaces (`.summary`) and a hairline grid (`.quick-grid`).
 - Verified: `tsc -b` clean, `vite build` passes, no console errors; `/auth` renders at ~720px with no horizontal overflow and the login/sign-up switch works; the dashboard body renders with mocked data (2 summary surfaces, 5 rows, 6 quick-access tiles, no overflow).
+
+Notes from the Marketplace pass:
+
+- Reusable page structure was promoted into `.um-editorial` so later pages need less bespoke CSS: `.page-head` / `.page-title` / `.page-lead` / `.page-toolbar`, `.card-surface`, `.meta-mono`, `.empty-state` / `.empty-icon`, and form layout `.back-link` / `.form-card` / `.form-stack` / `.form-grid` / `.form-actions` / `.form-note` / `.switch`. Dashboard was updated to use `.page-head` / `.page-title` / `.page-lead` in the same commit.
+- All five marketplace routes (listing, item detail, my-listings, list, edit) plus the photo uploader were restyled: gradients, rounded `Card`s and coloured shadows were replaced with 1px-framed `.mp-card` surfaces, editorial filters, a native `.switch`, hairline action rows and a square list-item affordance. shadcn `Button`/`Input`/`Label`/`Card` were replaced with `.button` / `.field-input` / `.field-label`; ₹ formatting, fetch/pagination/delete/share logic is unchanged.
+- Verified: `tsc -b` clean, `vite build` passes.
 
 ### Verified state of the landing
 
