@@ -15,6 +15,7 @@ import {
   userPermissions,
 } from "../db/schema";
 import type { Env } from "../middleware/auth";
+import { chooseSuccessor } from "../utils/account";
 
 const accountApp = new Hono<Env>();
 
@@ -47,9 +48,7 @@ accountApp.delete("/", async (c) => {
           .from(communityMembers)
           .where(eq(communityMembers.communityId, community.id));
 
-        const successor = members
-          .filter((m) => m.userId !== userId)
-          .sort((a, b) => (a.role === "moderator" ? -1 : 1) - (b.role === "moderator" ? -1 : 1))[0];
+        const successor = chooseSuccessor(members, userId);
 
         if (successor) {
           await tx
