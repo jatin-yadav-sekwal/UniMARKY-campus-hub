@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { m } from 'motion/react';
 import { api } from '@/lib/api';
-import { ArrowLeft, Star, Loader2, Leaf, Plus, Minus, ShoppingBag } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ArrowLeft, Star, Loader2, Leaf, Plus, Minus, Utensils } from 'lucide-react';
+import './lifestyle.css';
 
 interface MenuItemDetail {
     id: string;
@@ -42,165 +42,133 @@ export function MenuItemPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
-                <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+            <div className="um-editorial um-dish">
+                <div className="fd-loading">
+                    <Loader2 size={20} className="animate-spin" />
+                    <span>Loading dish...</span>
+                </div>
             </div>
         );
     }
 
     if (error || !item) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-                <p className="text-lg text-muted-foreground">{error || "Menu item not found"}</p>
-                <Button onClick={() => navigate(-1)} variant="outline">
-                    Go Back
-                </Button>
+            <div className="um-editorial um-dish">
+                <div className="empty-state">
+                    <span className="empty-icon">
+                        <Utensils size={24} strokeWidth={1.5} />
+                    </span>
+                    <h3>{error || "Menu item not found"}</h3>
+                    <button
+                        type="button"
+                        className="button button-secondary"
+                        onClick={() => navigate(-1)}
+                    >
+                        Go back
+                    </button>
+                </div>
             </div>
         );
     }
 
-    const price = parseFloat(item.price);
+    const price = parseFloat(item.price) || 0;
     const totalPrice = price * quantity;
 
     return (
-        <div className="max-w-4xl mx-auto pb-12">
-            {/* Back Button */}
-            <m.button
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
+        <div className="um-editorial um-dish">
+            <button
+                type="button"
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
+                className="back-link"
             >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Menu
-            </m.button>
+                <ArrowLeft size={15} /> Back to Menu
+            </button>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Image */}
+            <div className="dsh-grid">
                 <m.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                 >
-                    <div className="aspect-square rounded-3xl overflow-hidden bg-muted/30 border border-border/50">
+                    <div className="dsh-media">
                         {item.imageUrl ? (
-                            <img
-                                src={item.imageUrl}
-                                alt={item.name}
-                                className="w-full h-full object-cover"
-                            />
+                            <img src={item.imageUrl} alt={item.name} />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center text-6xl">
-                                🍽️
-                            </div>
+                            <span className="dsh-media-empty">
+                                <Utensils size={48} strokeWidth={1.2} />
+                            </span>
                         )}
                     </div>
                 </m.div>
 
-                {/* Details */}
                 <m.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="flex flex-col"
+                    className="dsh-details"
                 >
-                    {/* Veg/Non-Veg & Category */}
-                    <div className="flex items-center gap-3 mb-4">
-                        {item.isVeg ? (
-                            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-100 dark:bg-green-500/10 text-green-600 text-sm font-medium">
-                                <Leaf className="w-4 h-4" />
-                                Vegetarian
-                            </span>
-                        ) : (
-                            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 text-sm font-medium">
-                                🍗 Non-Vegetarian
-                            </span>
-                        )}
-                        {item.category && (
-                            <span className="px-3 py-1.5 rounded-full bg-muted text-muted-foreground text-sm font-medium">
-                                {item.category}
-                            </span>
-                        )}
+                    <div className="dsh-tags">
+                        <span className={`dsh-veg${item.isVeg ? '' : ' nonveg'}`}>
+                            {item.isVeg ? <Leaf size={12} /> : null}
+                            {item.isVeg ? 'Vegetarian' : 'Non-vegetarian'}
+                        </span>
+                        {item.category && <span className="dsh-cat">{item.category}</span>}
                     </div>
 
-                    {/* Name */}
-                    <h1 className="text-3xl md:text-4xl font-black text-foreground mb-2">
-                        {item.name}
-                    </h1>
+                    <h1 className="dsh-title">{item.name}</h1>
 
-                    {/* Restaurant Link */}
-                    <Link
-                        to={`/food/${item.restaurant.id}`}
-                        className="text-orange-500 hover:text-orange-600 font-medium mb-4"
-                    >
-                        from {item.restaurant.name}, {item.restaurant.location}
+                    <Link to={`/food/${item.restaurant.id}`} className="dsh-from">
+                        from {item.restaurant.name}
+                        {item.restaurant.location ? `, ${item.restaurant.location}` : ''}
                     </Link>
 
-                    {/* Rating */}
-                    <div className="flex items-center gap-4 mb-6">
-                        <div className="flex items-center gap-1.5">
-                            <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                            <span className="font-bold text-lg">{parseFloat(item.rating).toFixed(1)}</span>
-                        </div>
-                        <span className="text-muted-foreground">
-                            {item.reviewCount} reviews
-                        </span>
+                    <div className="dsh-rating">
+                        <Star size={15} fill="currentColor" />
+                        <b>{(parseFloat(item.rating) || 0).toFixed(1)}</b>
+                        <span>{item.reviewCount} reviews</span>
                     </div>
 
-                    {/* Description */}
                     {item.description && (
-                        <div className="mb-6">
-                            <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-2">
-                                Description
-                            </h3>
-                            <p className="text-foreground leading-relaxed text-lg">
-                                {item.description}
-                            </p>
+                        <div className="dsh-desc">
+                            <h3>Description</h3>
+                            <p>{item.description}</p>
                         </div>
                     )}
 
-                    {/* Price & Quantity */}
-                    <div className="mt-auto">
-                        <div className="p-6 rounded-2xl bg-gradient-to-br from-orange-500/10 to-red-500/5 border border-orange-500/20">
-                            <div className="flex items-center justify-between mb-4">
-                                <div>
-                                    <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Price per item</p>
-                                    <p className="text-2xl font-black text-foreground">₹{price.toFixed(0)}</p>
-                                </div>
-
-                                {/* Quantity Selector */}
-                                <div className="flex items-center gap-3">
-                                    <button
-                                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                        aria-label="Decrease quantity"
-                                        className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors"
-                                    >
-                                        <Minus className="w-4 h-4" />
-                                    </button>
-                                    <span className="w-8 text-center font-bold text-lg">{quantity}</span>
-                                    <button
-                                        onClick={() => setQuantity(quantity + 1)}
-                                        aria-label="Increase quantity"
-                                        className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors"
-                                    >
-                                        <Plus className="w-4 h-4" />
-                                    </button>
-                                </div>
+                    <div className="dsh-order">
+                        <div className="dsh-order-row">
+                            <div>
+                                <p className="dsh-price-label">Price per item</p>
+                                <p className="dsh-price">₹{price.toFixed(0)}</p>
                             </div>
 
-                            {/* Total */}
-                            <div className="flex items-center justify-between pt-4 border-t border-border/50">
-                                <span className="text-muted-foreground">Total</span>
-                                <span className="text-3xl font-black text-orange-500">₹{totalPrice.toFixed(0)}</span>
+                            <div className="dsh-qty">
+                                <button
+                                    type="button"
+                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                    aria-label="Decrease quantity"
+                                >
+                                    <Minus size={16} />
+                                </button>
+                                <span>{quantity}</span>
+                                <button
+                                    type="button"
+                                    onClick={() => setQuantity(quantity + 1)}
+                                    aria-label="Increase quantity"
+                                >
+                                    <Plus size={16} />
+                                </button>
                             </div>
                         </div>
 
-                        {/* Availability */}
-                        {!item.isAvailable && (
-                            <div className="mt-4 p-4 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 text-center font-medium">
-                                Currently unavailable
-                            </div>
-                        )}
+                        <div className="dsh-total">
+                            <span className="dsh-total-label">Total</span>
+                            <span className="dsh-total-value">₹{totalPrice.toFixed(0)}</span>
+                        </div>
                     </div>
+
+                    {!item.isAvailable && (
+                        <div className="dsh-unavailable">Currently unavailable</div>
+                    )}
                 </m.div>
             </div>
         </div>

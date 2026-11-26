@@ -276,7 +276,9 @@ Radius: the landing uses **4px** for controls. The app’s `--radius` (shadcn) i
 | Marketplace | `features/marketplace/MarketplacePage.tsx` (+ `MarketplaceItemPage.tsx`, `MyMarketplaceListingsPage.tsx`, `ListItemPage.tsx`, `EditMarketplaceItemPage.tsx`, `components/MarketplacePhotoUploader.tsx`) | `.um-marketplace` | `features/marketplace/marketplace.css` | Done (body only; shell pending) |
 | Communities | `features/communities/CommunitiesPage.tsx` (+ `CommunityPage.tsx`, `CreateCommunityPage.tsx`, `ManageCommunityPage.tsx`, `shared.tsx`) | `.um-communities` | `features/communities/communities.css` | Done (body only; shell pending) |
 | Study | `features/study/StudyPage.tsx` | `.um-study` | `features/study/study.css` | Done (body only; shell pending) |
-| Housing, Food | — | — | — | Next (high-traffic core) |
+| Housing | `features/lifestyle/pages/HousingPage.tsx` (+ `AccommodationPage.tsx`) | `.um-housing` / `.um-stay` | `features/lifestyle/pages/lifestyle.css` | Done (body only; shell pending) |
+| Food | `features/lifestyle/pages/FoodPage.tsx` (+ `RestaurantPage.tsx`, `MenuItemPage.tsx`) | `.um-food` / `.um-dish` | `features/lifestyle/pages/lifestyle.css` | Done (body only; shell pending) |
+| — | — | — | — | Remaining areas (Lost & Found, Events, Profile, etc.) |
 
 Notes from the Auth + Dashboard pass:
 
@@ -302,6 +304,16 @@ Notes from the Communities pass:
 Notes from the Study pass:
 
 - Filters rebuilt as a framed surface (`.st-filters`) with native `select.field-input`s, a bottom-aligned fetch button and hairline "Showing" chips. Resources are hairline cards with a per-category accent top-border (`.st-cat` uses the same colour), a `.st-download` action, and the shared `.empty-state` for both the initial and no-results states. shadcn `Select`/`Button`/`Badge`/`Card` replaced; fetch logic unchanged.
+- Verified: `tsc -b` clean, `vite build` passes.
+
+Notes from the Housing + Food pass:
+
+- Housing and Food share one stylesheet (`features/lifestyle/pages/lifestyle.css`) scoped to `.um-housing` / `.um-stay` (housing) and `.um-food` / `.um-dish` (food).
+- Cuisine and accommodation-type filters became underline tab rows (`.fd-cuisines` / `.hs-types`) with `aria-pressed` on the active item; the rounded orange "pill" filters and their coloured shadows are gone.
+- Cards are 1px-framed with square corners, a hairline footer rule and a hover border tint (`.fd-card`, `.hs-card`). The accent is a small colour chip on the type badge only — no gradients, no rounded media.
+- Restaurant detail (`RestaurantPage`) drops the gradient hero and text-over-image for a framed hero (`.fdr-hero`) with media on top and a hairline body, plus `.fdr-panel` info blocks, an underline category filter and hairline menu rows with square veg/non-veg markers (`.fdr-vegdot`).
+- Menu item detail (`MenuItemPage`) replaces the gradient order card with a hairline `.dsh-order` panel; the quantity stepper, ₹ totals and availability notice are unchanged in behaviour.
+- Fixed a broken housing detail link (`/lifestyle/housing/:id` → `/housing/:id`).
 - Verified: `tsc -b` clean, `vite build` passes.
 
 ### Verified state of the landing
