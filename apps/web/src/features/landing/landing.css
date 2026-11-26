@@ -329,6 +329,8 @@
 .um-landing .footer-bottom a:hover {color: #3157d5;}
 .um-landing .footer-bottom {border-top: 1px solid #e8e6e1; padding-top: 17px; display: flex; align-items: center; justify-content: space-between; color: #77736b; font-size: 8px;}
 .um-landing .footer-bottom div {display: flex; align-items: center; gap: 18px;}
+.um-landing .footer-cookie {border: 0; background: none; padding: 0; color: inherit; font: inherit; cursor: pointer;}
+.um-landing .footer-cookie:hover {color: #3157d5;}
 @media (max-width: 1150px) {
 .um-landing .sidebar {width: 218px; padding-left: 26px;}
 .um-landing .main-shell {margin-left: 218px;}

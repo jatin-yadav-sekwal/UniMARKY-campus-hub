@@ -1,6 +1,7 @@
 import { ArrowRight, ArrowUpRight, Instagram } from "lucide-react";
 import logo from "@/assets/unimarky-logo.png";
 import { siteNav } from "@/components/site/navigation";
+import { openCookieConsent } from "@/components/legal/CookieConsent";
 import { LandingLink } from "./LandingLink";
 
 interface FooterLink {
@@ -65,6 +66,9 @@ export function SiteFooter() {
           <LandingLink to="/privacy">Privacy</LandingLink>
           <LandingLink to="/terms">Terms</LandingLink>
           <a href="/universities">Universities</a>
+          <button type="button" className="footer-cookie" onClick={openCookieConsent}>
+            Cookies
+          </button>
           <span>Designed for wherever you study.</span>
         </div>
       </div>

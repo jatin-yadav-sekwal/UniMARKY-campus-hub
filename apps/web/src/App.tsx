@@ -9,6 +9,7 @@ import { ErrorPage } from '@/components/layout/ErrorPage';
 import ScrollToTop from '@/components/layout/ScrollToTop';
 import { PageLoader } from '@/components/layout/PageLoader';
 import { RouteMeta } from '@/components/seo/RouteMeta';
+import { CookieConsent } from '@/components/legal/CookieConsent';
 
 // Lazy-loaded pages — each gets its own chunk
 const LandingPage = lazy(() => import('@/features/landing/LandingPage').then(m => ({ default: m.LandingPage })));
@@ -68,6 +69,7 @@ export default function App() {
             <LazyMotion features={domMax} strict={false}>
                 <Suspense fallback={<RouteFallback />}>
                     <RouteMeta />
+                    <CookieConsent />
                     <Toaster position="top-center" richColors />
                     <ScrollToTop />
                 <Routes>

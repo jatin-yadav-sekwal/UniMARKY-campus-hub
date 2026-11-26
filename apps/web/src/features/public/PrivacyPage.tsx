@@ -69,7 +69,16 @@ export function PrivacyPage() {
                         </p>
                     </Section>
 
-                    <Section title="5. Your Rights & Data Deletion">
+                    <Section title="5. Cookies and Local Storage">
+                        <p>
+                            UniMARKY uses essential cookies and local storage to keep you signed
+                            in and to remember your cookie choice. We do not use advertising or
+                            analytics trackers. You can reopen the notice from the “Cookies” link
+                            in the footer, and clearing your browser storage will sign you out.
+                        </p>
+                    </Section>
+
+                    <Section title="6. Your Rights & Data Deletion">
                         <p>
                             You have full control over your data. You may download your listing
                             history or request complete account deletion at any time by emailing us
