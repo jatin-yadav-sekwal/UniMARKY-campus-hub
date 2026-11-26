@@ -1,0 +1,17 @@
+# Core (Kaggle GPU notebook)
+torch>=2.1
+transformers>=4.38
+datasets>=2.19
+huggingface_hub>=0.23
+accelerate>=0.27
+evaluate>=0.4
+rouge_score>=0.1.2
+sacrebleu>=2.3
+pandas
+pyyaml
+tqdm
+
+# Inference app (optional, built last)
+streamlit>=1.30
+pypdf>=4.0
+python-docx>=1.1

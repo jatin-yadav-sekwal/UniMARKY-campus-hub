@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+*.egg-info/
+.venv/
+venv/
+.env
+
+# Data / artefacts (never commit)
+/data/
+/outputs/
+/checkpoints/
+run_log.txt
+run_status.txt
+*.pt
+*.bin
+*.safetensors
+*.csv
+*.jsonl
+!configs/*.json
+
+# HF cache
+.cache/
