@@ -64,6 +64,7 @@ export function SiteFooter() {
         <div>
           <LandingLink to="/privacy">Privacy</LandingLink>
           <LandingLink to="/terms">Terms</LandingLink>
+          <a href="/universities">Universities</a>
           <span>Designed for wherever you study.</span>
         </div>
       </div>
