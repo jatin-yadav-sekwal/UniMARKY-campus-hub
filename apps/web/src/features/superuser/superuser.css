@@ -527,14 +527,27 @@
 }
 
 .um-superuser .su-vegdot {
-  width: 9px;
-  height: 9px;
+  width: 12px;
+  height: 12px;
   flex: none;
-  border: 1px solid #1f8a63;
+  display: grid;
+  place-items: center;
+  border: 2px solid #1f8a63;
+}
+
+.um-superuser .su-vegdot i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #1f8a63;
 }
 
 .um-superuser .su-vegdot.nonveg {
   border-color: #b3261e;
+}
+
+.um-superuser .su-vegdot.nonveg i {
+  background: #b3261e;
 }
 
 .um-superuser .su-menu-meta {

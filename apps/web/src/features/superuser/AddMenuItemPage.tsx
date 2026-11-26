@@ -455,12 +455,14 @@ export function AddMenuItemPage() {
                                 <div key={item.id} className="su-menu-row">
                                     <div style={{ minWidth: 0 }}>
                                         <p className="su-menu-name">
-                                            <i
+                                            <span
                                                 className={`su-vegdot${item.isVeg ? "" : " nonveg"}`}
                                                 aria-label={
                                                     item.isVeg ? "Vegetarian" : "Non-vegetarian"
                                                 }
-                                            />
+                                            >
+                                                <i />
+                                            </span>
                                             <span>{item.name}</span>
                                         </p>
                                         <div className="su-menu-meta">
