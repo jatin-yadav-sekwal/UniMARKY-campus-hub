@@ -188,7 +188,7 @@ export function FoodPage() {
                                 <Link to={`/food/${restaurant.id}`} className="fd-card">
                                     <div className="fd-media">
                                         {restaurant.imageUrl ? (
-                                            <img src={restaurant.imageUrl} alt={restaurant.name} />
+                                            <img src={restaurant.imageUrl} alt={restaurant.name} loading="lazy" decoding="async" />
                                         ) : (
                                             <span className="fd-media-empty">
                                                 <Utensils size={30} strokeWidth={1.4} />

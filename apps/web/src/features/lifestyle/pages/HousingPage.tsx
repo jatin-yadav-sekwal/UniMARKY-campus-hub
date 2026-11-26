@@ -209,7 +209,7 @@ export function HousingPage() {
                                     <Link to={`/housing/${accommodation.id}`} className="hs-card">
                                         <div className="hs-media">
                                             {firstImage ? (
-                                                <img src={firstImage} alt={accommodation.name} />
+                                                <img src={firstImage} alt={accommodation.name} loading="lazy" decoding="async" />
                                             ) : (
                                                 <span className="hs-media-empty">
                                                     <Home size={30} strokeWidth={1.4} />

@@ -225,7 +225,7 @@ export function LostFoundPage() {
                                 >
                                     <div className="lf-media">
                                         {item.imageUrl ? (
-                                            <img src={item.imageUrl} alt={item.itemName} />
+                                            <img src={item.imageUrl} alt={item.itemName} loading="lazy" decoding="async" />
                                         ) : (
                                             <span className="lf-media-empty">
                                                 {item.type === "lost" ? (

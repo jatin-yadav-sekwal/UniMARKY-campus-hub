@@ -225,7 +225,7 @@ export function MarketplacePage() {
                                 <Link to={`/marketplace/${item.id}`} className="mp-card">
                                     <div className="mp-media">
                                         {item.imageUrl ? (
-                                            <img src={item.imageUrl} alt={item.title} />
+                                            <img src={item.imageUrl} alt={item.title} loading="lazy" decoding="async" />
                                         ) : (
                                             <span className="mp-media-empty">
                                                 <Tag size={30} strokeWidth={1.4} />

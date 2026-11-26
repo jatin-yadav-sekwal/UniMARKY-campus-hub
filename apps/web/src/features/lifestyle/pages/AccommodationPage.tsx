@@ -66,6 +66,8 @@ function AccommodationImageGallery({
                         <img
                             src={images[currentImageIndex]}
                             alt={`${name} view ${currentImageIndex + 1}`}
+                            decoding="async"
+                            fetchPriority="high"
                         />
 
                         {images.length > 1 && (
@@ -110,7 +112,7 @@ function AccommodationImageGallery({
                             aria-label={`Select photo ${index + 1}`}
                             className={`hsd-thumb${index === currentImageIndex ? ' active' : ''}`}
                         >
-                            <img src={img} alt="" />
+                            <img src={img} alt={`${name} photo ${index + 1}`} loading="lazy" decoding="async" />
                         </button>
                     ))}
                 </div>

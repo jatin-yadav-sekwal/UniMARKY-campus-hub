@@ -667,6 +667,7 @@ function PostCard({
                     src={post.imageUrl}
                     alt="Post attachment"
                     loading="lazy"
+                    decoding="async"
                     className="cm-post-media"
                 />
             )}

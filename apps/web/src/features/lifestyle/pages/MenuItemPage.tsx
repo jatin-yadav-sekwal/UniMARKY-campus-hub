@@ -91,7 +91,7 @@ export function MenuItemPage() {
                 >
                     <div className="dsh-media">
                         {item.imageUrl ? (
-                            <img src={item.imageUrl} alt={item.name} />
+                            <img src={item.imageUrl} alt={item.name} decoding="async" fetchPriority="high" />
                         ) : (
                             <span className="dsh-media-empty">
                                 <Utensils size={48} strokeWidth={1.2} />

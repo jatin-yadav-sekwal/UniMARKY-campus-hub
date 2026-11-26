@@ -121,7 +121,7 @@ export function RestaurantPage() {
             >
                 <div className="fdr-media">
                     {restaurant.imageUrl ? (
-                        <img src={restaurant.imageUrl} alt={restaurant.name} />
+                        <img src={restaurant.imageUrl} alt={restaurant.name} decoding="async" fetchPriority="high" />
                     ) : (
                         <span className="fdr-media-empty">
                             <Utensils size={48} strokeWidth={1.2} />
@@ -243,7 +243,7 @@ export function RestaurantPage() {
                                 >
                                     <div className="fdr-item-img">
                                         {item.imageUrl ? (
-                                            <img src={item.imageUrl} alt={item.name} />
+                                            <img src={item.imageUrl} alt={item.name} loading="lazy" decoding="async" />
                                         ) : (
                                             <Utensils size={24} strokeWidth={1.4} />
                                         )}
