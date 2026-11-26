@@ -66,7 +66,12 @@ export function ProtectedRoute({ requireOnboarding = true }: { requireOnboarding
         return () => {
             cancelled = true;
         };
-    }, [user?.id, loading]);
+        // `requireOnboarding` is part of the dependency list because both gates
+        // render this same component: React reuses the instance when moving
+        // from /onboarding (requireOnboarding=false) to /dashboard (true), so
+        // without it the stale "not onboarded" result is reused and the app
+        // bounces straight back to /onboarding after a successful setup.
+    }, [user?.id, loading, requireOnboarding]);
 
     if (loading || (user && isChecking)) {
         return <PageLoader label="Checking your session" />;
