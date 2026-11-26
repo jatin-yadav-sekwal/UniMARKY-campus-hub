@@ -59,7 +59,7 @@ export function FoodPage() {
 
         try {
             const response: FoodResponse = await api.get(
-                `/restaurants?limit=${LIMIT}&offset=${currentOffset}&cuisine=${activeCuisine}`
+                `/food?limit=${LIMIT}&offset=${currentOffset}&cuisine=${activeCuisine}`
             );
 
             if (reset) {

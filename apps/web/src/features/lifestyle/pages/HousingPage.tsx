@@ -62,7 +62,7 @@ export function HousingPage() {
 
         try {
             const response: AccommodationResponse = await api.get(
-                `/accommodations?limit=${LIMIT}&offset=${currentOffset}&type=${activeType}`
+                `/accommodation?limit=${LIMIT}&offset=${currentOffset}&type=${activeType}`
             );
 
             if (reset) {
