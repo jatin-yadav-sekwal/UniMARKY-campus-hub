@@ -287,6 +287,7 @@
 .um-lostfound .lf-skeleton-line {
   height: 11px;
   background: #f0eee9;
+  animation: um-skeleton-pulse 1.4s ease-in-out infinite;
 }
 
 .um-lostfound .lf-skeleton-line.short {
@@ -649,5 +650,95 @@
   .um-lf-item .lfd-panel,
   .um-lf-item .lfd-contact {
     padding: 18px;
+  }
+}
+
+/* ---------------------------------------------------- listing redesign --- */
+.um-lostfound .lf-head-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.um-lostfound .lf-head-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.um-lostfound .lf-controls {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(67, 63, 56, .22);
+}
+
+.um-lostfound .lf-controls .lf-types {
+  flex: 1;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.um-lostfound .lf-controls .lf-toolbar {
+  flex: 0 0 300px;
+  margin: 0;
+}
+
+.um-lostfound .lf-controls .lf-search {
+  max-width: 300px;
+}
+
+.um-lostfound .lf-count {
+  text-align: right;
+}
+
+.um-lostfound .lf-skeleton {
+  padding: 0;
+  gap: 0;
+}
+
+.um-lostfound .lf-skeleton-media {
+  aspect-ratio: 4 / 3;
+  background: #f0eee9;
+  border-bottom: 1px solid #e8e6e1;
+  animation: um-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+.um-lostfound .lf-skeleton-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+}
+
+@media (max-width: 900px) {
+  .um-lostfound .page-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .um-lostfound .page-head-meta {
+    display: none;
+  }
+
+  .um-lostfound .lf-head-actions {
+    align-items: flex-start;
+  }
+
+  .um-lostfound .lf-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .um-lostfound .lf-controls .lf-toolbar {
+    flex: auto;
+  }
+
+  .um-lostfound .lf-controls .lf-search {
+    max-width: none;
   }
 }

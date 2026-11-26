@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useReducedMotion } from "motion/react";
+import type { LucideIcon } from "lucide-react";
 import {
   ArrowDownRight,
   ArrowRight,
@@ -12,10 +13,13 @@ import {
   Compass,
   GraduationCap,
   MapPin,
+  Plus,
+  ShoppingBag,
   Utensils,
   Users,
 } from "lucide-react";
 import brandMark from "@/assets/brand-mark.svg";
+import { useAuth } from "@/hooks/useAuth";
 import { SiteFooter } from "./SiteFooter";
 import { SiteNavigation } from "./SiteNavigation";
 import { LandingLink } from "./LandingLink";
@@ -29,6 +33,97 @@ function SectionLabel({ number, children }: { number: string; children: ReactNod
     </div>
   );
 }
+
+/** The six working spaces of the platform — every one links to a real page. */
+const services: {
+  title: string;
+  to: string;
+  icon: LucideIcon;
+  description: string;
+  note: string;
+}[] = [
+  {
+    title: "Marketplace",
+    to: "/marketplace",
+    icon: ShoppingBag,
+    description: "Buy and sell with verified students from your university.",
+    note: "BUY / SELL",
+  },
+  {
+    title: "Communities",
+    to: "/communities",
+    icon: Users,
+    description: "Clubs, batches and campus events, run by the students in them.",
+    note: "PEOPLE & PLACES",
+  },
+  {
+    title: "Study",
+    to: "/study",
+    icon: BookOpen,
+    description: "Notes, previous-year papers and resources by course and semester.",
+    note: "LEARN AT YOUR PACE",
+  },
+  {
+    title: "Accommodation",
+    to: "/housing",
+    icon: Building2,
+    description: "PGs, flats and campus stays listed near your university.",
+    note: "A PLACE TO LAND",
+  },
+  {
+    title: "Food",
+    to: "/food",
+    icon: Utensils,
+    description: "Daily menus, price ranges and student favourites around campus.",
+    note: "GOOD THINGS NEARBY",
+  },
+  {
+    title: "Lost & Found",
+    to: "/lost-found",
+    icon: MapPin,
+    description: "Report what you lost or found and get it back to its owner.",
+    note: "REPORT AN ITEM",
+  },
+];
+
+const listings = [
+  { item: "Textbooks & course notes", meta: "Like new · 2nd year", price: "₹250" },
+  { item: "Study lamp with timer", meta: "Hostel block C · Working", price: "₹400" },
+  { item: "Cycle, serviced", meta: "New tyres · North gate", price: "₹3,200" },
+];
+
+const faqs = [
+  {
+    question: "What can I do on Unimarky?",
+    answer:
+      "Marketplace, communities, study material, accommodation, food and lost & found — one student account for all six, scoped to your university.",
+  },
+  {
+    question: "Who can use it?",
+    answer:
+      "Students. Create an account, then pick your university during onboarding; that choice sets which listings, communities and resources you see.",
+  },
+  {
+    question: "Do I need an account to browse?",
+    answer:
+      "Yes. Every service sits behind the same student account, so you sign up once and move between them without signing in again.",
+  },
+  {
+    question: "How do I sell something?",
+    answer:
+      "Open Marketplace and choose List an item. Add a title, price, description and photos; the listing then appears in your university's marketplace for other students to find.",
+  },
+  {
+    question: "How do I contact a seller or host?",
+    answer:
+      "Each listing has a contact section. If the seller or host shared a phone number, it is shown there so you can reach them directly.",
+  },
+  {
+    question: "How do I get help?",
+    answer:
+      "Use the Contact page to reach the team. Include the page you were on and what went wrong so we can look into it.",
+  },
+];
 
 function EcosystemMap() {
   return (
@@ -68,7 +163,7 @@ function EcosystemMap() {
           <Compass size={17} />
           <span>FIND</span>
         </div>
-        <span className="map-coordinate coord-one">51°30&apos;26.4&quot;N</span>
+        <span className="map-coordinate coord-one">51°30&apos;26.4"N</span>
         <span className="map-coordinate coord-two">CAMPUS / 001</span>
       </div>
       <div className="map-legend">
@@ -86,6 +181,7 @@ function EcosystemMap() {
 
 export function LandingPage() {
   const { hash } = useLocation();
+  const { session } = useAuth();
   const prefersReducedMotion = useReducedMotion();
 
   // Hash links from other pages (e.g. /#faqs) land on the right section.
@@ -102,6 +198,12 @@ export function LandingPage() {
 
     return () => window.clearTimeout(timer);
   }, [hash, prefersReducedMotion]);
+
+  // Signed-in students never need the marketing page — send them straight to
+  // the app. ProtectedRoute still decides between /dashboard and /onboarding.
+  if (session) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="um-landing">
@@ -137,15 +239,15 @@ export function LandingPage() {
                     in one <span>place.</span>
                   </h1>
                   <p className="hero-lead">
-                    Find campus communities, study support, accommodation and food in one
-                    place.
+                    Buy and sell on campus, find communities, study resources, stays and
+                    food — one account for all of it.
                   </p>
                   <div className="hero-actions">
                     <LandingLink className="button button-primary" to="/#ecosystem">
                       Explore the ecosystem <ArrowRight size={15} />
                     </LandingLink>
-                    <LandingLink className="button button-secondary" to="/about">
-                      About the platform
+                    <LandingLink className="button button-secondary" to="/marketplace">
+                      Browse the marketplace
                     </LandingLink>
                   </div>
                 </div>
@@ -165,9 +267,10 @@ export function LandingPage() {
                 </h2>
                 <div>
                   <p className="section-lead">
-                    Find the resources you need for study, housing, food and student life.
+                    Marketplace, communities, study material, accommodation, food and lost
+                    & found — all of it scoped to your university.
                   </p>
-                  <LandingLink className="text-link" to="/#integration">
+                  <LandingLink className="text-link" to="/#services">
                     Explore the platform <ArrowRight size={15} />
                   </LandingLink>
                 </div>
@@ -178,65 +281,49 @@ export function LandingPage() {
               </div>
             </section>
 
-            <section className="discover-section" id="marketplace">
-              <SectionLabel number="02">Marketplace &amp; resources</SectionLabel>
-              <div className="discover-heading">
-                <h2>
-                  Explore what&apos;s
-                  <br />
-                  <span>around campus.</span>
-                </h2>
-                <p>Browse student services and useful campus resources.</p>
-              </div>
-              <div className="feature-list">
-                <LandingLink className="feature-row" to="/communities">
-                  <span className="feature-no">01</span>
-                  <span className="feature-icon">
-                    <Users size={19} />
-                  </span>
-                  <span className="feature-copy">
-                    <strong>Community</strong>
-                    <small>Find student groups and campus events.</small>
-                  </span>
-                  <span className="feature-note">PEOPLE &amp; PLACES</span>
-                  <ArrowUpRight className="feature-arrow" size={17} />
-                </LandingLink>
-                <LandingLink className="feature-row" to="/study">
-                  <span className="feature-no">02</span>
-                  <span className="feature-icon">
-                    <BookOpen size={19} />
-                  </span>
-                  <span className="feature-copy">
-                    <strong>Study</strong>
-                    <small>Browse study resources and learning spaces.</small>
-                  </span>
-                  <span className="feature-note">LEARN AT YOUR PACE</span>
-                  <ArrowUpRight className="feature-arrow" size={17} />
-                </LandingLink>
-                <LandingLink className="feature-row" to="/housing">
-                  <span className="feature-no">03</span>
-                  <span className="feature-icon">
-                    <Building2 size={19} />
-                  </span>
-                  <span className="feature-copy">
-                    <strong>Accommodation</strong>
-                    <small>Explore student accommodation options.</small>
-                  </span>
-                  <span className="feature-note">A PLACE TO LAND</span>
-                  <ArrowUpRight className="feature-arrow" size={17} />
-                </LandingLink>
-                <LandingLink className="feature-row" to="/food">
-                  <span className="feature-no">04</span>
-                  <span className="feature-icon">
-                    <Utensils size={19} />
-                  </span>
-                  <span className="feature-copy">
-                    <strong>Food</strong>
-                    <small>Find food options around campus.</small>
-                  </span>
-                  <span className="feature-note">GOOD THINGS NEARBY</span>
-                  <ArrowUpRight className="feature-arrow" size={17} />
-                </LandingLink>
+            <section className="market-section" id="marketplace">
+              <SectionLabel number="02">Marketplace</SectionLabel>
+              <div className="market-layout">
+                <div className="market-copy">
+                  <h2>
+                    Buy and sell
+                    <br />
+                    <span>on campus.</span>
+                  </h2>
+                  <p className="market-lead">
+                    List textbooks, hostel gear, cycles and electronics. Every seller is a
+                    verified student from your university, so you always know who you are
+                    dealing with.
+                  </p>
+                  <div className="hero-actions">
+                    <LandingLink className="button button-primary" to="/marketplace">
+                      Browse the marketplace <ArrowRight size={15} />
+                    </LandingLink>
+                    <LandingLink className="button button-secondary" to="/marketplace/list">
+                      List an item
+                    </LandingLink>
+                  </div>
+                </div>
+                <div className="market-board">
+                  <div className="market-board-head">
+                    <span>LISTING BOARD</span>
+                    <span>EXAMPLES</span>
+                  </div>
+                  <ul>
+                    {listings.map((listing) => (
+                      <li className="market-row" key={listing.item}>
+                        <span className="market-row-copy">
+                          <strong>{listing.item}</strong>
+                          <small>{listing.meta}</small>
+                        </span>
+                        <span className="market-row-price">{listing.price}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="market-board-foot">
+                    <span>LISTINGS STAY INSIDE YOUR UNIVERSITY</span>
+                  </div>
+                </div>
               </div>
             </section>
 
@@ -264,7 +351,10 @@ export function LandingPage() {
                   <br />
                   <span>on your campus.</span>
                 </h2>
-                <p>Explore student groups, events and ways to connect with other students.</p>
+                <p>
+                  Clubs, batches and campus events — run by the students who are already
+                  there. Join a group, post an update, find your people.
+                </p>
                 <LandingLink className="text-link" to="/communities">
                   Explore community <ArrowRight size={15} />
                 </LandingLink>
@@ -280,7 +370,10 @@ export function LandingPage() {
                     <br />
                     for <span>what&apos;s next.</span>
                   </h2>
-                  <p>Browse study resources and find spaces to work between classes.</p>
+                  <p>
+                    Notes, previous-year papers and course resources organised by subject
+                    and semester. Save what you need for the exam you have not met yet.
+                  </p>
                   <LandingLink className="button button-primary" to="/study">
                     Explore study resources <ArrowRight size={15} />
                   </LandingLink>
@@ -306,7 +399,10 @@ export function LandingPage() {
                   <br />
                   <span>Room to grow.</span>
                 </h2>
-                <p>Browse accommodation options and find a place near your university.</p>
+                <p>
+                  PGs, flats and campus stays listed by students and hosts near your
+                  university. Filter by distance, then talk to the host directly.
+                </p>
                 <LandingLink className="text-link" to="/housing">
                   Explore accommodation <ArrowRight size={15} />
                 </LandingLink>
@@ -353,29 +449,43 @@ export function LandingPage() {
                   <br />
                   <span>Good company.</span>
                 </h2>
-                <p>Browse cafés, dining halls and food options near campus.</p>
+                <p>
+                  Daily menus, price ranges and student favourites from the places around
+                  campus — and the exact dish you are looking for.
+                </p>
                 <LandingLink className="text-link" to="/food">
                   See what&apos;s nearby <ArrowRight size={15} />
                 </LandingLink>
               </div>
             </section>
 
-            <section className="integration-section" id="integration">
-              <SectionLabel number="07">Integration</SectionLabel>
-              <div className="integration-row">
+            <section className="services-section" id="services">
+              <SectionLabel number="07">One campus, integrated</SectionLabel>
+              <div className="services-heading">
                 <h2>
-                  Campus services,
+                  Campus life, split into
                   <br />
-                  <span>in one place.</span>
+                  <span>six useful places.</span>
                 </h2>
-                <div>
-                  <p>Explore student resources for study, housing, food and community.</p>
-                  <LandingLink className="button button-secondary" to="/about">
-                    Learn more <ArrowRight size={15} />
-                  </LandingLink>
-                </div>
+                <p>Open any of them and get on with it — each one is a full page.</p>
               </div>
-              <div className="integration-foot">
+              <div className="feature-list">
+                {services.map((service, index) => (
+                  <LandingLink className="feature-row" to={service.to} key={service.title}>
+                    <span className="feature-no">{String(index + 1).padStart(2, "0")}</span>
+                    <span className="feature-icon">
+                      <service.icon size={19} />
+                    </span>
+                    <span className="feature-copy">
+                      <strong>{service.title}</strong>
+                      <small>{service.description}</small>
+                    </span>
+                    <span className="feature-note">{service.note}</span>
+                    <ArrowUpRight className="feature-arrow" size={17} />
+                  </LandingLink>
+                ))}
+              </div>
+              <div className="services-foot">
                 <span>STUDENT SERVICES</span>
                 <span>UNIMARKY</span>
               </div>
@@ -401,9 +511,20 @@ export function LandingPage() {
               <SectionLabel number="08">FAQs</SectionLabel>
               <div>
                 <h2>Questions?</h2>
-                <p>Contact us for more information about Unimarky.</p>
+                <p>Short answers about using Unimarky.</p>
+                <div className="faq-list">
+                  {faqs.map((faq) => (
+                    <details className="faq-item" key={faq.question}>
+                      <summary>
+                        {faq.question}
+                        <Plus size={15} />
+                      </summary>
+                      <p>{faq.answer}</p>
+                    </details>
+                  ))}
+                </div>
                 <LandingLink className="text-link" to="/contact">
-                  Contact Unimarky <ArrowRight size={15} />
+                  Still stuck? Contact us <ArrowRight size={15} />
                 </LandingLink>
               </div>
             </section>

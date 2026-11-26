@@ -45,22 +45,7 @@ export function DashboardPage() {
             <div className="um-editorial um-dashboard">
                 <div className="dash-loading">
                     <Loader2 size={20} className="animate-spin" />
-                    <span>Loading your campus…</span>
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="um-editorial um-dashboard">
-                <div className="page-head">
-                    <p className="section-label">
-                        <span>01</span>/ Dashboard
-                    </p>
-                </div>
-                <div className="alert alert-error" role="alert">
-                    We couldn’t load your dashboard: {error}
+                    <span>Loading your campus...</span>
                 </div>
             </div>
         );
@@ -81,7 +66,18 @@ export function DashboardPage() {
                         explore everything Unimarky has to offer.
                     </p>
                 </div>
+                <div className="page-head-meta">
+                    <span className="meta-mono">Student workspace</span>
+                    <span className="page-head-rule" aria-hidden="true" />
+                    <span className="meta-mono">Unimarky / Campus</span>
+                </div>
             </header>
+
+            {error && (
+                <div className="alert alert-error" role="alert">
+                    We couldn’t load your latest activity: {error}
+                </div>
+            )}
 
             <div className="dash-grid">
                 <SummaryCard
@@ -92,6 +88,7 @@ export function DashboardPage() {
                     unit="saved"
                     data={data?.marketplace}
                     icon={ShoppingBag}
+                    tone="market"
                 />
                 <SummaryCard
                     title="Lost & Found"
@@ -101,26 +98,32 @@ export function DashboardPage() {
                     unit="reported"
                     data={data?.lostFound}
                     icon={Search}
+                    tone="lost"
                 />
             </div>
 
-            <section aria-labelledby="explore-heading">
-                <div className="dash-subhead">
+            <section className="dash-section" aria-labelledby="explore-heading">
+                <div className="section-head">
                     <p className="section-label" id="explore-heading">
                         <span>02</span>/ Explore campus
                     </p>
+                    <span className="rule" aria-hidden="true" />
+                    <span className="meta-mono">Six services</span>
                 </div>
-                <div className="quick-grid">
-                    {quickAccessItems.map(({ title, href, desc, icon: Icon }) => (
-                        <Link key={href} to={href} className="quick-item">
-                            <span className="quick-icon">
-                                <Icon size={18} strokeWidth={1.6} />
+                <div className="dash-index">
+                    {quickAccessItems.map(({ title, href, desc, icon: Icon }, index) => (
+                        <Link key={href} to={href} className="index-row">
+                            <span className="index-no">
+                                {String(index + 1).padStart(2, '0')}
                             </span>
-                            <span className="quick-copy">
+                            <span className="index-icon">
+                                <Icon size={17} strokeWidth={1.6} />
+                            </span>
+                            <span className="index-copy">
                                 <strong>{title}</strong>
                                 <small>{desc}</small>
                             </span>
-                            <ArrowRight className="quick-arrow" size={16} />
+                            <ArrowRight className="index-arrow" size={16} />
                         </Link>
                     ))}
                 </div>
@@ -135,6 +138,7 @@ interface SummaryCardProps {
     data?: { id: string; title?: string; itemName?: string }[];
     icon: React.ElementType;
     unit: string;
+    tone: 'market' | 'lost';
     secondaryHref?: string;
     secondaryLabel?: string;
 }
@@ -145,13 +149,14 @@ function SummaryCard({
     data,
     icon: Icon,
     unit,
+    tone,
     secondaryHref,
     secondaryLabel,
 }: SummaryCardProps) {
     const count = data?.length ?? 0;
 
     return (
-        <article className="summary">
+        <article className={`summary ${tone}`}>
             <header className="summary-head">
                 <span className="summary-title">
                     <span className="summary-icon">
@@ -160,7 +165,8 @@ function SummaryCard({
                     {title}
                 </span>
                 <span className="summary-count">
-                    {String(count).padStart(2, '0')} {unit}
+                    <strong>{String(count).padStart(2, '0')}</strong>
+                    <small>{unit}</small>
                 </span>
             </header>
 
@@ -181,18 +187,17 @@ function SummaryCard({
             </ul>
 
             <div className="summary-actions">
-                <Link to={href} className="button button-primary">
-                    Show all ({count})
-                    <ArrowRight size={15} />
+                <Link to={href} className="summary-link">
+                    View all <ArrowRight size={14} />
                 </Link>
                 {secondaryHref && secondaryLabel && (
                     <Link
                         to={secondaryHref}
-                        className="button button-secondary icon-button"
+                        className="summary-add"
                         aria-label={secondaryLabel}
                         title={secondaryLabel}
                     >
-                        <Plus size={16} />
+                        <Plus size={15} />
                     </Link>
                 )}
             </div>

@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BookOpen, Home, ShoppingBag, Users } from 'lucide-react';
 import { AuthForm } from '@/components/auth/AuthForm';
 import { useAuth } from '@/hooks/useAuth';
-import logo from '@/components/layout/file.svg';
+import logo from '@/assets/unimarky-logo.png';
 import './auth.css';
 
 const benefits = [

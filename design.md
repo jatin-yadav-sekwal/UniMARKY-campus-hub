@@ -174,7 +174,7 @@ Square diagram on `rgba(255,255,255,.16)` with a `rgba(71,65,58,.26)` frame: 36p
 
 ### Footer
 
-White surface, top hairline `#e8e6e1`, grid `1.55fr 1fr 1fr 1fr .8fr` (max-width 1200px): brand block (logo, one line, primary CTA) then `EXPLORE / RESOURCES / COMPANY / CONNECT` columns, then a bottom bar with `© {year}` and Privacy/Terms. Only link to real, supported destinations.
+White surface, top hairline `#e8e6e1`, grid `1.55fr 1.2fr 1fr .8fr` (max-width 1328px): brand block (logo, one line, primary CTA) then `EXPLORE / COMPANY / CONNECT` columns, then a bottom bar with `© {year}` and Privacy/Terms. Only link to real, supported destinations — `EXPLORE` is driven by the shared `siteNav` list so the footer can never drift from the router.
 
 ### Forms, cards, lists (for other pages)
 
@@ -194,7 +194,14 @@ Match the landing breakpoints:
 
 - **1150px and below:** narrow the sidebar to 218px and the gutters; reduce grid gaps and feature-row columns.
 - **900px and below:** hide the desktop sidebar, show the sticky mobile header, simplify the hero and footer to stacked grids; heading scale drops to the 34px tier.
+- **820px and below:** the hero and the marketplace listing board stack into one column.
 - **620px and below:** 20px gutters; stack editorial sections; hero diagram full width; hide secondary feature metadata; footer becomes 2 columns.
+
+The page gutter is one fluid token — `--um-gutter: clamp(20px, 4vw, 64px)` — shared by the page column, the closing band, the footer and the side rules, so nothing drifts at a breakpoint.
+
+Below 900px there is no sidebar, so the content keeps its own two rules. `.page-rules` insets itself with `clamp(0px, min(calc(var(--um-text-inset) - var(--um-rule-gap)), calc((100vw - 620px) * 0.18)), 999px)`, where `--um-text-inset` is the gutter plus any space outside the 1328px column and `--um-rule-gap` is 20px: the gap to the screen edge grows with the viewport, copy never touches a line, and the gap is exactly 0 at 620px and below.
+
+On desktop the frame has three rules. A left margin rule runs in the sidebar's padding (`.sidebar::before`), the sidebar/content divider runs at the column boundary (`.main-shell::before`), and the right page rule closes the frame. All three use the same 1px hairline; the two outer rules share `clamp(12px, 1.4vw, 24px)` from their screen edges, so the frame is symmetric, and the divider is the only line between the sidebar and the content.
 
 At every size, keep text and controls inside the viewport, preserve ≥40px touch targets, and prevent horizontal scrolling.
 
@@ -264,7 +271,7 @@ Radius: the landing uses **4px** for controls. The app’s `--radius` (shadcn) i
 **Later, once the direction is approved (global):**
 
 7. Swap the token values above in `apps/web/src/index.css` (one place) and lower `--radius`; the already-migrated pages then change for free.
-8. Migrate the shared protected shell (`MainLayout` / `Navbar` / `Sidebar`) to the editorial system, and retire the old `components/site/*` shell and the unused landing `sections/`.
+8. Retire the old `components/site/*` shell and the unused landing `sections/` (the protected shell now uses the editorial frame).
 
 ### Migration log
 
@@ -286,12 +293,13 @@ Radius: the landing uses **4px** for controls. The app’s `--radius` (shadcn) i
 | Superuser | `features/superuser/SuperuserDashboard.tsx` (+ `AddRestaurantPage.tsx`, `EditRestaurantPage.tsx`, `AddMenuItemPage.tsx`, `AddAccommodationPage.tsx`, `EditAccommodationPage.tsx`, `AddStudyMaterialPage.tsx`, `RestaurantFormFields.tsx`, `AccommodationFormFields.tsx`) | `.um-superuser` (+ `.su-food` / `.su-stay` / `.su-study`) | `features/superuser/superuser.css` | Done (body only; shell pending) |
 | Admin | `features/admin/AdminDashboard.tsx` | `.um-admin` | `features/admin/admin.css` | Done (body only; shell pending) |
 | 404 | `components/layout/ErrorPage.tsx` | `.um-public` (via `PublicShell`) | `features/public/public.css` | Done |
-| — | — | — | — | Remaining areas (shared protected shell + global tokens — pending approval) |
+| — | — | — | — | Remaining: global token swap (step 7); WIP retiral (step 8) |
 
 Notes from the Auth + Dashboard pass:
 
-- The protected shell (`Navbar`/`Sidebar`) is **not** migrated yet, so `/dashboard` currently shows the editorial body inside the old orange shell. That resolves when tokens + shell are swapped in step 7–8.
+- The protected shell now uses the same editorial frame as the public pages: a landing-style fixed sidebar (`components/layout/Sidebar.tsx`), the mobile header/menu, and the same three page rules. The old pill navbar and orange sidebar are gone.
 - Auth replaced the shadcn `Tabs` with a native segmented control and the shadcn `Button`/`Input`/`Label` with `.button` / `.field-input` / `.field-label`; all Supabase calls and redirect logic are unchanged.
+- **Mobile auth** — below 900px the marketing intro is hidden, so `/auth` shows only the form, centred in the viewport with 44px/20px side padding and the page rules still framing it.
 - Dashboard dropped motion, gradients and shadcn `Card` for framed surfaces (`.summary`) and a hairline grid (`.quick-grid`).
 - Verified: `tsc -b` clean, `vite build` passes, no console errors; `/auth` renders at ~720px with no horizontal overflow and the login/sign-up switch works; the dashboard body renders with mocked data (2 summary surfaces, 5 rows, 6 quick-access tiles, no overflow).
 
@@ -361,6 +369,24 @@ Notes from the 404 pass:
 - The 404 page now uses the same `PublicShell` as the marketing pages, so a dead link lands in the same navigation/footer system instead of the old bare shadcn screen with a giant translucent `404`. The copy was rewritten in the editorial voice ("This page went missing.") with a "Back to home" `.button button-primary`.
 - Verified: `tsc -b` clean, `vite build` passes; `/does-not-exist` renders with the public shell and no console errors.
 
+Notes from the landing UX fix pass:
+
+- **Navigation and footer** — `components/site/navigation.ts` is the single source of truth for the public shell: `siteNav` lists the six real product pages (`/marketplace`, `/communities`, `/study`, `/housing`, `/food`, `/lost-found`) and no landing anchors, so the sidebar can only point at full pages. The footer's `EXPLORE` column reads the same list, `COMPANY` keeps About/Contact, `CONNECT` keeps Instagram/Contact, and the bottom bar keeps Privacy/Terms — no dead links.
+- **Logged-in redirect** — `LandingPage` reads the session with `useAuth()` and renders `<Navigate to="/dashboard" replace />` for a signed-in visitor; `ProtectedRoute` still decides dashboard vs onboarding.
+- **Gutters and side rules** — one fluid token `--um-gutter: clamp(20px, 4vw, 64px)` drives the page column, closing band, footer and rules. `.page-rules` insets itself dynamically (see §8): the rules run `--um-rule-gap` (20px) outside the text column so copy never touches a line, the gap to the screen edge grows on desktop, declines with the viewport and is exactly 0 on mobile.
+- **Breakpoints** — new 820px tablet block (hero and marketplace board stack) alongside 1150/900/620; the old fixed paddings and per-breakpoint rule overrides are gone.
+- **Loaders and skeletons** — the orange spinners are replaced by a shared `components/layout/PageLoader.tsx` (three accent bars + mono label, `.um-loader` in `index.css`), used by the Suspense fallback in `App.tsx` and by `ProtectedRoute`; in-page loaders and skeleton blocks were restyled to the editorial treatment, with `um-skeleton-pulse` and a reduced-motion fallback.
+- **Topic-relevant sections** — the landing now has a real marketplace section (copy + listing-board visual, links to `/marketplace` and `/marketplace/list`) and a "One campus, six services" index that links all six pages; every topic section names what that service actually does.
+- Verified: `tsc -b` clean, `vite build` passes; no console errors and no horizontal overflow at 1920/1440/1280/1024/834/768/430/390/360; measured rule gap 227 → 58 → 51 → 41 → 33 → 27 → 0px; a mocked session redirected `/` → `/dashboard` → `/onboarding` as expected.
+- The protected app shell (`MainLayout` / `Navbar` / `Sidebar`) is still the old orange design (step 7–8 pending) — out of scope for this pass.
+
+Notes from the protected shell + component pass:
+
+- The protected shell now uses the landing frame end to end: atmosphere, fixed editorial sidebar (`components/layout/Sidebar.tsx`), mobile header/menu, and the same three page rules. The old pill navbar and orange sidebar are gone.
+- Shared primitives were tightened: page heads close with a hairline; `.page-head-meta` / `.page-head-rule` give a right-hand mono column; `.section-head` pairs a label with a rule and a meta note; buttons keep the 4px corner but now have a 42px height, inset highlight on primary, white secondary, a `button-sm` variant and a visible focus ring.
+- Dashboard was rebuilt around those primitives: accent-topped summary cards (Marketplace blue, Lost & Found green) with a large mono count, a hairline action row, and a two-column numbered campus index instead of the old bordered quick-grid.
+- Marketplace and Lost & Found listings were aligned to the same system: the category/type tabs and search now share one controls row, page heads carry the mono meta column and primary/secondary actions, cards use a 2px category accent, a 4:3 media block and a hairline price/footer row; the marketplace listing's floating FAB was replaced by a head action, and Lost & Found cards now show the description over a media-shaped skeleton.
+
 ### Verified state of the landing
 
-The rebuilt landing mounts cleanly under React Router at `/`, wires all buttons/links to real routes (`/marketplace`, `/communities`, `/study`, `/housing`, `/food`, `/auth`, `/about`, `/contact`, `/privacy`, `/terms`) plus in-page anchors (`/#ecosystem`, `/#integration`, `/#faqs`), and uses the real UniMARKY wordmark. `npm --workspace web run build` passes.
+The rebuilt landing mounts cleanly under React Router at `/`, wires all buttons/links to real routes (`/marketplace`, `/marketplace/list`, `/communities`, `/study`, `/housing`, `/food`, `/lost-found`, `/auth`, `/about`, `/contact`, `/privacy`, `/terms`) plus in-page anchors (`/#ecosystem`, `/#services`, `/#faqs`), and uses the real UniMARKY wordmark. `npm --workspace web run build` passes.

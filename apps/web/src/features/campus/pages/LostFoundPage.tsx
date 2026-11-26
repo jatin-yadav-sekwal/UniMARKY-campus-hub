@@ -108,17 +108,27 @@ export function LostFoundPage() {
                     </p>
                 </div>
 
-                <div style={{ display: 'flex', gap: 10 }}>
-                    <Link to="/lost-found/my-listings" className="button button-secondary">
-                        My listings
-                    </Link>
-                    <Link to="/lost-found/report" className="button button-primary">
-                        <Plus size={16} /> Report item
-                    </Link>
+                <div className="lf-head-actions">
+                    <div className="page-head-meta">
+                        <span className="meta-mono">Campus reports</span>
+                        <span className="page-head-rule" aria-hidden="true" />
+                        <span className="meta-mono">
+                            {total > 0 ? `${total} reports` : 'Lost & found'}
+                        </span>
+                    </div>
+                    <div className="lf-head-buttons">
+                        <Link to="/lost-found/my-listings" className="button button-secondary">
+                            My listings
+                        </Link>
+                        <Link to="/lost-found/report" className="button button-primary">
+                            <Plus size={16} /> Report item
+                        </Link>
+                    </div>
                 </div>
             </header>
 
-            <div className="lf-types" role="group" aria-label="Filter by report type">
+            <div className="lf-controls">
+                <div className="lf-types" role="group" aria-label="Filter by report type">
                 {typeFilters.map((filter) => (
                     <button
                         key={filter.value}
@@ -147,6 +157,7 @@ export function LostFoundPage() {
                     />
                 </div>
             </div>
+            </div>
 
             <AnimatePresence mode="wait">
                 {loading ? (
@@ -159,9 +170,12 @@ export function LostFoundPage() {
                     >
                         {[...Array(4)].map((_, i) => (
                             <div key={i} className="lf-skeleton">
-                                <div className="lf-skeleton-line" />
-                                <div className="lf-skeleton-line short" />
-                                <div className="lf-skeleton-line tiny" />
+                                <div className="lf-skeleton-media" />
+                                <div className="lf-skeleton-body">
+                                    <div className="lf-skeleton-line" />
+                                    <div className="lf-skeleton-line short" />
+                                    <div className="lf-skeleton-line tiny" />
+                                </div>
                             </div>
                         ))}
                     </m.div>
@@ -235,6 +249,10 @@ export function LostFoundPage() {
                                             <MapPin size={12} />
                                             <span>{item.location}</span>
                                         </p>
+
+                                        {item.description && (
+                                            <p className="lf-desc">{item.description}</p>
+                                        )}
 
                                         <div className="lf-foot">
                                             <span className="who">{item.reporterName}</span>

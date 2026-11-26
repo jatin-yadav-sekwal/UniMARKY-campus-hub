@@ -206,6 +206,7 @@
 .um-communities .cm-skeleton-line {
   height: 11px;
   background: #f0eee9;
+  animation: um-skeleton-pulse 1.4s ease-in-out infinite;
 }
 
 .um-communities .cm-skeleton-line.short {

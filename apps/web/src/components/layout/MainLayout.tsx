@@ -1,20 +1,27 @@
 import { Outlet } from 'react-router-dom';
-import { Navbar } from './Navbar';
 import { Sidebar } from './Sidebar';
+import '@/features/landing/landing.css';
 
 export function MainLayout() {
     return (
-        <div className="min-h-screen bg-background text-foreground">
-            <Navbar />
-            <div className="flex h-screen overflow-hidden pt-20"> {/* pt-20 to verify navbar offset */}
-                {/* Fixed Sidebar */}
-                <aside className="hidden md:flex w-64 flex-col fixed inset-y-0 z-40 top-20 border-r bg-background">
-                    <Sidebar />
-                </aside>
+        <div className="um-landing um-app">
+            <div className="atmosphere" aria-hidden="true">
+                <div className="atmosphere-diffusion" />
+                <div className="atmosphere-fade" />
+            </div>
 
-                {/* Scrollable Main Content */}
-                <main className="flex-1 overflow-y-auto md:ml-64 p-6 pb-24">
-                    <Outlet />
+            <div className="um-landing-content">
+                <Sidebar />
+
+                <main className="main-shell" id="top">
+                    <div className="page-rules" aria-hidden="true">
+                        <i />
+                        <i />
+                    </div>
+
+                    <div className="main-content">
+                        <Outlet />
+                    </div>
                 </main>
             </div>
         </div>

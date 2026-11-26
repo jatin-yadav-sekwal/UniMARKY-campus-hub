@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2 } from 'lucide-react';
+import { PageLoader } from '@/components/layout/PageLoader';
 import { useEffect, useState } from 'react';
 
 export function ProtectedRoute({ requireOnboarding = true }: { requireOnboarding?: boolean }) {
@@ -69,11 +69,7 @@ export function ProtectedRoute({ requireOnboarding = true }: { requireOnboarding
     }, [user?.id, loading]);
 
     if (loading || (user && isChecking)) {
-        return (
-            <div className="flex items-center justify-center h-screen">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
-        );
+        return <PageLoader label="Checking your session" />;
     }
 
     if (!user) {

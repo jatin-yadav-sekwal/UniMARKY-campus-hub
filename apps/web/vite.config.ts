@@ -37,6 +37,18 @@ export default defineConfig({
             return 'vendor-supabase';
           }
 
+          // The WebGL gradient is loaded lazily. Keep Three.js and the shader
+          // packages in their own chunk so the first paint never waits on them.
+          if (
+            id.includes('@shadergradient') ||
+            id.includes('@react-three') ||
+            id.includes('three-stdlib') ||
+            id.includes('camera-controls') ||
+            /[\\/]node_modules[\\/]three[\\/]/.test(id)
+          ) {
+            return 'vendor-shader';
+          }
+
           // Match only the React runtime and router packages. A broad
           // `id.includes('react')` also catches libraries such as
           // lucide-react and @radix-ui/react-*, which then made

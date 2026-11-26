@@ -298,6 +298,58 @@
       radial-gradient(620px 540px at 16% 46%, rgba(147, 197, 253, 0.65) 0%, rgba(147, 197, 253, 0) 68%),
       radial-gradient(720px 560px at 54% 4%, rgba(196, 181, 253, 0.7) 0%, rgba(196, 181, 253, 0) 70%);
   }
+
+  /* ---------------------------------------------------------- page loader --- */
+  /* Shared loading state: three accent bars over a mono label. Used for route
+     chunks, the auth gate and every list that is still fetching. */
+  .um-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    min-height: 60vh;
+    padding: 48px 24px;
+  }
+
+  .um-loader-inline {
+    min-height: 0;
+    padding: 40px 24px;
+  }
+
+  .um-loader-bars {
+    display: flex;
+    gap: 5px;
+  }
+
+  .um-loader-bars i {
+    width: 3px;
+    height: 20px;
+    background: #3157d5;
+    opacity: .18;
+    animation: um-loader-bar 1s ease-in-out infinite;
+  }
+
+  .um-loader-bars i:nth-child(2) { animation-delay: .12s; }
+  .um-loader-bars i:nth-child(3) { animation-delay: .24s; }
+
+  .um-loader-label {
+    font: 500 9px 'DM Mono', monospace;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #8f8b83;
+  }
+
+  @keyframes um-loader-bar {
+    0%, 100% { opacity: .18; transform: scaleY(.55); }
+    50% { opacity: 1; transform: scaleY(1); }
+  }
+
+  /* Skeleton blocks breathe while their data is on the way. */
+  @keyframes um-skeleton-pulse {
+    0%, 100% { opacity: .45; }
+    50% { opacity: 1; }
+  }
 }
 
 @layer utilities {
@@ -329,6 +381,11 @@
     .um-reveal {
       opacity: 1 !important;
       transform: none !important;
+    }
+
+    .um-loader-bars i {
+      animation: none;
+      opacity: .6;
     }
   }
 }

@@ -198,27 +198,17 @@
     padding: 0 44px;
   }
 
+  /* Mobile: the marketing intro is dropped and the form is the whole page. */
   .um-auth .auth-intro {
-    padding: 40px 0 28px;
-  }
-
-  .um-auth .auth-intro-body {
-    margin: 28px 0 32px;
-  }
-
-  .um-auth .auth-intro-body h1 {
-    font-size: 34px;
-  }
-
-  .um-auth .auth-foot {
-    margin-top: 8px;
+    display: none;
   }
 
   .um-auth .auth-panel {
-    justify-content: flex-start;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
     border-left: 0;
-    border-top: 1px solid rgba(67, 63, 56, .22);
-    padding: 36px 0 56px;
+    padding: 48px 0;
   }
 
   .um-auth .auth-card {
@@ -231,12 +221,7 @@
     padding: 0 20px;
   }
 
-  .um-auth .auth-intro-body h1 {
-    font-size: 31px;
-  }
-
-  .um-auth .auth-foot {
-    flex-direction: column;
-    gap: 6px;
+  .um-auth .auth-panel {
+    padding: 32px 0;
   }
 }

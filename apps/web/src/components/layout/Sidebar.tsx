@@ -1,89 +1,138 @@
-import { Link, useLocation } from 'react-router-dom';
-import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
+import type { MouseEvent } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { ArrowUpRight, LogOut, Menu, X } from 'lucide-react';
+import logo from '@/assets/unimarky-logo.png';
 import { api } from '@/lib/api';
-import {
-    LayoutDashboard,
-    ShoppingBag,
-    MapPin,
-    BookOpen,
-    Coffee,
-    Home,
-    Users,
-    Shield,
-    ShieldCheck,
-    Crown,
-} from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
-interface NavItem {
+interface AppNavItem {
     title: string;
     href: string;
-    icon: React.ComponentType<{ className?: string }>;
-    roles?: string[];  // if undefined, visible to all
+    roles?: string[];
 }
 
-const allItems: NavItem[] = [
-    { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { title: 'Communities', href: '/communities', icon: Users },
-    { title: 'Marketplace', href: '/marketplace', icon: ShoppingBag },
-    { title: 'Lost & Found', href: '/lost-found', icon: MapPin },
-    { title: 'Study', href: '/study', icon: BookOpen },
-    { title: 'Food', href: '/food', icon: Coffee },
-    { title: 'Housing', href: '/housing', icon: Home },
-    // Superuser-only
-    { title: 'My Listings', href: '/superuser/dashboard', icon: Crown, roles: ['superuser', 'userX'] },
-    // Normal user
-    { title: 'Become Superuser', href: '/request-role', icon: ShieldCheck, roles: ['normal'] },
-    // Admin-only
-    { title: 'Admin Panel', href: '/admin/dashboard', icon: Shield, roles: ['userX'] },
+const primaryItems: AppNavItem[] = [
+    { title: 'Dashboard', href: '/dashboard' },
+    { title: 'Marketplace', href: '/marketplace' },
+    { title: 'Communities', href: '/communities' },
+    { title: 'Study', href: '/study' },
+    { title: 'Accommodation', href: '/housing' },
+    { title: 'Food', href: '/food' },
+    { title: 'Lost & Found', href: '/lost-found' },
 ];
 
-interface SidebarProps {
-    className?: string;
+const roleItems: AppNavItem[] = [
+    { title: 'My Listings', href: '/superuser/dashboard', roles: ['superuser', 'userX'] },
+    { title: 'Become Superuser', href: '/request-role', roles: ['normal'] },
+    { title: 'Admin Panel', href: '/admin/dashboard', roles: ['userX'] },
+];
+
+function isActive(href: string, pathname: string) {
+    return pathname === href || (href !== '/dashboard' && pathname.startsWith(`${href}/`));
 }
 
-export function Sidebar({ className }: SidebarProps) {
-    const location = useLocation();
-    const [userRole, setUserRole] = useState<string>('normal');
+function closeMenu(event: MouseEvent<HTMLAnchorElement>) {
+    event.currentTarget.closest('details')?.removeAttribute('open');
+}
+
+export function Sidebar() {
+    const { pathname } = useLocation();
+    const navigate = useNavigate();
+    const { session, signOut } = useAuth();
+    const [role, setRole] = useState('normal');
 
     useEffect(() => {
+        if (!session) return;
         api.get('/profiles/me')
-            .then((profile) => {
-                setUserRole(profile.role || 'normal');
-            })
-            .catch(() => {
-                setUserRole('normal');
-            });
-    }, []);
+            .then((profile) => setRole(profile.role || 'normal'))
+            .catch(() => setRole('normal'));
+    }, [session]);
 
-    const visibleItems = allItems.filter(
-        (item) => !item.roles || item.roles.includes(userRole)
-    );
+    const items = [
+        ...primaryItems,
+        ...roleItems.filter((item) => !item.roles || item.roles.includes(role)),
+    ];
+
+    const handleLogout = async () => {
+        await signOut();
+        navigate('/');
+    };
 
     return (
-        <nav className={cn("h-full py-4", className)}>
-            <div className="space-y-4 py-4">
-                <div className="px-3 py-2">
-                    <div className="space-y-1">
-                        {visibleItems.map((item) => (
+        <>
+            <aside className="sidebar" aria-label="Workspace navigation">
+                <Link className="brand" to="/dashboard" aria-label="UniMARKY dashboard">
+                    <img src={logo} alt="UniMARKY" className="brand-logo" draggable={false} />
+                </Link>
+                <span className="side-label">WORKSPACE</span>
+                <nav className="side-nav">
+                    {items.map((item, index) => {
+                        const active = isActive(item.href, pathname);
+                        return (
                             <Link
                                 key={item.href}
                                 to={item.href}
-                                className={cn(
-                                    "flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors",
-                                    location.pathname === item.href ||
-                                        (item.href !== '/dashboard' && location.pathname.startsWith(item.href))
-                                        ? "bg-accent/50 text-accent-foreground"
-                                        : "text-muted-foreground"
-                                )}
+                                className={active ? 'active' : undefined}
+                                aria-current={active ? 'page' : undefined}
                             >
-                                <item.icon className="mr-2 h-4 w-4" />
+                                <span className="nav-index">
+                                    {String(index + 1).padStart(2, '0')}
+                                </span>
                                 {item.title}
                             </Link>
-                        ))}
-                    </div>
+                        );
+                    })}
+                </nav>
+                <div className="side-bottom">
+                    <Link
+                        to="/profile"
+                        aria-current={pathname === '/profile' ? 'page' : undefined}
+                    >
+                        Profile <ArrowUpRight size={14} />
+                    </Link>
+                    <button type="button" onClick={handleLogout}>
+                        Log out <LogOut size={14} />
+                    </button>
                 </div>
-            </div>
-        </nav>
+            </aside>
+
+            <header className="mobile-header">
+                <Link className="brand" to="/dashboard" aria-label="UniMARKY dashboard">
+                    <img src={logo} alt="UniMARKY" className="brand-logo" draggable={false} />
+                </Link>
+                <details className="mobile-menu">
+                    <summary aria-label="Open navigation">
+                        <Menu size={21} />
+                        <X size={21} />
+                    </summary>
+                    <nav>
+                        {items.map((item) => {
+                            const active = isActive(item.href, pathname);
+                            return (
+                                <Link
+                                    key={item.href}
+                                    to={item.href}
+                                    onClick={closeMenu}
+                                    className={active ? 'active' : undefined}
+                                    aria-current={active ? 'page' : undefined}
+                                >
+                                    {item.title}
+                                    <ArrowUpRight size={14} />
+                                </Link>
+                            );
+                        })}
+                        <Link to="/profile" onClick={closeMenu}>
+                            Profile
+                            <ArrowUpRight size={14} />
+                        </Link>
+                        <button type="button" onClick={handleLogout}>
+                            Log out
+                            <LogOut size={14} />
+                        </button>
+                    </nav>
+                </details>
+            </header>
+        </>
     );
 }

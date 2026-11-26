@@ -115,16 +115,35 @@ export function MarketplacePage() {
                         peers safely.
                     </p>
                 </div>
-                <button
-                    type="button"
-                    className="button button-secondary"
-                    onClick={() => navigate("/marketplace/my-listings")}
-                >
-                    My listings
-                </button>
+                <div className="mp-head-actions">
+                    <div className="page-head-meta">
+                        <span className="meta-mono">Campus marketplace</span>
+                        <span className="page-head-rule" aria-hidden="true" />
+                        <span className="meta-mono">
+                            {total > 0 ? `${total} items` : 'Student listings'}
+                        </span>
+                    </div>
+                    <div className="mp-head-buttons">
+                        <button
+                            type="button"
+                            className="button button-secondary"
+                            onClick={() => navigate("/marketplace/my-listings")}
+                        >
+                            My listings
+                        </button>
+                        <button
+                            type="button"
+                            className="button button-primary"
+                            onClick={() => navigate("/marketplace/list")}
+                        >
+                            <Plus size={16} /> List an item
+                        </button>
+                    </div>
+                </div>
             </header>
 
-            <div className="mp-filters" role="group" aria-label="Filter by category">
+            <div className="mp-controls">
+                <div className="mp-filters" role="group" aria-label="Filter by category">
                 {categories.map((cat) => (
                     <button
                         key={cat.value}
@@ -150,6 +169,7 @@ export function MarketplacePage() {
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
+            </div>
             </div>
 
             <AnimatePresence mode="wait">
@@ -217,11 +237,19 @@ export function MarketplacePage() {
                                     </div>
 
                                     <div className="mp-body">
+                                        <span className="mp-cat-label">
+                                            {item.category?.replace("-", " ")}
+                                        </span>
                                         <h3>{item.title}</h3>
-                                        <p className="mp-price">₹{parseFloat(item.price).toLocaleString()}</p>
-                                        <div className="mp-meta">
-                                            <span>{item.category?.replace("-", " ")}</span>
-                                            <span>{conditionLabels[item.condition] || item.condition || "Used"}</span>
+                                        <div className="mp-foot">
+                                            <p className="mp-price">
+                                                ₹{parseFloat(item.price).toLocaleString()}
+                                            </p>
+                                            <span className="mp-condition">
+                                                {conditionLabels[item.condition] ||
+                                                    item.condition ||
+                                                    "Used"}
+                                            </span>
                                         </div>
                                     </div>
                                 </Link>
@@ -260,15 +288,6 @@ export function MarketplacePage() {
                     Showing {filteredItems.length} of {total} items
                 </p>
             )}
-
-            <button
-                type="button"
-                onClick={() => navigate("/marketplace/list")}
-                aria-label="List an item on marketplace"
-                className="mp-fab"
-            >
-                <Plus size={22} strokeWidth={2} />
-            </button>
         </div>
     );
 }

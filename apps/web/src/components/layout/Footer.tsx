@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Instagram } from "lucide-react";
-import file from "@/components/layout/file.svg";
+import file from "@/assets/unimarky-logo.png";
 
 export function Footer() {
     return (

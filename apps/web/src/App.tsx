@@ -1,6 +1,5 @@
 import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
 import './index.css'
 
 // Layout components (keep eager — needed immediately)
@@ -8,6 +7,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 import { ErrorPage } from '@/components/layout/ErrorPage';
 import ScrollToTop from '@/components/layout/ScrollToTop';
+import { PageLoader } from '@/components/layout/PageLoader';
 
 // Lazy-loaded pages — each gets its own chunk
 const LandingPage = lazy(() => import('@/features/landing/LandingPage').then(m => ({ default: m.LandingPage })));
@@ -51,16 +51,9 @@ const ContactPage = lazy(() => import('@/features/public/ContactPage').then(m =>
 const TermsPage = lazy(() => import('@/features/public/TermsPage').then(m => ({ default: m.TermsPage })));
 const PrivacyPage = lazy(() => import('@/features/public/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
 
-// Shared loading spinner for Suspense boundaries
-function PageLoader() {
-    return (
-        <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="flex flex-col items-center gap-3">
-                <Loader2 className="w-8 h-8 animate-spin text-brand-orange" />
-                <p className="text-sm text-muted-foreground animate-pulse">Loading…</p>
-            </div>
-        </div>
-    );
+// Shared loading state for Suspense boundaries
+function RouteFallback() {
+    return <PageLoader label="Loading" />;
 }
 
 import { Toaster } from 'sonner';
@@ -70,7 +63,7 @@ export default function App() {
     return (
         <MotionConfig reducedMotion="user">
             <LazyMotion features={domMax} strict={false}>
-                <Suspense fallback={<PageLoader />}>
+                <Suspense fallback={<RouteFallback />}>
                     <Toaster position="top-center" richColors />
                     <ScrollToTop />
                 <Routes>

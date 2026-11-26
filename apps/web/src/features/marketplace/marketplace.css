@@ -254,6 +254,7 @@
 .um-marketplace .mp-skeleton-media {
   aspect-ratio: 1 / 1;
   background: #f5f4f1;
+  animation: um-skeleton-pulse 1.4s ease-in-out infinite;
 }
 
 .um-marketplace .mp-skeleton-body {
@@ -266,6 +267,7 @@
 .um-marketplace .mp-skeleton-line {
   height: 10px;
   background: #f0eee9;
+  animation: um-skeleton-pulse 1.4s ease-in-out infinite;
 }
 
 .um-marketplace .mp-skeleton-line.short {
@@ -596,6 +598,121 @@
   }
 
   .um-marketplace .mp-search {
+    max-width: none;
+  }
+}
+
+/* ---------------------------------------------------- listing redesign --- */
+.um-marketplace .mp-head-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.um-marketplace .mp-head-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.um-marketplace .mp-controls {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(67, 63, 56, .22);
+}
+
+.um-marketplace .mp-controls .mp-filters {
+  flex: 1;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.um-marketplace .mp-controls .mp-toolbar {
+  flex: 0 0 300px;
+  margin: 0;
+}
+
+.um-marketplace .mp-controls .mp-search {
+  max-width: 300px;
+}
+
+.um-marketplace .mp-card {
+  border-top: 2px solid #3157d5;
+}
+
+.um-marketplace .mp-card:hover {
+  border-color: #dcd9d3;
+  border-top-color: #3157d5;
+}
+
+.um-marketplace .mp-media {
+  aspect-ratio: 4 / 3;
+}
+
+.um-marketplace .mp-body {
+  gap: 6px;
+  padding: 16px;
+}
+
+.um-marketplace .mp-cat-label {
+  color: #8f8b83;
+  font: 400 9px 'DM Mono', monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.um-marketplace .mp-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid rgba(67, 63, 56, .16);
+}
+
+.um-marketplace .mp-foot .mp-price {
+  font-size: 19px;
+}
+
+.um-marketplace .mp-condition {
+  color: #8f8b83;
+  font-size: 11px;
+}
+
+.um-marketplace .mp-count {
+  text-align: right;
+}
+
+@media (max-width: 900px) {
+  .um-marketplace .page-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .um-marketplace .page-head-meta {
+    display: none;
+  }
+
+  .um-marketplace .mp-head-actions {
+    align-items: flex-start;
+  }
+
+  .um-marketplace .mp-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .um-marketplace .mp-controls .mp-toolbar {
+    flex: auto;
+  }
+
+  .um-marketplace .mp-controls .mp-search {
     max-width: none;
   }
 }

@@ -1,5 +1,5 @@
 import { ArrowRight, ArrowUpRight, Instagram } from "lucide-react";
-import logo from "@/components/layout/file.svg";
+import logo from "@/assets/unimarky-logo.png";
 import { siteNav } from "@/components/site/navigation";
 import { LandingLink } from "./LandingLink";
 
@@ -8,19 +8,10 @@ interface FooterLink {
   to: string;
 }
 
-const resourceLinks: FooterLink[] = [
-  { label: "FAQs", to: "/#faqs" },
-  { label: "Help center", to: "/contact" },
-  { label: "Study guides", to: "/study" },
-  { label: "Integration", to: "/#integration" },
-  { label: "Documentation", to: "/about" },
-];
-
+/** Only pages that actually exist in the router. */
 const companyLinks: FooterLink[] = [
   { label: "About us", to: "/about" },
-  { label: "Our mission", to: "/about" },
   { label: "Contact", to: "/contact" },
-  { label: "Feedback", to: "/contact" },
 ];
 
 function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) {
@@ -52,8 +43,7 @@ export function SiteFooter() {
           </LandingLink>
         </div>
 
-        <FooterColumn title="EXPLORE" links={siteNav.slice(0, 6)} />
-        <FooterColumn title="RESOURCES" links={resourceLinks} />
+        <FooterColumn title="EXPLORE" links={siteNav} />
         <FooterColumn title="COMPANY" links={companyLinks} />
 
         <div className="footer-col">

@@ -3,15 +3,31 @@ export interface SiteNavItem {
   to: string;
 }
 
-/** Primary navigation. Hash targets live on the landing page. */
+/**
+ * Primary navigation. Every entry is a full page of the site — the public
+ * shell never points back at an anchor inside the landing page.
+ */
 export const siteNav: SiteNavItem[] = [
-  { label: "Ecosystem", to: "/#ecosystem" },
   { label: "Marketplace", to: "/marketplace" },
-  { label: "Community", to: "/communities" },
+  { label: "Communities", to: "/communities" },
   { label: "Study", to: "/study" },
   { label: "Accommodation", to: "/housing" },
   { label: "Food", to: "/food" },
-  { label: "Integration", to: "/#integration" },
+  { label: "Lost & Found", to: "/lost-found" },
+];
+
+/**
+ * Section index for the landing page. The public shell swaps to this list on
+ * `/` so the sidebar mirrors the page instead of repeating the page nav.
+ */
+export const landingSections: SiteNavItem[] = [
+  { label: "Connected campus", to: "/#ecosystem" },
+  { label: "Marketplace", to: "/#marketplace" },
+  { label: "Community", to: "/#community" },
+  { label: "Study", to: "/#study" },
+  { label: "Accommodation", to: "/#accommodation" },
+  { label: "Food", to: "/#food" },
+  { label: "Integration", to: "/#services" },
   { label: "FAQs", to: "/#faqs" },
 ];
 

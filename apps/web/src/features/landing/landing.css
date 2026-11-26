@@ -9,6 +9,15 @@
   font-family: 'DM Sans', sans-serif;
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
+
+  /* One fluid gutter drives the page column, the full-bleed band, the footer
+     and the page rules. It is the widest on desktop and closes to 20px on
+     small phones, so every block stays inside the same column. */
+  --um-gutter: clamp(20px, 4vw, 64px);
+
+  /* The page rules run this far outside the text column, so copy never
+     touches a line. */
+  --um-rule-gap: 20px;
 }
 
 /* Holds every page layer above the fixed atmosphere. */
@@ -55,6 +64,8 @@
 .um-landing .atmosphere-fade {position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 0%, rgba(255,255,255,.03) 42%, rgba(255,255,255,.24) 55%, rgba(255,255,255,.68) 67%, #fff 81%, #fff 100%);}
 .um-landing .sidebar {width: 250px; position: fixed; z-index: 10; inset: 0 auto 0 0; padding: 37px 29px 27px 35px; display: flex; flex-direction: column; background: transparent;}
 .um-landing .brand {display: inline-flex; align-items: center; gap: 9px; width: fit-content; font-size: 17px; letter-spacing: -.055em; font-weight: 600;}
+.um-landing .sidebar .brand {width: 100%;}
+.um-landing .sidebar .brand-logo {height: auto; max-height: 27px; max-width: 100%;}
 .um-landing .brand-mark {width: 21px; height: 21px; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; transform: rotate(-8deg);}
 .um-landing .brand-mark span {background: #3157d5; border-radius: 1px;}
 .um-landing .brand-mark span:nth-child(2) {background: #e95b47;}
@@ -95,11 +106,38 @@
 .um-landing .side-bottom {margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 11px 8px; font-size: 12px;}
 .um-landing .side-bottom a {display: flex; align-items: center; gap: 4px;}
 .um-landing .side-bottom a:hover {color: #3157d5;}
+.um-landing .side-bottom button {display: flex; align-items: center; gap: 4px; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-align: left;}
+.um-landing .side-bottom button:hover {color: #3157d5;}
+.um-landing .side-bottom .side-login,
+.um-landing .side-bottom .side-signup {align-items: center; justify-content: center; min-height: 38px; padding: 0 10px; border-radius: 4px; font-size: 12px; font-weight: 500; transition: background-color .18s ease, border-color .18s ease, color .18s ease;}
+.um-landing .side-bottom .side-login {border: 1px solid #3157d5; color: #2949b4;}
+.um-landing .side-bottom .side-login:hover {color: #2949b4; background: rgba(49,87,213,.06);}
+.um-landing .side-bottom .side-signup {border: 1px solid #3157d5; background: #3157d5; color: #fff;}
+.um-landing .side-bottom .side-signup:hover {border-color: #2446b9; background: #2446b9; color: #fff;}
 .um-landing .side-note {grid-column: 1 / -1; margin-top: 44px; color: #797670; font: 11px/1.6 'DM Mono', monospace;}
 .um-landing .mobile-header {display: none;}
 .um-landing .main-shell {position: relative; margin-left: 250px; min-height: 100vh; overflow: hidden;}
-.um-landing .page-rules {position: absolute; z-index: 0; inset: 0 max(32px, calc((100% - 1200px) / 2)); pointer-events: none; border-left: 1px solid rgba(89,85,78,.23); border-right: 1px solid rgba(89,85,78,.23);}
-.um-landing .main-content {position: relative; z-index: 1; max-width: 1328px; margin: 0 auto; padding: 0 64px;}
+/* Three rules: the left margin rule sits in the sidebar's padding, the divider
+   on the sidebar/content boundary, and the right rule beside the copy. Below
+   900px the sidebar (and its two rules) is gone, so the content rule returns. */
+.um-landing .sidebar::before {content: ''; position: absolute; inset-block: 0; left: clamp(12px, 1.4vw, 24px); width: 0; border-left: 1px solid rgba(89,85,78,.23); pointer-events: none;}
+.um-landing .main-shell::before {content: ''; position: absolute; z-index: 0; inset-block: 0; left: 0; width: 0; border-left: 1px solid rgba(89,85,78,.23); pointer-events: none;}
+/* The rules sit --um-rule-gap outside the text column: they keep a wide
+   margin to the screen edge on desktop, shrink with the viewport, reach the
+   screen edge on mobile, and copy always stays between them. */
+.um-landing .page-rules {position: absolute; z-index: 0; inset-block: 0; --um-text-inset: calc(var(--um-gutter) + max(0px, (100% - 1328px) / 2)); inset-inline: clamp(0px, min(calc(var(--um-text-inset) - var(--um-rule-gap)), calc((100vw - 620px) * 0.18)), 999px); pointer-events: none; border-left: 1px solid rgba(89,85,78,.23); border-right: 1px solid rgba(89,85,78,.23);}
+/* Desktop frame: both outer rules share the same inset from the screen edges,
+   so the frame is symmetric. The sidebar divider is the only line between the
+   sidebar and the content column. */
+@media (min-width: 901px) {
+.um-landing .page-rules {border-left: 0; inset-inline: clamp(12px, 1.4vw, 24px);}
+}
+.um-landing .main-content {position: relative; z-index: 1; max-width: 1328px; margin: 0 auto; padding: 0 var(--um-gutter);}
+/* Protected workspace shell: the landing frame with room above the page. */
+.um-app .main-content {padding-block: 44px 80px;}
+@media (max-width: 900px) {
+.um-app .main-content {padding-block: 28px 56px;}
+}
 .um-landing .main-content > section[id] {scroll-margin-top: 24px;}
 .um-landing .hero {min-height: 720px; height: min(100dvh, 850px); max-height: 880px; position: relative; padding-top: 31px;}
 .um-landing .hero-meta {display: flex; justify-content: space-between; color: #5f5c56; font-size: 9px; letter-spacing: .065em;}
@@ -115,13 +153,13 @@
 .um-landing p {margin-top: 0;}
 .um-landing .hero h1 {font: 400 clamp(43px, 4.05vw, 58px)/1.07 'Space Grotesk', sans-serif; letter-spacing: -.06em; margin: 0 0 21px; color: #24231f;}
 .um-landing .hero h1 span,
-.um-landing .discover-heading h2 span,
+.um-landing .services-heading h2 span,
 .um-landing .intro-grid h2 span,
 .um-landing .community-copy h2 span,
 .um-landing .study-layout h2 span,
 .um-landing .neighborhood-copy h2 span,
 .um-landing .food-copy h2 span,
-.um-landing .integration-row h2 span,
+.um-landing .market-copy h2 span,
 .um-landing .closing-section h2 span {color: #5751a7;}
 .um-landing .hero-lead {max-width: 390px; color: #4d4a45; font-size: 16px; line-height: 1.65; margin-bottom: 25px;}
 .um-landing .hero-actions {display: flex; flex-wrap: wrap; gap: 10px;}
@@ -161,12 +199,12 @@
 .um-landing .intro-section {padding: 75px 0 54px;}
 .um-landing .intro-grid {display: grid; grid-template-columns: 1.05fr .95fr; gap: 50px; margin-top: 31px;}
 .um-landing .intro-grid h2,
-.um-landing .discover-heading h2,
+.um-landing .services-heading h2,
+.um-landing .market-copy h2,
 .um-landing .community-copy h2,
 .um-landing .study-layout h2,
 .um-landing .neighborhood-copy h2,
 .um-landing .food-copy h2,
-.um-landing .integration-row h2,
 .um-landing .closing-section h2 {font: 400 39px/1.15 'Space Grotesk', sans-serif; letter-spacing: -.045em;}
 .um-landing .intro-grid h2 {max-width: 470px; margin: 0;}
 .um-landing .intro-grid h2 span {color: #716c62;}
@@ -176,10 +214,10 @@
 .um-landing .text-link:hover {border-color: #2949b4;}
 .um-landing .intro-index {margin-top: 51px; border-top: 1px solid rgba(67,63,56,.22); padding-top: 12px; display: flex; justify-content: space-between; color: #78746d; font-size: 8px; letter-spacing: .06em;}
 .um-landing .intro-index span:last-child {display: flex; align-items: center; gap: 6px;}
-.um-landing .discover-section {padding: 55px 0 80px;}
-.um-landing .discover-heading {display: flex; justify-content: space-between; align-items: end; gap: 36px; margin: 27px 0 33px;}
-.um-landing .discover-heading h2 {margin: 0;}
-.um-landing .discover-heading p {max-width: 310px; margin: 0 2% 3px 0; color: #66625c; font-size: 14px; line-height: 1.65;}
+.um-landing .services-section {padding: 75px 0 65px;}
+.um-landing .services-heading {display: flex; justify-content: space-between; align-items: end; gap: 36px; margin: 27px 0 33px;}
+.um-landing .services-heading h2 {margin: 0;}
+.um-landing .services-heading p {max-width: 310px; margin: 0 2% 3px 0; color: #66625c; font-size: 14px; line-height: 1.65;}
 .um-landing .feature-list {border-top: 1px solid rgba(67,63,56,.28);}
 .um-landing .feature-row {min-height: 82px; display: grid; grid-template-columns: 43px 42px minmax(190px,1fr) 155px 22px; align-items: center; gap: 14px; border-bottom: 1px solid rgba(67,63,56,.22); transition: padding .2s ease, background .2s ease;}
 .um-landing .feature-row:hover {padding-left: 8px; background: rgba(255,255,255,.25);}
@@ -190,6 +228,22 @@
 .um-landing .feature-copy small {color: #6b6760; font-size: 12px;}
 .um-landing .feature-note {color: #79756d; font-size: 8px; letter-spacing: .05em;}
 .um-landing .feature-arrow {color: #58554e;}
+
+/* --------------------------------------------------------------- market --- */
+.um-landing .market-section {padding: 55px 0 80px;}
+.um-landing .market-layout {display: grid; grid-template-columns: 1fr .92fr; gap: 60px; align-items: center; margin-top: 31px;}
+.um-landing .market-copy h2 {margin: 0 0 18px;}
+.um-landing .market-lead {color: #66625c; font-size: 14px; line-height: 1.7; max-width: 430px; margin-bottom: 22px;}
+.um-landing .market-board {border: 1px solid rgba(71,65,58,.25); background: rgba(255,255,255,.32);}
+.um-landing .market-board-head {display: flex; justify-content: space-between; gap: 12px; padding: 13px 16px; border-bottom: 1px solid rgba(71,65,58,.18); color: #77736b; font: 8px 'DM Mono', monospace; letter-spacing: .06em;}
+.um-landing .market-board ul {list-style: none; margin: 0; padding: 0;}
+.um-landing .market-row {display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 16px; border-bottom: 1px solid rgba(71,65,58,.14);}
+.um-landing .market-row:last-child {border-bottom: 0;}
+.um-landing .market-row-copy {display: flex; flex-direction: column; gap: 4px; min-width: 0;}
+.um-landing .market-row-copy strong {font: 500 15px 'Space Grotesk', sans-serif; color: #24231f;}
+.um-landing .market-row-copy small {color: #6b6760; font-size: 12px;}
+.um-landing .market-row-price {color: #5751a7; font: 500 14px 'DM Sans', sans-serif; white-space: nowrap;}
+.um-landing .market-board-foot {padding: 11px 16px; border-top: 1px solid rgba(71,65,58,.18); background: rgba(255,255,255,.5); color: #77736b; font: 8px 'DM Mono', monospace; letter-spacing: .06em;}
 .um-landing .community-section {display: grid; grid-template-columns: 1fr 1fr; min-height: 420px; align-items: center; gap: 56px; padding: 27px 0 80px;}
 .um-landing .community-art {min-height: 344px; position: relative; overflow: hidden; background: linear-gradient(130deg,rgba(240,68,56,.18),rgba(167,139,250,.24) 55%,rgba(245,158,11,.18)); border: 1px solid rgba(71,65,58,.22);}
 .um-landing .art-rule {position: absolute; background: rgba(63,59,53,.22);}
@@ -247,22 +301,24 @@
 .um-landing .food-copy h2 {margin: 20px 0 12px;}
 .um-landing .food-copy>p {margin-bottom: 12px;}
 .um-landing .food-copy .section-label {font-size: 8px;}
-.um-landing .integration-section {padding: 75px 0 65px;}
-.um-landing .integration-row {display: grid; grid-template-columns: 1fr .8fr; gap: 50px; align-items: end; margin-top: 28px;}
-.um-landing .integration-row h2 {margin: 0; font-size: 35px;}
-.um-landing .integration-row h2 span {color: #716c62;}
-.um-landing .integration-row p {color: #66625c; font-size: 14px; line-height: 1.7; max-width: 375px; margin-bottom: 18px;}
-.um-landing .integration-foot {display: flex; justify-content: space-between; border-top: 1px solid rgba(67,63,56,.22); margin-top: 50px; padding-top: 12px; color: #77736b; font: 8px 'DM Mono',monospace; letter-spacing: .06em;}
-.um-landing .closing-section {min-height: 374px; margin: 12px -64px 0; padding: 57px 64px 48px; background: #f7f6f3; position: relative; border-top: 1px solid rgba(67,63,56,.2); border-bottom: 1px solid rgba(67,63,56,.2);}
+.um-landing .services-foot {display: flex; justify-content: space-between; border-top: 1px solid rgba(67,63,56,.22); margin-top: 50px; padding-top: 12px; color: #77736b; font: 8px 'DM Mono',monospace; letter-spacing: .06em;}
+.um-landing .closing-section {min-height: 374px; margin: 12px calc(var(--um-gutter) * -1) 0; padding: 57px var(--um-gutter) 48px; background: #f7f6f3; position: relative; border-top: 1px solid rgba(67,63,56,.2); border-bottom: 1px solid rgba(67,63,56,.2);}
 .um-landing .closing-eyebrow {display: flex; align-items: center; gap: 8px; color: #5e5b55; font-size: 8px; letter-spacing: .07em;}
 .um-landing .closing-section h2 {margin: 24px 0 11px; font-size: 43px;}
 .um-landing .closing-section p {color: #66625c; font-size: 14px; margin-bottom: 18px;}
-.um-landing .closing-coordinate {position: absolute; right: 64px; bottom: 20px; color: #77736b; font-size: 8px; letter-spacing: .05em;}
+.um-landing .closing-coordinate {position: absolute; right: var(--um-gutter); bottom: 20px; color: #77736b; font-size: 8px; letter-spacing: .05em;}
 .um-landing .faq-strip {display: grid; grid-template-columns: .8fr 1.2fr; gap: 55px; padding: 48px 0 62px;}
 .um-landing .faq-strip h2 {font: 400 22px 'Space Grotesk',sans-serif; margin: 0 0 8px;}
 .um-landing .faq-strip p {color: #66625c; font-size: 13px; margin: 0 0 7px;}
-.um-landing .footer {position: relative; z-index: 2; background: #fff; border-top: 1px solid #e8e6e1; padding: 57px max(64px, calc((100% - 1200px) / 2)) 21px;}
-.um-landing .footer-inner {display: grid; grid-template-columns: 1.55fr 1fr 1fr 1fr .8fr; gap: 28px; max-width: 1200px; margin: 0 auto 52px;}
+.um-landing .faq-list {margin: 20px 0 16px; border-top: 1px solid rgba(89,85,78,.18);}
+.um-landing .faq-item {border-bottom: 1px solid rgba(89,85,78,.18);}
+.um-landing .faq-item summary {display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 12px 0; color: #262522; font-size: 14px; cursor: pointer; list-style: none;}
+.um-landing .faq-item summary::-webkit-details-marker {display: none;}
+.um-landing .faq-item summary svg {flex: 0 0 auto; color: #77736b; transition: transform .18s ease;}
+.um-landing .faq-item[open] summary svg {transform: rotate(45deg);}
+.um-landing .faq-item p {max-width: 58ch; margin: 0 0 14px; line-height: 1.6;}
+.um-landing .footer {position: relative; z-index: 2; background: #fff; border-top: 1px solid #e8e6e1; padding: 57px var(--um-gutter) 21px;}
+.um-landing .footer-inner {display: grid; grid-template-columns: 1.55fr 1.2fr 1fr .8fr; gap: 28px; max-width: calc(1328px - var(--um-gutter) * 2); margin: 0 auto 52px;}
 .um-landing .footer-brand .brand {font-size: 16px;}
 .um-landing .footer-brand p {max-width: 210px; margin: 17px 0; color: #706d67; font-size: 12px; line-height: 1.6;}
 .um-landing .footer-cta {display: inline-flex; align-items: center; gap: 7px; color: #3157d5; font-size: 12px;}
@@ -274,21 +330,18 @@
 .um-landing .footer-bottom {border-top: 1px solid #e8e6e1; padding-top: 17px; display: flex; align-items: center; justify-content: space-between; color: #77736b; font-size: 8px;}
 .um-landing .footer-bottom div {display: flex; align-items: center; gap: 18px;}
 @media (max-width: 1150px) {
-.um-landing .main-content {padding: 0 38px;}
-.um-landing .page-rules {inset-inline: 16px;}
 .um-landing .sidebar {width: 218px; padding-left: 26px;}
 .um-landing .main-shell {margin-left: 218px;}
 .um-landing .hero-grid {gap: 20px; grid-template-columns: .95fr 1.05fr;}
 .um-landing .hero h1 {font-size: 48px;}
-.um-landing .footer {padding-inline: 38px;}
-.um-landing .closing-section {margin-inline: -38px; padding-inline: 38px;}
-.um-landing .closing-coordinate {right: 38px;}
 .um-landing .feature-row {grid-template-columns: 30px 38px minmax(170px,1fr) 130px 20px; gap: 10px;}
+.um-landing .market-layout {gap: 40px;}
 }
 @media (max-width: 900px) {
 .um-landing .sidebar {display: none;}
 .um-landing .main-shell {margin-left: 0;}
-.um-landing .mobile-header {height: 66px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 20; padding: 0 32px; background: rgba(255,255,255,.53); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(71,65,58,.13);}
+.um-landing .main-shell::before {display: none;}
+.um-landing .mobile-header {height: 66px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 20; padding: 0 var(--um-gutter); background: rgba(255,255,255,.53); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(71,65,58,.13);}
 .um-landing .mobile-header .brand {font-size: 16px;}
 .um-landing .mobile-menu {position: relative;}
 .um-landing .mobile-menu summary {list-style: none; cursor: pointer; display: grid; place-items: center; size: 40px;}
@@ -296,11 +349,12 @@
 .um-landing .mobile-menu summary svg:last-child {display:none;}
 .um-landing .mobile-menu[open] summary svg:first-child {display:none;}
 .um-landing .mobile-menu[open] summary svg:last-child {display:block;}
-.um-landing .mobile-menu nav {position: absolute; right: -15px; top: 43px; width: min(310px, calc(100vw - 40px)); padding: 12px 18px; background: #fff; border: 1px solid #e8e6e1; box-shadow: 0 14px 35px rgba(35,32,27,.11); display: flex; flex-direction: column;}
+.um-landing .mobile-menu nav {position: absolute; right: -15px; top: 43px; width: min(310px, calc(100vw - 40px)); padding: 12px 18px; background: #fff; border: 1px solid #e8e6e1; box-shadow: 0 14px 35px rgba(35,32,27,.11); display: flex; flex-direction: column; max-height: calc(100vh - 128px); overflow-y: auto;}
 .um-landing .mobile-menu nav a {min-height: 39px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #efeee9; font-size: 13px;}
+.um-landing .mobile-menu nav a.active {color: #252421; font-weight: 500;}
 .um-landing .mobile-menu nav a:last-child {border: 0;}
-.um-landing .main-content {padding-inline: 44px;}
-.um-landing .page-rules {inset-inline: 24px;}
+.um-landing .mobile-menu nav button {min-height: 39px; width: 100%; display: flex; align-items: center; justify-content: space-between; border: 0; border-bottom: 1px solid #efeee9; background: none; color: inherit; font: inherit; font-size: 13px; cursor: pointer; text-align: left;}
+.um-landing .mobile-menu nav button:last-child {border-bottom: 0;}
 .um-landing .hero {min-height: 700px; height: auto;}
 .um-landing .hero-grid {min-height: 585px; grid-template-columns: 1fr 1fr; gap: 22px;}
 .um-landing .hero h1 {font-size: 42px;}
@@ -312,7 +366,8 @@
 .um-landing .node-campus {transform: translate(-50%,-50%) scale(.9);}
 .um-landing .intro-grid {gap: 30px;}
 .um-landing .intro-grid h2,
-.um-landing .discover-heading h2,
+.um-landing .services-heading h2,
+.um-landing .market-copy h2,
 .um-landing .community-copy h2,
 .um-landing .study-layout h2,
 .um-landing .neighborhood-copy h2,
@@ -320,20 +375,29 @@
 .um-landing .community-section {gap: 35px;}
 .um-landing .study-layout {gap: 45px;}
 .um-landing .neighborhood-section {gap: 36px;}
-.um-landing .footer {padding-inline: 44px;}
 .um-landing .footer-inner {grid-template-columns: 1.4fr 1fr 1fr; row-gap: 36px;}
 .um-landing .footer-brand {grid-row: span 2;}
-.um-landing .closing-section {margin-inline: -44px; padding-inline: 44px;}
-.um-landing .closing-coordinate {right: 44px;}
+}
+/* Tablet portrait and narrow laptops: the two-column blocks stop fitting. */
+@media (max-width: 820px) {
+.um-landing .hero {min-height: 0; height: auto; padding-bottom: 52px;}
+.um-landing .hero-grid {display: flex; flex-direction: column; align-items: stretch; gap: 34px; min-height: 0; padding: 48px 0 0;}
+.um-landing .hero h1 {font-size: clamp(38px, 7vw, 46px); line-height: 1.08;}
+.um-landing .hero-lead {max-width: 420px; font-size: 15px;}
+.um-landing .ecosystem-map {max-width: 490px; margin-inline: auto;}
+.um-landing .scroll-cue {position: static; margin-top: 30px;}
+.um-landing .market-layout {grid-template-columns: 1fr; gap: 30px;}
+.um-landing .market-copy h2 {font-size: 31px;}
+.um-landing .market-lead {font-size: 13px; max-width: 460px;}
+.um-landing .services-heading {display: block; margin: 22px 0 23px;}
+.um-landing .services-heading p {margin-top: 14px; font-size: 13px;}
 }
 @media (max-width: 620px) {
-.um-landing .mobile-header {padding-inline: 20px; height: 60px;}
-.um-landing .main-content {padding-inline: 20px;}
-.um-landing .page-rules {inset-inline: 8px; border-right-color: transparent;}
-.um-landing .hero {min-height: 0; height: auto; padding-top: 23px; padding-bottom: 50px;}
+.um-landing .mobile-header {height: 60px;}
+.um-landing .hero {padding-top: 23px; padding-bottom: 50px;}
 .um-landing .hero-meta {font-size: 7px;}
 .um-landing .hero-meta span:last-child {display: none;}
-.um-landing .hero-grid {display: flex; flex-direction: column; align-items: stretch; gap: 34px; min-height: 0; padding: 52px 0 0;}
+.um-landing .hero-grid {padding: 52px 0 0;}
 .um-landing .hero h1 {font-size: clamp(38px, 10vw, 48px); line-height: 1.08;}
 .um-landing .hero-lead {max-width: 350px; font-size: 15px;}
 .um-landing .hero-footnote {margin-top: 24px;}
@@ -344,11 +408,11 @@
 .um-landing .orbit-two {width: 310px; height: 310px;}
 .um-landing .orbit-one {width: 195px; height: 195px;}
 .um-landing .map-legend {font-size: 6px;}
-.um-landing .scroll-cue {bottom: 13px;}
 .um-landing .intro-section {padding: 48px 0 35px;}
 .um-landing .intro-grid {display: block; margin-top: 23px;}
 .um-landing .intro-grid h2,
-.um-landing .discover-heading h2,
+.um-landing .services-heading h2,
+.um-landing .market-copy h2,
 .um-landing .community-copy h2,
 .um-landing .study-layout h2,
 .um-landing .neighborhood-copy h2,
@@ -356,9 +420,13 @@
 .um-landing .intro-grid>div {margin-top: 20px;}
 .um-landing .intro-grid p.section-lead {font-size: 16px;}
 .um-landing .intro-index {margin-top: 31px; font-size: 7px;}
-.um-landing .discover-section {padding: 37px 0 48px;}
-.um-landing .discover-heading {display: block; margin: 22px 0 23px;}
-.um-landing .discover-heading p {margin-top: 14px; font-size: 13px;}
+.um-landing .market-section {padding: 37px 0 48px;}
+.um-landing .market-row {padding: 12px 14px;}
+.um-landing .market-row-copy strong {font-size: 14px;}
+.um-landing .market-row-copy small {font-size: 11px;}
+.um-landing .market-row-price {font-size: 13px;}
+.um-landing .market-board-head,
+.um-landing .market-board-foot {padding-inline: 14px; font-size: 7px;}
 .um-landing .feature-row {min-height: 75px; grid-template-columns: 20px 34px minmax(0,1fr) 18px; gap: 9px;}
 .um-landing .feature-icon {width: 31px; height: 31px;}
 .um-landing .feature-copy strong {font-size: 15px;}
@@ -381,20 +449,16 @@
 .um-landing .food-copy h2 {font-size: 28px;}
 .um-landing .food-copy>p {font-size: 12px;}
 .um-landing .food-copy .section-label {font-size: 7px; gap: 6px;}
-.um-landing .integration-section {padding: 49px 0 43px;}
-.um-landing .integration-row {display: block; margin-top: 22px;}
-.um-landing .integration-row h2 {font-size: 30px;}
-.um-landing .integration-row>div {margin-top: 18px;}
-.um-landing .integration-row p {font-size: 13px;}
-.um-landing .integration-foot {margin-top: 32px; font-size: 7px;}
-.um-landing .closing-section {min-height: 346px; margin: 4px -20px 0; padding: 43px 20px;}
+.um-landing .services-section {padding: 49px 0 43px;}
+.um-landing .services-foot {margin-top: 32px; font-size: 7px;}
+.um-landing .closing-section {min-height: 346px; margin-top: 4px; padding-block: 43px;}
 .um-landing .closing-section h2 {font-size: 37px;}
 .um-landing .closing-section p {max-width: 295px; font-size: 13px; line-height: 1.6;}
-.um-landing .closing-coordinate {right: 20px; bottom: 15px; font-size: 6px;}
+.um-landing .closing-coordinate {bottom: 15px; font-size: 6px;}
 .um-landing .faq-strip {display: block; padding: 36px 0 45px;}
 .um-landing .faq-strip>div {margin-top: 22px;}
 .um-landing .faq-strip h2 {font-size: 20px;}
-.um-landing .footer {padding: 40px 20px 18px;}
+.um-landing .footer {padding-block: 40px 18px;}
 .um-landing .footer-inner {grid-template-columns: 1fr 1fr; gap: 30px 23px; margin-bottom: 34px;}
 .um-landing .footer-brand {grid-column: 1 / -1; grid-row: auto;}
 .um-landing .footer-brand p {margin: 12px 0;}
