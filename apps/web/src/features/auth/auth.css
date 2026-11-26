@@ -225,3 +225,49 @@
     padding: 32px 0;
   }
 }
+
+/* ----------------------------------------------- forgot / reset password --- */
+.um-auth.um-auth-simple .auth-shell {
+  grid-template-columns: 1fr;
+  max-width: 560px;
+  padding: 0 20px;
+}
+
+.um-auth.um-auth-simple .auth-panel {
+  align-items: center;
+  border-left: 0;
+  padding: 56px 0;
+}
+
+.um-auth.um-auth-simple .auth-card {
+  max-width: 420px;
+}
+
+.um-auth.um-auth-simple .auth-brand {
+  display: inline-block;
+  margin-bottom: 30px;
+}
+
+.um-auth .auth-forgot {
+  margin: 8px 0 0;
+  text-align: right;
+  font-size: 12px;
+}
+
+.um-auth .auth-forgot a {
+  color: #2949b4;
+}
+
+.um-auth .auth-simple-note {
+  margin: 22px 0 0;
+  font-size: 13px;
+}
+
+.um-auth .um-auth-checking {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 0;
+  color: #66625c;
+  font-size: 13px;
+}

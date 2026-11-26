@@ -1,4 +1,5 @@
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { m } from "motion/react";
 import {
     User,
@@ -13,6 +14,7 @@ import {
     Lock,
     Camera,
     BadgeCheck,
+    Trash2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
@@ -96,7 +98,8 @@ function profileReducer(state: ProfileState, action: ProfileAction): ProfileStat
 }
 
 export function ProfilePage() {
-    const { user } = useAuth();
+    const { user, signOut } = useAuth();
+    const navigate = useNavigate();
 
     const initialAvatar =
         (user?.user_metadata as any)?.custom_avatar_url ||
@@ -129,6 +132,27 @@ export function ProfilePage() {
         uploadingAvatar,
         avatarUrl,
     } = state;
+
+    const [deleteConfirm, setDeleteConfirm] = useState("");
+    const [deleting, setDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
+
+    const handleDeleteAccount = async () => {
+        if (deleteConfirm !== "DELETE") return;
+        setDeleting(true);
+        setDeleteError(null);
+        try {
+            await api.delete("/account");
+            await signOut();
+            navigate("/", { replace: true });
+        } catch (err: any) {
+            setDeleteError(
+                err?.message || "Could not delete the account. Please contact support."
+            );
+        } finally {
+            setDeleting(false);
+        }
+    };
 
     useEffect(() => {
         fetchProfile();
@@ -475,6 +499,48 @@ export function ProfilePage() {
                             </>
                         )}
                     </button>
+                </div>
+
+                <div className="pr-danger">
+                    <div>
+                        <h3>Delete account</h3>
+                        <p>
+                            This permanently removes your profile, listings, posts and community
+                            memberships. It cannot be undone.
+                        </p>
+                    </div>
+                    <div className="pr-danger-actions">
+                        <input
+                            className="field-input"
+                            placeholder="Type DELETE to confirm"
+                            aria-label="Type DELETE to confirm account deletion"
+                            value={deleteConfirm}
+                            onChange={(event) => setDeleteConfirm(event.target.value)}
+                        />
+                        <button
+                            type="button"
+                            className="button pr-danger-button"
+                            disabled={deleteConfirm !== "DELETE" || deleting}
+                            onClick={handleDeleteAccount}
+                        >
+                            {deleting ? (
+                                <>
+                                    <Loader2 size={16} className="animate-spin" />
+                                    Deleting...
+                                </>
+                            ) : (
+                                <>
+                                    <Trash2 size={16} />
+                                    Delete account
+                                </>
+                            )}
+                        </button>
+                    </div>
+                    {deleteError && (
+                        <div className="alert alert-error" role="alert">
+                            {deleteError}
+                        </div>
+                    )}
                 </div>
             </m.div>
         </div>

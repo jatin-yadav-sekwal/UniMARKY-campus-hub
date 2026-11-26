@@ -137,6 +137,12 @@ export function AuthForm() {
                     />
                 </div>
 
+                {mode === 'login' && (
+                    <p className="auth-forgot">
+                        <Link to="/forgot-password">Forgot password?</Link>
+                    </p>
+                )}
+
                 {error && (
                     <div className="alert alert-error" role="alert">
                         {error}

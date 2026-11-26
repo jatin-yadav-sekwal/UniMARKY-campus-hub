@@ -3,8 +3,11 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { secureHeaders } from "hono/secure-headers";
+import { bodyLimit } from "hono/body-limit";
 import { isOriginAllowed, validateEnv } from "./env";
 import { authMiddleware } from "./middleware/auth";
+import { rateLimit } from "./middleware/rateLimit";
 import type { Env } from "./middleware/auth";
 
 // Route Imports
@@ -18,6 +21,7 @@ import dashboardApp from "./routes/dashboard";
 import roleRequestsApp from "./routes/roleRequests";
 import studyApp from "./routes/study";
 import communitiesApp from "./routes/communities";
+import accountApp from "./routes/account";
 
 validateEnv();
 
@@ -53,6 +57,23 @@ app.use(
 app.get("/healthz", (c) => c.json({ ok: true }));
 app.get("/", (c) => c.text("Unimarky API is running!"));
 
+// Edge/HTTP hardening. The rate limiter is per API instance; pair it with
+// Cloudflare (or Upstash) for multi-instance and L3/L4 protection.
+app.use("*", secureHeaders());
+app.use(
+  "/api/*",
+  bodyLimit({
+    maxSize: 1024 * 1024,
+    onError: (c) => c.json({ error: "Payload too large" }, 413),
+  })
+);
+app.use("/api/*", rateLimit({ windowMs: 60_000, max: 180, keyPrefix: "api" }));
+app.use(
+  "/api/profiles/onboarding",
+  rateLimit({ windowMs: 60_000, max: 10, keyPrefix: "onboarding" })
+);
+app.use("/api/account", rateLimit({ windowMs: 3_600_000, max: 5, keyPrefix: "account" }));
+
 app.use("/api/*", authMiddleware);
 
 // Mount Routes
@@ -66,6 +87,7 @@ app.route("/api/dashboard", dashboardApp);
 app.route("/api/role-requests", roleRequestsApp);
 app.route("/api/study", studyApp);
 app.route("/api/communities", communitiesApp);
+app.route("/api/account", accountApp);
 
 app.onError((err, c) => {
   console.error("[api] Unhandled error:", err);

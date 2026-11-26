@@ -189,3 +189,51 @@
     padding: 18px;
   }
 }
+
+/* ------------------------------------------------------------ danger zone --- */
+.um-profile .pr-danger {
+  margin-top: 28px;
+  padding: 20px;
+  border: 1px solid rgba(179, 38, 30, .28);
+  background: rgba(179, 38, 30, .03);
+}
+
+.um-profile .pr-danger h3 {
+  margin: 0 0 6px;
+  font: 500 18px 'Space Grotesk', sans-serif;
+  color: #8f1d17;
+}
+
+.um-profile .pr-danger p {
+  margin: 0;
+  max-width: 560px;
+  color: #6b6760;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.um-profile .pr-danger-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.um-profile .pr-danger-actions .field-input {
+  max-width: 240px;
+}
+
+.um-profile .pr-danger-button {
+  background: #b3261e;
+  border: 1px solid #b3261e;
+  color: #fff;
+}
+
+.um-profile .pr-danger-button:hover:not(:disabled) {
+  background: #921d17;
+  border-color: #921d17;
+}
+
+.um-profile .pr-danger .alert {
+  margin-top: 14px;
+}
