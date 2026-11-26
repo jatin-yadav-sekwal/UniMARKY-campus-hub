@@ -275,7 +275,8 @@ Radius: the landing uses **4px** for controls. The app’s `--radius` (shadcn) i
 | Dashboard | `features/dashboard/DashboardPage.tsx` | `.um-dashboard` | `features/dashboard/dashboard.css` | Done (body only; shell pending) |
 | Marketplace | `features/marketplace/MarketplacePage.tsx` (+ `MarketplaceItemPage.tsx`, `MyMarketplaceListingsPage.tsx`, `ListItemPage.tsx`, `EditMarketplaceItemPage.tsx`, `components/MarketplacePhotoUploader.tsx`) | `.um-marketplace` | `features/marketplace/marketplace.css` | Done (body only; shell pending) |
 | Communities | `features/communities/CommunitiesPage.tsx` (+ `CommunityPage.tsx`, `CreateCommunityPage.tsx`, `ManageCommunityPage.tsx`, `shared.tsx`) | `.um-communities` | `features/communities/communities.css` | Done (body only; shell pending) |
-| Study, Housing, Food | — | — | — | Next (high-traffic core) |
+| Study | `features/study/StudyPage.tsx` | `.um-study` | `features/study/study.css` | Done (body only; shell pending) |
+| Housing, Food | — | — | — | Next (high-traffic core) |
 
 Notes from the Auth + Dashboard pass:
 
@@ -296,6 +297,11 @@ Notes from the Communities pass:
 - Replaced the shadcn `Tabs` with a native `.cm-tabs` underline tablist, the shadcn `Select`s with native `select.field-input`, and `Card`/`Button`/`Input`/`Label` with `.cm-*` surfaces and `.button` / `.field-input` / `.field-label`. Feed, membership, role-change, archive and delete logic is unchanged.
 - `shared.tsx` now exports `CATEGORY_COLORS` (replacing `CATEGORY_GRADIENTS`) and renders an editorial square initials avatar and dot badge.
 - Added `.button-ghost` and `.alert-row` (icon + text + dismiss) to `.um-editorial`.
+- Verified: `tsc -b` clean, `vite build` passes.
+
+Notes from the Study pass:
+
+- Filters rebuilt as a framed surface (`.st-filters`) with native `select.field-input`s, a bottom-aligned fetch button and hairline "Showing" chips. Resources are hairline cards with a per-category accent top-border (`.st-cat` uses the same colour), a `.st-download` action, and the shared `.empty-state` for both the initial and no-results states. shadcn `Select`/`Button`/`Badge`/`Card` replaced; fetch logic unchanged.
 - Verified: `tsc -b` clean, `vite build` passes.
 
 ### Verified state of the landing

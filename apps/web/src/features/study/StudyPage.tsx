@@ -13,18 +13,9 @@ import {
     HelpCircle,
     FileCheck,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { api } from "@/lib/api";
 import { downloadFromDrive, isDriveUrl } from "@/lib/driveUtils";
+import './study.css';
 
 const CUH_DEPARTMENTS = [
     "Computer Science & Engineering",
@@ -62,36 +53,36 @@ const CUH_DEPARTMENTS = [
 
 const YEARS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 
-const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; color: string }> = {
+const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; accent: string }> = {
     previous_year_papers: {
         label: "Previous Year Papers",
         icon: Calendar,
-        color: "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700/50",
+        accent: "#b4762a",
     },
     notes: {
         label: "Notes",
         icon: BookMarked,
-        color: "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700/50",
+        accent: "#2f6bd8",
     },
     sessional_exams: {
         label: "Sessional Exams",
         icon: FileCheck,
-        color: "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700/50",
+        accent: "#5751a7",
     },
     assignments: {
         label: "Assignments",
         icon: HelpCircle,
-        color: "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700/50",
+        accent: "#1f8a63",
     },
     syllabus: {
         label: "Syllabus",
         icon: Sparkles,
-        color: "bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-700/50",
+        accent: "#c2537a",
     },
     reference_books: {
         label: "Reference Books",
         icon: BookOpen,
-        color: "bg-teal-100 text-teal-800 border-teal-300 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-700/50",
+        accent: "#2b8fa8",
     },
 };
 
@@ -133,155 +124,131 @@ function StudyFilterBar({
     onFetch,
 }: FilterBarProps) {
     return (
-        <m.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="rounded-2xl border border-border/50 bg-card p-6 mb-8 shadow-sm"
-        >
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="space-y-2">
-                    <label htmlFor="dept-select" className="text-sm font-semibold text-foreground">Department</label>
-                    <Select value={department} onValueChange={onSelectDepartment}>
-                        <SelectTrigger id="dept-select" aria-label="Department" className="w-full h-11 rounded-xl">
-                            <SelectValue placeholder="Select Department" />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-72">
-                            {CUH_DEPARTMENTS.map((dept) => (
-                                <SelectItem key={dept} value={dept}>
-                                    {dept}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+        <div className="st-filters">
+            <div className="st-filter-grid">
+                <div className="field">
+                    <label htmlFor="dept-select" className="field-label">Department</label>
+                    <select
+                        id="dept-select"
+                        aria-label="Department"
+                        value={department}
+                        onChange={(e) => onSelectDepartment(e.target.value)}
+                        className="field-input"
+                    >
+                        <option value="">Select department</option>
+                        {CUH_DEPARTMENTS.map((dept) => (
+                            <option key={dept} value={dept}>
+                                {dept}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
-                <div className="space-y-2">
-                    <label htmlFor="year-select" className="text-sm font-semibold text-foreground">Year</label>
-                    <Select value={year} onValueChange={onSelectYear}>
-                        <SelectTrigger id="year-select" aria-label="Year" className="w-full h-11 rounded-xl">
-                            <SelectValue placeholder="Select Year" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {YEARS.map((y) => (
-                                <SelectItem key={y} value={y}>
-                                    {y}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                <div className="field">
+                    <label htmlFor="year-select" className="field-label">Year</label>
+                    <select
+                        id="year-select"
+                        aria-label="Year"
+                        value={year}
+                        onChange={(e) => onSelectYear(e.target.value)}
+                        className="field-input"
+                    >
+                        <option value="">Select year</option>
+                        {YEARS.map((y) => (
+                            <option key={y} value={y}>
+                                {y}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
-                <div className="space-y-2">
-                    <label htmlFor="cat-filter" className="text-sm font-semibold text-foreground">Category</label>
-                    <Select value={categoryFilter} onValueChange={onSelectCategory}>
-                        <SelectTrigger id="cat-filter" aria-label="Category" className="w-full h-11 rounded-xl">
-                            <SelectValue placeholder="All Categories" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Categories</SelectItem>
-                            {Object.entries(CATEGORY_META).map(([key, meta]) => (
-                                <SelectItem key={key} value={key}>
-                                    {meta.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                <div className="field">
+                    <label htmlFor="cat-filter" className="field-label">Category</label>
+                    <select
+                        id="cat-filter"
+                        aria-label="Category"
+                        value={categoryFilter}
+                        onChange={(e) => onSelectCategory(e.target.value)}
+                        className="field-input"
+                    >
+                        <option value="all">All categories</option>
+                        {Object.entries(CATEGORY_META).map(([key, meta]) => (
+                            <option key={key} value={key}>
+                                {meta.label}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
-                <div className="space-y-2">
-                    <span className="text-sm font-semibold text-transparent select-none block" aria-hidden="true">Action</span>
-                    <Button
+                <div className="st-action">
+                    <button
+                        type="button"
                         onClick={onFetch}
                         disabled={!canFetch || loading}
-                        className="w-full h-11 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white font-semibold shadow-lg shadow-indigo-500/25 transition-shadow duration-300"
+                        className="button button-primary st-fetch"
                     >
                         {loading ? (
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            <Loader2 size={16} className="animate-spin" />
                         ) : (
-                            <Search className="h-4 w-4 mr-2" />
+                            <Search size={16} />
                         )}
-                        Fetch Content
-                    </Button>
+                        Fetch content
+                    </button>
                 </div>
             </div>
 
             {department && year && (
-                <m.div
-                    initial={{ opacity: 0, scaleY: 0.95, transformOrigin: "top" }}
-                    animate={{ opacity: 1, scaleY: 1 }}
-                    transition={{ duration: 0.2 }}
-                    className="mt-4 pt-4 border-t border-border/50 flex flex-wrap items-center gap-2"
-                >
-                    <span className="text-xs font-medium text-muted-foreground">Showing:</span>
-                    <Badge variant="secondary" className="rounded-full text-xs">
-                        {department}
-                    </Badge>
-                    <Badge variant="secondary" className="rounded-full text-xs">
-                        {year}
-                    </Badge>
+                <div className="st-active">
+                    <span className="st-active-label">Showing</span>
+                    <span className="st-chip">{department}</span>
+                    <span className="st-chip">{year}</span>
                     {categoryFilter && categoryFilter !== "all" && (
-                        <Badge variant="secondary" className="rounded-full text-xs">
-                            {CATEGORY_META[categoryFilter]?.label}
-                        </Badge>
+                        <span className="st-chip">{CATEGORY_META[categoryFilter]?.label}</span>
                     )}
-                </m.div>
+                </div>
             )}
-        </m.div>
+        </div>
     );
 }
 
 function StudyMaterialCard({ material, index }: { material: StudyMaterial; index: number }) {
     const catMeta = CATEGORY_META[material.category];
     const CatIcon = catMeta?.icon || FileText;
+    const accent = catMeta?.accent || "#6b6760";
 
     return (
         <m.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
+            className="st-card"
+            style={{ '--st-accent': accent } as React.CSSProperties}
         >
-            <Card className="group h-full overflow-hidden rounded-2xl border-border/50 hover:border-border hover:shadow-lg transition-shadow duration-300 p-0">
-                <div className="p-5 flex flex-col h-full">
-                    <div className="flex items-start justify-between mb-3">
-                        <Badge
-                            variant="outline"
-                            className={`rounded-full text-xs font-semibold px-2.5 py-0.5 ${catMeta?.color || ""}`}
-                        >
-                            <CatIcon className="h-3 w-3 mr-1" />
-                            {catMeta?.label || material.category}
-                        </Badge>
-                    </div>
+            <span className="st-cat">
+                <CatIcon size={12} />
+                {catMeta?.label || material.category}
+            </span>
 
-                    <h3 className="text-base font-bold text-foreground mb-1 line-clamp-2 group-hover:text-indigo-600 transition-colors">
-                        {material.title}
-                    </h3>
-                    <p className="text-sm font-medium text-indigo-500/80 mb-2">
-                        {material.subjectName}
-                    </p>
+            <h3 className="st-title">{material.title}</h3>
+            <p className="st-subject">{material.subjectName}</p>
 
-                    {material.description && (
-                        <p className="text-sm text-muted-foreground mb-3 line-clamp-3 flex-grow">
-                            {material.description}
-                        </p>
-                    )}
+            {material.description && (
+                <p className="st-desc">{material.description}</p>
+            )}
 
-                    <div className="mt-auto pt-3 border-t border-border/50 flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">
-                            {material.uploaderName || "Anonymous"}
-                        </span>
-                        {material.fileUrl && (
-                            <button
-                                onClick={() => downloadFromDrive(material.fileUrl!)}
-                                className="inline-flex items-center gap-1 text-xs font-semibold text-white bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 px-3 py-1.5 rounded-lg shadow-sm transition-colors duration-200 cursor-pointer"
-                            >
-                                <Download className="h-3 w-3" />
-                                {isDriveUrl(material.fileUrl!) ? "Download" : "Open"}
-                            </button>
-                        )}
-                    </div>
-                </div>
-            </Card>
+            <div className="st-footer">
+                <span className="st-uploader">{material.uploaderName || "Anonymous"}</span>
+                {material.fileUrl && (
+                    <button
+                        type="button"
+                        onClick={() => downloadFromDrive(material.fileUrl!)}
+                        className="st-download"
+                    >
+                        <Download size={12} />
+                        {isDriveUrl(material.fileUrl!) ? "Download" : "Open"}
+                    </button>
+                )}
+            </div>
         </m.div>
     );
 }
@@ -318,27 +285,21 @@ export function StudyPage() {
     };
 
     return (
-        <div className="min-h-screen">
-            <div className="mb-8">
-                <m.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center gap-3 mb-2"
-                >
-                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 shadow-lg shadow-indigo-500/25">
-                        <GraduationCap className="h-6 w-6 text-white" />
-                    </div>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Study Resources</h1>
-                </m.div>
-                <m.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className="text-muted-foreground ml-1"
-                >
-                    Access notes, previous year papers, sessional exams and more — filtered by department & year.
-                </m.p>
-            </div>
+        <div className="um-editorial um-study">
+            <header className="page-head">
+                <div>
+                    <p className="section-label">
+                        <span>01</span>/ Study
+                    </p>
+                    <h1 className="page-title">
+                        Study <span>resources.</span>
+                    </h1>
+                    <p className="page-lead">
+                        Access notes, previous year papers, sessional exams and more — filtered by
+                        department and year.
+                    </p>
+                </div>
+            </header>
 
             <StudyFilterBar
                 department={department}
@@ -353,13 +314,9 @@ export function StudyPage() {
             />
 
             {error && (
-                <m.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="rounded-xl border border-red-300/50 bg-red-50 p-4 mb-6 text-red-700 text-sm"
-                >
+                <div className="alert alert-error" role="alert">
                     {error}
-                </m.div>
+                </div>
             )}
 
             <AnimatePresence mode="wait">
@@ -369,28 +326,27 @@ export function StudyPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="flex flex-col items-center justify-center py-20 gap-4"
+                        className="st-loading"
                     >
-                        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-                        <p className="text-muted-foreground font-medium">Fetching resources...</p>
+                        <Loader2 size={22} className="animate-spin" />
+                        <p>Fetching resources...</p>
                     </m.div>
                 ) : hasFetched && materials.length === 0 ? (
                     <m.div
                         key="empty"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="flex flex-col items-center justify-center py-20 gap-4"
+                        className="empty-state"
                     >
-                        <div className="p-4 rounded-2xl bg-muted/50">
-                            <BookOpen className="h-12 w-12 text-muted-foreground" />
-                        </div>
-                        <div className="text-center">
-                            <h3 className="text-lg font-bold text-foreground mb-1">No resources found</h3>
-                            <p className="text-muted-foreground text-sm max-w-sm">
-                                No study materials are available for {department} — {year} yet. Check back later or try a different filter.
-                            </p>
-                        </div>
+                        <span className="empty-icon">
+                            <BookOpen size={24} strokeWidth={1.5} />
+                        </span>
+                        <h3>No resources found</h3>
+                        <p>
+                            No study materials are available for {department} — {year} yet. Check
+                            back later or try a different filter.
+                        </p>
                     </m.div>
                 ) : hasFetched && materials.length > 0 ? (
                     <m.div
@@ -399,13 +355,11 @@ export function StudyPage() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                     >
-                        <div className="flex items-center justify-between mb-4">
-                            <p className="text-sm text-muted-foreground font-medium">
-                                {materials.length} resource{materials.length !== 1 ? "s" : ""} found
-                            </p>
-                        </div>
+                        <p className="meta-mono st-count">
+                            {materials.length} resource{materials.length !== 1 ? "s" : ""} found
+                        </p>
 
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="st-grid">
                             {materials.map((material, index) => (
                                 <StudyMaterialCard key={material.id} material={material} index={index} />
                             ))}
@@ -414,19 +368,18 @@ export function StudyPage() {
                 ) : (
                     <m.div
                         key="initial"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="flex flex-col items-center justify-center py-20 gap-4"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="empty-state"
                     >
-                        <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-violet-500/10">
-                            <GraduationCap className="h-12 w-12 text-indigo-500" />
-                        </div>
-                        <div className="text-center">
-                            <h3 className="text-lg font-bold text-foreground mb-1">Select your filters</h3>
-                            <p className="text-muted-foreground text-sm max-w-sm">
-                                Choose your department and year above, then click "Fetch Content" to find study resources.
-                            </p>
-                        </div>
+                        <span className="empty-icon">
+                            <GraduationCap size={24} strokeWidth={1.5} />
+                        </span>
+                        <h3>Select your filters</h3>
+                        <p>
+                            Choose your department and year above, then click "Fetch content" to
+                            find study resources.
+                        </p>
                     </m.div>
                 )}
             </AnimatePresence>
