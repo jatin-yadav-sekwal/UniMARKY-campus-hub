@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+Disallow: /auth
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /onboarding
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /marketplace
+Disallow: /communities
+Disallow: /study
+Disallow: /housing
+Disallow: /food
+Disallow: /lost-found
+Disallow: /request-role
+Disallow: /superuser
+Disallow: /admin
+
+Sitemap: https://unimarky.runs-on.dev/sitemap.xml

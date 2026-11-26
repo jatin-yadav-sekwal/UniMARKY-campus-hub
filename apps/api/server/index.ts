@@ -2,12 +2,12 @@ import "dotenv/config";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
 import { bodyLimit } from "hono/body-limit";
 import { isOriginAllowed, validateEnv } from "./env";
 import { authMiddleware } from "./middleware/auth";
 import { rateLimit } from "./middleware/rateLimit";
+import { requestLog } from "./middleware/requestLog";
 import type { Env } from "./middleware/auth";
 
 // Route Imports
@@ -28,7 +28,7 @@ validateEnv();
 const app = new Hono<Env>();
 
 // Global Middleware
-app.use("*", logger());
+app.use("*", requestLog());
 app.use(
   "*",
   cors({
@@ -90,7 +90,17 @@ app.route("/api/communities", communitiesApp);
 app.route("/api/account", accountApp);
 
 app.onError((err, c) => {
-  console.error("[api] Unhandled error:", err);
+  console.error(
+    JSON.stringify({
+      level: "error",
+      type: "request_error",
+      requestId: c.res.headers.get("x-request-id") ?? undefined,
+      method: c.req.method,
+      path: c.req.path,
+      message: err.message,
+      stack: process.env.NODE_ENV === "production" ? undefined : err.stack,
+    })
+  );
   return c.json({ error: "Internal Server Error" }, 500);
 });
 
