@@ -1,31 +1,33 @@
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { m } from 'motion/react';
+import { Link } from "react-router-dom";
+import { m } from "motion/react";
+import { Compass } from "lucide-react";
+import { PublicShell } from "@/features/public/PublicShell";
 
 export function ErrorPage() {
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground text-center p-6">
-            <m.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-            >
-                <h1 className="text-9xl font-extrabold tracking-tighter text-muted-foreground/20">404</h1>
-            </m.div>
+        <PublicShell>
             <m.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="absolute"
+                transition={{ duration: 0.5 }}
+                className="page-head"
             >
-                <h2 className="text-2xl font-bold mb-4">Page Not Found</h2>
-                <p className="text-muted-foreground mb-8">
-                    The page you are looking for does not exist or has been moved.
-                </p>
-                <Link to="/">
-                    <Button>Go Home</Button>
+                <div>
+                    <p className="section-label">
+                        <span>404</span>/ Not found
+                    </p>
+                    <h1 className="page-title">
+                        This page went <span>missing.</span>
+                    </h1>
+                    <p className="page-lead">
+                        The page you are looking for does not exist or has been moved.
+                    </p>
+                </div>
+
+                <Link to="/" className="button button-primary">
+                    <Compass size={15} /> Back to home
                 </Link>
             </m.div>
-        </div>
+        </PublicShell>
     );
 }

@@ -285,6 +285,7 @@ Radius: the landing uses **4px** for controls. The app’s `--radius` (shadcn) i
 | Request Role | `features/roles/RequestRolePage.tsx` | `.um-roles` | `features/roles/roles.css` | Done (body only; shell pending) |
 | Superuser | `features/superuser/SuperuserDashboard.tsx` (+ `AddRestaurantPage.tsx`, `EditRestaurantPage.tsx`, `AddMenuItemPage.tsx`, `AddAccommodationPage.tsx`, `EditAccommodationPage.tsx`, `AddStudyMaterialPage.tsx`, `RestaurantFormFields.tsx`, `AccommodationFormFields.tsx`) | `.um-superuser` (+ `.su-food` / `.su-stay` / `.su-study`) | `features/superuser/superuser.css` | Done (body only; shell pending) |
 | Admin | `features/admin/AdminDashboard.tsx` | `.um-admin` | `features/admin/admin.css` | Done (body only; shell pending) |
+| 404 | `components/layout/ErrorPage.tsx` | `.um-public` (via `PublicShell`) | `features/public/public.css` | Done |
 | — | — | — | — | Remaining areas (shared protected shell + global tokens — pending approval) |
 
 Notes from the Auth + Dashboard pass:
@@ -354,6 +355,11 @@ Notes from the Superuser + Admin pass:
 - All shadcn `Button`/`Input`/`Label` were replaced with `.button` / `.field-input` / `.field-label`; the accommodation type selector became square segmented choices (`.su-choice`) with `aria-pressed`; the rounded dashed photo targets became square ones (`.su-upload`, `.su-photos`); the shadcn `Select` on the study-material form became native `select.field-input`.
 - **Admin dashboard** — the purple/pink gradient headline, the coloured status pills and the purple gradient avatar became an editorial page head, an underline status filter (`.ad-filters`, one accent dot per status) and a square accent avatar (`.ad-avatar`). Approve/Reject are now outlined hairline buttons (`.ad-action`) that fill on hover; the approved/rejected states use a mono status chip (`.ad-status`).
 - Verified: `tsc -b` clean, `vite build` passes; all seven superuser/admin routes load without console errors (protected routes still need a live session to render their bodies).
+
+Notes from the 404 pass:
+
+- The 404 page now uses the same `PublicShell` as the marketing pages, so a dead link lands in the same navigation/footer system instead of the old bare shadcn screen with a giant translucent `404`. The copy was rewritten in the editorial voice ("This page went missing.") with a "Back to home" `.button button-primary`.
+- Verified: `tsc -b` clean, `vite build` passes; `/does-not-exist` renders with the public shell and no console errors.
 
 ### Verified state of the landing
 
