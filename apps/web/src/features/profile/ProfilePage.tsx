@@ -11,16 +11,14 @@ import {
     Loader2,
     AlertCircle,
     Lock,
-    Camera
+    Camera,
+    BadgeCheck,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
 import { uploadImage } from "@/lib/uploadImage";
 import { supabase } from "@/lib/supabase";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import "./profile.css";
 
 interface Profile {
     id: string;
@@ -55,7 +53,11 @@ type ProfileAction =
     | { type: "SAVE_SUCCESS" }
     | { type: "SAVE_ERROR"; error: string }
     | { type: "DISMISS_SAVE_SUCCESS" }
-    | { type: "SET_FIELD"; field: "department" | "studentClass" | "mobileNumber"; value: string }
+    | {
+          type: "SET_FIELD";
+          field: "department" | "studentClass" | "mobileNumber";
+          value: string;
+      }
     | { type: "SET_AVATAR_URL"; url: string | null }
     | { type: "SET_UPLOADING_AVATAR"; uploading: boolean };
 
@@ -91,237 +93,6 @@ function profileReducer(state: ProfileState, action: ProfileAction): ProfileStat
         default:
             return state;
     }
-}
-
-interface ProfileHeaderProps {
-    avatarUrl: string | null;
-    userFullName: string;
-    universityName?: string | null;
-    uploadingAvatar: boolean;
-    onAvatarUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
-
-function ProfileHeaderCard({
-    avatarUrl,
-    userFullName,
-    universityName,
-    uploadingAvatar,
-    onAvatarUpload,
-}: ProfileHeaderProps) {
-    return (
-        <div className="relative bg-gradient-to-r from-brand-navy via-brand-navy/95 to-brand-navy p-6 sm:p-8">
-            <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
-                <div className="relative group">
-                    <Avatar className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl border-4 border-white/20 shadow-xl overflow-hidden">
-                        {avatarUrl && (
-                            <AvatarImage src={avatarUrl} alt={userFullName} className="object-cover" />
-                        )}
-                        <AvatarFallback className="bg-gradient-to-br from-brand-orange to-brand-yellow text-white text-3xl font-black">
-                            {userFullName[0]}
-                        </AvatarFallback>
-                    </Avatar>
-
-                    <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-2xl">
-                        {uploadingAvatar ? (
-                            <Loader2 className="w-6 h-6 text-white animate-spin" />
-                        ) : (
-                            <Camera className="w-6 h-6 text-white" />
-                        )}
-                        <input
-                            type="file"
-                            accept="image/*"
-                            aria-label="Upload profile picture"
-                            onChange={onAvatarUpload}
-                            className="hidden"
-                            disabled={uploadingAvatar}
-                        />
-                    </label>
-                </div>
-
-                <div className="flex-1">
-                    <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1">
-                        {userFullName}
-                    </h2>
-                    <p className="text-white/70 flex items-center justify-center sm:justify-start gap-2">
-                        <Building2 className="h-4 w-4" />
-                        {universityName || "University"}
-                    </p>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-interface ReadOnlySectionProps {
-    fullName?: string | null;
-    universityName?: string | null;
-    email?: string | null;
-}
-
-function ReadOnlyAccountSection({ fullName, universityName, email }: ReadOnlySectionProps) {
-    return (
-        <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                <Lock className="h-4 w-4" />
-                Account Information (Read-only)
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label className="text-muted-foreground">Full Name</Label>
-                    <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-                        <Input
-                            value={fullName || ""}
-                            disabled
-                            className="pl-10 bg-muted/30 cursor-not-allowed"
-                        />
-                    </div>
-                </div>
-
-                <div className="space-y-2">
-                    <Label className="text-muted-foreground">University</Label>
-                    <div className="relative">
-                        <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-                        <Input
-                            value={universityName || ""}
-                            disabled
-                            className="pl-10 bg-muted/30 cursor-not-allowed"
-                        />
-                    </div>
-                </div>
-
-                <div className="space-y-2">
-                    <Label className="text-muted-foreground">Email</Label>
-                    <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-                        <Input
-                            value={email || ""}
-                            disabled
-                            className="pl-10 bg-muted/30 cursor-not-allowed"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                Name and university cannot be changed. Contact support if you need to update these.
-            </p>
-        </div>
-    );
-}
-
-interface EditableSectionProps {
-    department: string;
-    studentClass: string;
-    mobileNumber: string;
-    saving: boolean;
-    saveSuccess: boolean;
-    error: string | null;
-    onChangeField: (field: "department" | "studentClass" | "mobileNumber", value: string) => void;
-    onSave: () => void;
-}
-
-function EditableProfileSection({
-    department,
-    studentClass,
-    mobileNumber,
-    saving,
-    saveSuccess,
-    error,
-    onChangeField,
-    onSave,
-}: EditableSectionProps) {
-    return (
-        <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm font-semibold text-brand-navy uppercase tracking-wider">
-                <GraduationCap className="h-4 w-4" />
-                Editable Information
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="department">Department</Label>
-                    <div className="relative">
-                        <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            id="department"
-                            value={department}
-                            onChange={(e) => onChangeField("department", e.target.value)}
-                            placeholder="e.g., Computer Science"
-                            className="pl-10"
-                        />
-                    </div>
-                </div>
-
-                <div className="space-y-2">
-                    <Label htmlFor="class">Class / Year</Label>
-                    <div className="relative">
-                        <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            id="class"
-                            value={studentClass}
-                            onChange={(e) => onChangeField("studentClass", e.target.value)}
-                            placeholder="e.g., 3rd Year"
-                            className="pl-10"
-                        />
-                    </div>
-                </div>
-
-                <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="mobile">Mobile Number</Label>
-                    <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            id="mobile"
-                            value={mobileNumber}
-                            onChange={(e) => onChangeField("mobileNumber", e.target.value)}
-                            placeholder="+91 98765 43210"
-                            className="pl-10"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {error && (
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 text-red-600 text-sm">
-                    <AlertCircle className="h-4 w-4" />
-                    {error}
-                </div>
-            )}
-
-            {saveSuccess && (
-                <m.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center gap-2 p-3 rounded-lg bg-green-50 text-green-600 text-sm"
-                >
-                    Profile updated successfully!
-                </m.div>
-            )}
-
-            <div className="flex justify-end pt-4">
-                <Button
-                    onClick={onSave}
-                    disabled={saving}
-                    className="px-8 py-6 rounded-xl bg-gradient-to-r from-brand-navy to-brand-navy/90 hover:from-brand-orange hover:to-brand-yellow font-bold transition-colors duration-300"
-                >
-                    {saving ? (
-                        <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Saving...
-                        </>
-                    ) : (
-                        <>
-                            <Save className="mr-2 h-4 w-4" />
-                            Save Changes
-                        </>
-                    )}
-                </Button>
-            </div>
-        </div>
-    );
 }
 
 export function ProfilePage() {
@@ -361,6 +132,7 @@ export function ProfilePage() {
 
     useEffect(() => {
         fetchProfile();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -401,7 +173,10 @@ export function ProfilePage() {
             await fetchProfile();
         } catch (err: any) {
             console.error("Failed to save profile:", err);
-            dispatch({ type: "SAVE_ERROR", error: err.message || "Failed to save changes. Please try again." });
+            dispatch({
+                type: "SAVE_ERROR",
+                error: err.message || "Failed to save changes. Please try again.",
+            });
         }
     };
 
@@ -427,7 +202,7 @@ export function ProfilePage() {
             }
 
             const { error } = await supabase.auth.updateUser({
-                data: { custom_avatar_url: imageUrl }
+                data: { custom_avatar_url: imageUrl },
             });
 
             if (error) throw error;
@@ -443,8 +218,11 @@ export function ProfilePage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
-                <Loader2 className="w-8 h-8 animate-spin text-brand-orange" />
+            <div className="um-editorial um-profile">
+                <div className="pr-loading">
+                    <Loader2 size={20} className="animate-spin" />
+                    <span>Loading profile...</span>
+                </div>
             </div>
         );
     }
@@ -456,59 +234,247 @@ export function ProfilePage() {
         "Student";
 
     return (
-        <div className="max-w-4xl mx-auto pb-12">
-            <div className="mb-8">
-                <m.h1
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight mb-2"
-                >
-                    <span className="text-brand-navy">MY </span>
-                    <span className="bg-gradient-to-r from-brand-orange to-brand-yellow bg-clip-text text-transparent">PROFILE</span>
-                </m.h1>
-                <m.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className="text-muted-foreground"
-                >
-                    Manage your account details and preferences
-                </m.p>
-            </div>
+        <div className="um-editorial um-profile">
+            <header className="page-head">
+                <div>
+                    <p className="section-label">
+                        <span>01</span>/ Profile
+                    </p>
+                    <h1 className="page-title">
+                        Your <span>profile.</span>
+                    </h1>
+                    <p className="page-lead">
+                        Manage your account details and preferences.
+                    </p>
+                </div>
+            </header>
 
             <m.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="bg-background border border-border/50 rounded-2xl overflow-hidden shadow-sm"
+                className="pr-hero"
             >
-                <ProfileHeaderCard
-                    avatarUrl={avatarUrl}
-                    userFullName={userFullName}
-                    universityName={profile?.universityName}
-                    uploadingAvatar={uploadingAvatar}
-                    onAvatarUpload={handleAvatarUpload}
-                />
+                <div className="pr-avatar">
+                    {avatarUrl ? (
+                        <img src={avatarUrl} alt={userFullName} />
+                    ) : (
+                        userFullName.charAt(0).toUpperCase()
+                    )}
+                    <label className="pr-avatar-pick">
+                        {uploadingAvatar ? (
+                            <Loader2 size={22} className="animate-spin" />
+                        ) : (
+                            <Camera size={22} />
+                        )}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            aria-label="Upload profile picture"
+                            onChange={handleAvatarUpload}
+                            className="hidden"
+                            disabled={uploadingAvatar}
+                        />
+                    </label>
+                </div>
 
-                <div className="p-6 sm:p-8 space-y-8">
-                    <ReadOnlyAccountSection
-                        fullName={profile?.fullName}
-                        universityName={profile?.universityName}
-                        email={user?.email}
-                    />
+                <div className="pr-id">
+                    <h2 className="pr-name">
+                        {userFullName}
+                        {profile?.isVerified && (
+                            <span className="pr-verified">
+                                <BadgeCheck size={12} /> Verified
+                            </span>
+                        )}
+                    </h2>
+                    <p className="pr-university">
+                        <Building2 size={14} />
+                        {profile?.universityName || "University"}
+                    </p>
+                </div>
+            </m.div>
 
-                    <div className="border-t border-border/50" />
+            {/* Account information (read-only) */}
+            <m.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="pr-panel"
+            >
+                <p className="pr-label">
+                    <Lock size={12} /> Account information (read-only)
+                </p>
 
-                    <EditableProfileSection
-                        department={department}
-                        studentClass={studentClass}
-                        mobileNumber={mobileNumber}
-                        saving={saving}
-                        saveSuccess={saveSuccess}
-                        error={error}
-                        onChangeField={(field, val) => dispatch({ type: "SET_FIELD", field, value: val })}
-                        onSave={handleSave}
-                    />
+                <div className="pr-grid">
+                    <div className="field">
+                        <label className="field-label" htmlFor="pr-fullname">
+                            Full name
+                        </label>
+                        <div className="pr-field">
+                            <User size={15} />
+                            <input
+                                id="pr-fullname"
+                                value={profile?.fullName || ""}
+                                disabled
+                                className="field-input"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="field">
+                        <label className="field-label" htmlFor="pr-university">
+                            University
+                        </label>
+                        <div className="pr-field">
+                            <Building2 size={15} />
+                            <input
+                                id="pr-university"
+                                value={profile?.universityName || ""}
+                                disabled
+                                className="field-input"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="field full">
+                        <label className="field-label" htmlFor="pr-email">
+                            Email
+                        </label>
+                        <div className="pr-field">
+                            <Mail size={15} />
+                            <input
+                                id="pr-email"
+                                value={user?.email || ""}
+                                disabled
+                                className="field-input"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <p className="pr-note">
+                    <AlertCircle size={13} />
+                    Name and university cannot be changed. Contact support if you need to update
+                    these.
+                </p>
+            </m.div>
+
+            {/* Editable information */}
+            <m.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="pr-panel"
+            >
+                <p className="pr-label">
+                    <GraduationCap size={12} /> Editable information
+                </p>
+
+                <div className="pr-grid">
+                    <div className="field">
+                        <label className="field-label" htmlFor="pr-department">
+                            Department
+                        </label>
+                        <div className="pr-field">
+                            <BookOpen size={15} />
+                            <input
+                                id="pr-department"
+                                value={department}
+                                onChange={(e) =>
+                                    dispatch({
+                                        type: "SET_FIELD",
+                                        field: "department",
+                                        value: e.target.value,
+                                    })
+                                }
+                                placeholder="e.g., Computer Science"
+                                className="field-input"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="field">
+                        <label className="field-label" htmlFor="pr-class">
+                            Class / year
+                        </label>
+                        <div className="pr-field">
+                            <GraduationCap size={15} />
+                            <input
+                                id="pr-class"
+                                value={studentClass}
+                                onChange={(e) =>
+                                    dispatch({
+                                        type: "SET_FIELD",
+                                        field: "studentClass",
+                                        value: e.target.value,
+                                    })
+                                }
+                                placeholder="e.g., 3rd Year"
+                                className="field-input"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="field full">
+                        <label className="field-label" htmlFor="pr-mobile">
+                            Mobile number
+                        </label>
+                        <div className="pr-field">
+                            <Phone size={15} />
+                            <input
+                                id="pr-mobile"
+                                value={mobileNumber}
+                                onChange={(e) =>
+                                    dispatch({
+                                        type: "SET_FIELD",
+                                        field: "mobileNumber",
+                                        value: e.target.value,
+                                    })
+                                }
+                                placeholder="+91 98765 43210"
+                                className="field-input"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {error && (
+                    <div className="alert alert-error alert-row" role="alert">
+                        <AlertCircle size={16} />
+                        <span>{error}</span>
+                    </div>
+                )}
+
+                {saveSuccess && (
+                    <m.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="alert alert-success alert-row"
+                        role="status"
+                    >
+                        <BadgeCheck size={16} />
+                        <span>Profile updated successfully!</span>
+                    </m.div>
+                )}
+
+                <div className="pr-actions">
+                    <button
+                        type="button"
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="button button-primary"
+                    >
+                        {saving ? (
+                            <>
+                                <Loader2 size={16} className="animate-spin" />
+                                Saving...
+                            </>
+                        ) : (
+                            <>
+                                <Save size={16} />
+                                Save changes
+                            </>
+                        )}
+                    </button>
                 </div>
             </m.div>
         </div>

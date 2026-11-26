@@ -1,11 +1,3 @@
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
-
 const universities = [
     // Featured
     { label: "Central University of Haryana", value: "cuh" },
@@ -51,7 +43,7 @@ const universities = [
     { label: "Shiv Nadar University", value: "snu" },
     { label: "Ashoka University", value: "ashoka" },
     { label: "Thapar Institute of Engineering", value: "thapar" },
-]
+];
 
 interface UniversitySelectorProps {
     value: string;
@@ -60,17 +52,19 @@ interface UniversitySelectorProps {
 
 export function UniversitySelector({ value, onChange }: UniversitySelectorProps) {
     return (
-        <Select value={value} onValueChange={onChange}>
-            <SelectTrigger className="w-full h-11 rounded-xl">
-                <SelectValue placeholder="Select university..." />
-            </SelectTrigger>
-            <SelectContent className="max-h-72">
-                {universities.map((uni) => (
-                    <SelectItem key={uni.value} value={uni.label}>
-                        {uni.label}
-                    </SelectItem>
-                ))}
-            </SelectContent>
-        </Select>
-    )
+        <select
+            id="university"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            aria-label="Select university"
+            className="field-input"
+        >
+            <option value="">Select university...</option>
+            {universities.map((uni) => (
+                <option key={uni.value} value={uni.label}>
+                    {uni.label}
+                </option>
+            ))}
+        </select>
+    );
 }

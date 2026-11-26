@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { m } from "motion/react";
 import {
-    Shield,
     ShieldCheck,
     ShieldX,
     Clock,
@@ -12,9 +11,8 @@ import {
     FileText,
     Sparkles,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
+import "./roles.css";
 
 interface RoleRequest {
     id: string;
@@ -22,6 +20,13 @@ interface RoleRequest {
     reason: string;
     createdAt: string;
 }
+
+const benefits = [
+    "Register and manage your own restaurants",
+    "Add menu items with pricing and descriptions",
+    "List accommodations near your campus",
+    "Dedicated superuser dashboard",
+];
 
 export function RequestRolePage() {
     const [requests, setRequests] = useState<RoleRequest[]>([]);
@@ -35,6 +40,7 @@ export function RequestRolePage() {
 
     useEffect(() => {
         fetchRequests();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const fetchRequests = async () => {
@@ -72,169 +78,166 @@ export function RequestRolePage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
-                <Loader2 className="w-8 h-8 animate-spin text-brand-orange" />
+            <div className="um-editorial um-roles">
+                <div className="rr-loading">
+                    <Loader2 size={20} className="animate-spin" />
+                    <span>Loading requests...</span>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-3xl mx-auto pb-12">
-            {/* Header */}
-            <div className="mb-8">
-                <m.h1
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-3xl sm:text-4xl font-black tracking-tight mb-2"
-                >
-                    <span className="text-brand-navy">BECOME A </span>
-                    <span className="bg-gradient-to-r from-brand-orange to-brand-yellow bg-clip-text text-transparent">
-                        SUPERUSER
-                    </span>
-                </m.h1>
-                <m.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className="text-muted-foreground"
-                >
-                    Request elevated privileges to manage restaurants and accommodations
-                </m.p>
-            </div>
+        <div className="um-editorial um-roles">
+            <div className="rr-wrap">
+                <header className="page-head">
+                    <div>
+                        <p className="section-label">
+                            <span>01</span>/ Superuser
+                        </p>
+                        <h1 className="page-title">
+                            Become a <span>superuser.</span>
+                        </h1>
+                        <p className="page-lead">
+                            Request elevated privileges to manage restaurants and accommodations.
+                        </p>
+                    </div>
+                </header>
 
-            {/* Benefits Card */}
-            <m.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
-                className="bg-gradient-to-br from-brand-navy via-brand-navy/95 to-brand-navy rounded-2xl p-6 mb-8 text-white"
-            >
-                <div className="flex items-center gap-2 mb-4">
-                    <Sparkles className="h-5 w-5 text-brand-yellow" />
-                    <h2 className="text-lg font-bold">Superuser Benefits</h2>
-                </div>
-                <ul className="space-y-2 text-white/80 text-sm">
-                    <li className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0" />
-                        Register and manage your own restaurants
-                    </li>
-                    <li className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0" />
-                        Add menu items with pricing and descriptions
-                    </li>
-                    <li className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0" />
-                        List accommodations near your campus
-                    </li>
-                    <li className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0" />
-                        Dedicated superuser dashboard
-                    </li>
-                </ul>
-            </m.div>
-
-            {/* Past Requests */}
-            {requests.length > 0 && (
                 <m.div
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="mb-8 space-y-3"
+                    transition={{ delay: 0.05 }}
+                    className="rr-benefits"
                 >
-                    <h2 className="text-lg font-bold text-brand-navy">Your Requests</h2>
-                    {requests.map((req) => (
-                        <div
-                            key={req.id}
-                            className="bg-background border border-border/50 rounded-xl p-4 flex items-center justify-between"
-                        >
-                            <div className="flex-1">
-                                <p className="text-sm text-muted-foreground line-clamp-1">{req.reason}</p>
-                                <p className="text-xs text-muted-foreground/70 mt-1 flex items-center gap-1">
-                                    <Clock className="h-3 w-3" />
-                                    {new Date(req.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-                                </p>
-                            </div>
-                            <span
-                                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${req.status === "pending"
-                                        ? "bg-yellow-100 text-yellow-800"
-                                        : req.status === "approved"
-                                            ? "bg-green-100 text-green-700"
-                                            : "bg-red-100 text-red-700"
-                                    }`}
-                            >
-                                {req.status === "pending" && <Clock className="h-3 w-3" />}
-                                {req.status === "approved" && <ShieldCheck className="h-3 w-3" />}
-                                {req.status === "rejected" && <ShieldX className="h-3 w-3" />}
-                                {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
-                            </span>
+                    <h2 className="rr-benefits-title">
+                        <Sparkles size={16} /> Superuser benefits
+                    </h2>
+                    {benefits.map((benefit) => (
+                        <div key={benefit} className="rr-benefit">
+                            <CheckCircle2 size={15} />
+                            <span>{benefit}</span>
                         </div>
                     ))}
                 </m.div>
-            )}
 
-            {/* Submit Form */}
-            {!hasPending && (
-                <m.form
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.25 }}
-                    onSubmit={handleSubmit}
-                    className="bg-background border border-border/50 rounded-2xl p-6 sm:p-8 space-y-6"
-                >
-                    <h2 className="text-lg font-bold text-brand-navy flex items-center gap-2">
-                        <FileText className="h-5 w-5" /> Submit Request
-                    </h2>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="reason">Why do you want to become a Superuser? *</Label>
-                        <textarea
-                            id="reason"
-                            value={reason}
-                            onChange={(e) => setReason(e.target.value)}
-                            placeholder="I run a restaurant near campus and would like to list it for students... (at least 10 characters)"
-                            className="w-full p-3 rounded-lg border border-input bg-background text-sm min-h-[120px] resize-y"
-                            required
-                        />
-                        <p className="text-xs text-muted-foreground">{reason.length} / 10 min characters</p>
-                    </div>
-
-                    {error && (
-                        <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 text-red-600 text-sm">
-                            <AlertCircle className="h-4 w-4" /> {error}
-                        </div>
-                    )}
-
-                    {success && (
-                        <m.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="flex items-center gap-2 p-3 rounded-lg bg-green-50 text-green-600 text-sm"
-                        >
-                            <CheckCircle2 className="h-4 w-4" /> Request submitted! An admin will review it soon.
-                        </m.div>
-                    )}
-
-                    <Button
-                        type="submit"
-                        disabled={submitting || reason.trim().length < 10}
-                        className="w-full py-6 rounded-xl bg-gradient-to-r from-brand-orange to-brand-yellow text-white font-bold hover:opacity-90"
+                {requests.length > 0 && (
+                    <m.div
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="rr-requests"
                     >
-                        {submitting ? (
-                            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...</>
-                        ) : (
-                            <><Send className="mr-2 h-4 w-4" /> Submit Request</>
-                        )}
-                    </Button>
-                </m.form>
-            )}
+                        <p className="rr-requests-head">Your requests</p>
 
-            {hasPending && !success && (
-                <div className="text-center py-8 bg-yellow-50 rounded-2xl border border-yellow-200">
-                    <Clock className="h-10 w-10 mx-auto text-yellow-500 mb-3" />
-                    <p className="font-medium text-yellow-800">Your request is pending review</p>
-                    <p className="text-sm text-yellow-600 mt-1">An admin will review your request soon.</p>
-                </div>
-            )}
+                        {requests.map((req) => (
+                            <div key={req.id} className="rr-request">
+                                <div className="rr-request-body">
+                                    <p className="rr-reason">{req.reason}</p>
+                                    <p className="rr-date">
+                                        <Clock size={11} />
+                                        {new Date(req.createdAt).toLocaleDateString("en-IN", {
+                                            day: "numeric",
+                                            month: "short",
+                                            year: "numeric",
+                                        })}
+                                    </p>
+                                </div>
+
+                                <span className={`rr-status ${req.status}`}>
+                                    {req.status === "pending" && <Clock size={11} />}
+                                    {req.status === "approved" && <ShieldCheck size={11} />}
+                                    {req.status === "rejected" && <ShieldX size={11} />}
+                                    {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+                                </span>
+                            </div>
+                        ))}
+                    </m.div>
+                )}
+
+                {!hasPending && (
+                    <m.form
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.15 }}
+                        onSubmit={handleSubmit}
+                        className="form-card"
+                    >
+                        <p className="rr-label">
+                            <FileText size={12} /> Submit request
+                        </p>
+
+                        <div className="form-stack">
+                            <div className="field">
+                                <label className="field-label" htmlFor="reason">
+                                    Why do you want to become a superuser? *
+                                </label>
+                                <textarea
+                                    id="reason"
+                                    value={reason}
+                                    onChange={(e) => setReason(e.target.value)}
+                                    placeholder="I run a restaurant near campus and would like to list it for students... (at least 10 characters)"
+                                    className="field-input"
+                                    style={{ minHeight: 120, resize: "vertical" }}
+                                    required
+                                />
+                                <p className="rr-counter">{reason.length} / 10 min characters</p>
+                            </div>
+
+                            {error && (
+                                <div className="alert alert-error alert-row" role="alert">
+                                    <AlertCircle size={16} />
+                                    <span>{error}</span>
+                                </div>
+                            )}
+
+                            {success && (
+                                <m.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="alert alert-success alert-row"
+                                    role="status"
+                                >
+                                    <CheckCircle2 size={16} />
+                                    <span>
+                                        Request submitted! An admin will review it soon.
+                                    </span>
+                                </m.div>
+                            )}
+                        </div>
+
+                        <div className="form-actions">
+                            <button
+                                type="submit"
+                                disabled={submitting || reason.trim().length < 10}
+                                className="button button-primary"
+                            >
+                                {submitting ? (
+                                    <>
+                                        <Loader2 size={16} className="animate-spin" />
+                                        Submitting...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Send size={16} />
+                                        Submit request
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </m.form>
+                )}
+
+                {hasPending && !success && (
+                    <div className="rr-notice">
+                        <Clock size={22} />
+                        <div>
+                            <strong>Your request is pending review</strong>
+                            <p>An admin will review your request soon.</p>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

@@ -1,15 +1,12 @@
 import { useState } from 'react';
 import { m } from 'motion/react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { UniversitySelector } from './components/UniversitySelector';
 import { api } from '@/lib/api';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { Loader2 } from 'lucide-react';
+import './onboarding.css';
 
 export function OnboardingPage() {
     const { user, loading: authLoading } = useAuth();
@@ -25,8 +22,10 @@ export function OnboardingPage() {
     // user object exists.
     if (authLoading) {
         return (
-            <div className="flex h-screen w-full items-center justify-center bg-gray-50 dark:bg-zinc-950">
-                <Loader2 className="w-8 h-8 animate-spin text-brand-orange" />
+            <div className="um-editorial um-onboarding">
+                <div className="ob-loading">
+                    <Loader2 size={20} className="animate-spin" />
+                </div>
             </div>
         );
     }
@@ -87,64 +86,86 @@ export function OnboardingPage() {
     };
 
     return (
-        <div className="flex h-screen w-full items-center justify-center bg-gray-50 dark:bg-zinc-950 p-4">
+        <div className="um-editorial um-onboarding">
             <m.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="w-full max-w-md"
+                className="ob-shell"
             >
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Welcome to Unimarky! 🎓</CardTitle>
-                        <CardDescription>
-                            Let's set up your profile to get started.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label>Select University</Label>
+                <div className="ob-card">
+                    <p className="section-label">
+                        <span>01</span>/ Welcome
+                    </p>
+                    <h1 className="ob-title">Set up your profile.</h1>
+                    <p className="ob-lead">
+                        A couple of details and you are ready for the campus.
+                    </p>
+
+                    <div className="form-stack">
+                        <div className="field">
+                            <label className="field-label" htmlFor="university">
+                                University
+                            </label>
                             <UniversitySelector value={university} onChange={setUniversity} />
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="mobile">Mobile Number</Label>
-                            <Input
+                        <div className="field">
+                            <label className="field-label" htmlFor="mobile">
+                                Mobile number
+                            </label>
+                            <input
                                 id="mobile"
                                 type="tel"
                                 inputMode="numeric"
                                 placeholder="10-digit mobile number"
                                 value={mobileNumber}
-                                onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                                onChange={(e) =>
+                                    setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))
+                                }
+                                className="field-input"
                             />
                         </div>
 
                         {isSocialLogin && (
-                            <div className="space-y-2">
-                                <Label htmlFor="password">Set a Password (optional)</Label>
-                                <Input
+                            <div className="field">
+                                <label className="field-label" htmlFor="password">
+                                    Set a password (optional)
+                                </label>
+                                <input
                                     id="password"
                                     type="password"
                                     placeholder="Min. 6 characters"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
+                                    className="field-input"
                                 />
-                                <p className="text-xs text-muted-foreground">
-                                    You signed in with {user.app_metadata?.provider}. Set a password if you also
-                                    want to log in with email.
+                                <p className="ob-note">
+                                    You signed in with {user.app_metadata?.provider}. Set a password
+                                    if you also want to log in with email.
                                 </p>
                             </div>
                         )}
+                    </div>
 
-                        <Button
-                            className="w-full mt-4"
+                    <div className="ob-actions">
+                        <button
+                            type="button"
                             onClick={handleSubmit}
                             disabled={!university || mobileNumber.length !== 10 || loading}
+                            className="button button-primary"
                         >
-                            {loading ? "Setting up..." : "Complete Setup"}
-                        </Button>
-                    </CardContent>
-                </Card>
+                            {loading ? (
+                                <>
+                                    <Loader2 size={16} className="animate-spin" />
+                                    Setting up...
+                                </>
+                            ) : (
+                                "Complete setup"
+                            )}
+                        </button>
+                    </div>
+                </div>
             </m.div>
         </div>
     );

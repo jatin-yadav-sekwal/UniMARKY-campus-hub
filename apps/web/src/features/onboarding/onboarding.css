@@ -1,0 +1,70 @@
+/* ===========================================================================
+   Onboarding — editorial pass. Scoped to .um-onboarding.
+   =========================================================================== */
+
+.um-editorial.um-onboarding {
+  background: transparent;
+  min-height: 100%;
+}
+
+.um-onboarding .ob-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: #8f8b83;
+}
+
+.um-onboarding .ob-shell {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 60px 0 80px;
+}
+
+.um-onboarding .ob-card {
+  border: 1px solid #e8e6e1;
+  border-top: 2px solid #3157d5;
+  background: #fff;
+  padding: 30px 28px;
+}
+
+.um-onboarding .ob-title {
+  margin: 12px 0 8px;
+  font: 400 clamp(26px, 3vw, 32px)/1.15 'Space Grotesk', sans-serif;
+  letter-spacing: -.045em;
+  color: #24231f;
+}
+
+.um-onboarding .ob-lead {
+  margin: 0 0 26px;
+  color: #66625c;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.um-onboarding .ob-note {
+  margin: 0;
+  color: #8f8b83;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.um-onboarding .ob-actions {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(67, 63, 56, .16);
+}
+
+.um-onboarding .ob-actions .button {
+  width: 100%;
+}
+
+@media (max-width: 620px) {
+  .um-onboarding .ob-shell {
+    padding: 36px 0 56px;
+  }
+
+  .um-onboarding .ob-card {
+    padding: 22px 18px;
+  }
+}

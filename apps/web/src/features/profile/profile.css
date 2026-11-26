@@ -1,0 +1,191 @@
+/* ===========================================================================
+   Profile — editorial pass. Scoped to .um-profile.
+   =========================================================================== */
+
+.um-editorial.um-profile {
+  background: transparent;
+}
+
+.um-profile .pr-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 80px 0;
+  color: #66625c;
+  font-size: 14px;
+}
+
+.um-profile .pr-hero {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  border: 1px solid #e8e6e1;
+  border-top: 2px solid #3157d5;
+  background: #fff;
+  padding: 24px;
+  margin-bottom: 26px;
+}
+
+.um-profile .pr-avatar {
+  position: relative;
+  width: 92px;
+  height: 92px;
+  flex: none;
+  overflow: hidden;
+  border: 1px solid #e8e6e1;
+  background: #f5f4f1;
+  color: #3157d5;
+  font: 500 34px 'Space Grotesk', sans-serif;
+  display: grid;
+  place-items: center;
+}
+
+.um-profile .pr-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.um-profile .pr-avatar-pick {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(36, 35, 31, .48);
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+
+.um-profile .pr-avatar:hover .pr-avatar-pick,
+.um-profile .pr-avatar-pick:focus-within {
+  opacity: 1;
+}
+
+.um-profile .pr-id {
+  min-width: 0;
+}
+
+.um-profile .pr-name {
+  margin: 0 0 6px;
+  font: 400 clamp(24px, 2.6vw, 32px)/1.15 'Space Grotesk', sans-serif;
+  letter-spacing: -.04em;
+  color: #24231f;
+}
+
+.um-profile .pr-university {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: #66625c;
+  font-size: 13px;
+}
+
+.um-profile .pr-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 12px;
+  padding: 3px 8px;
+  border: 1px solid rgba(31, 138, 99, .4);
+  color: #1f8a63;
+  font: 400 9px 'DM Mono', monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.um-profile .pr-panel {
+  border: 1px solid #e8e6e1;
+  background: #fff;
+  padding: 26px;
+  margin-bottom: 20px;
+}
+
+.um-profile .pr-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 20px;
+  color: #55514c;
+  font: 400 9px 'DM Mono', monospace;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.um-profile .pr-label svg {
+  color: #3157d5;
+}
+
+.um-profile .pr-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.um-profile .pr-grid .full {
+  grid-column: 1 / -1;
+}
+
+.um-profile .pr-field {
+  position: relative;
+}
+
+.um-profile .pr-field svg {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a09c94;
+  pointer-events: none;
+}
+
+.um-profile .pr-field .field-input {
+  padding-left: 38px;
+}
+
+.um-profile .pr-field .field-input:disabled {
+  background: #f7f6f3;
+  color: #8f8b83;
+  cursor: not-allowed;
+}
+
+.um-profile .pr-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 18px 0 0;
+  color: #8f8b83;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.um-profile .pr-note svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.um-profile .pr-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(67, 63, 56, .16);
+}
+
+@media (max-width: 620px) {
+  .um-profile .pr-hero {
+    padding: 18px;
+  }
+
+  .um-profile .pr-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .um-profile .pr-panel {
+    padding: 18px;
+  }
+}
