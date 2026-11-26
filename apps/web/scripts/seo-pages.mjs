@@ -62,6 +62,56 @@ const escapeHtml = (value) =>
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;');
 
+const faqs = [
+  {
+    q: 'What can I do on Unimarky?',
+    a: 'Marketplace, communities, study material, accommodation, food and lost & found — one student account for all six, scoped to your university.',
+  },
+  {
+    q: 'Who can use it?',
+    a: 'Students. Create an account, then pick your university during onboarding; that choice sets which listings, communities and resources you see.',
+  },
+  {
+    q: 'Do I need an account to browse?',
+    a: 'Yes. Every service sits behind the same student account, so you sign up once and move between them without signing in again.',
+  },
+  {
+    q: 'How do I sell something?',
+    a: "Open Marketplace and choose List an item. Add a title, price, description and photos; the listing then appears in your university's marketplace for other students to find.",
+  },
+  {
+    q: 'How do I contact a seller or host?',
+    a: 'Each listing has a contact section. If the seller or host shared a phone number, it is shown there so you can reach them directly.',
+  },
+  {
+    q: 'How do I get help?',
+    a: 'Use the Contact page to reach the team. Include the page you were on and what went wrong so we can look into it.',
+  },
+];
+
+function structuredData(path, page) {
+  if (path === '/') {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqs.map(({ q, a }) => ({
+        '@type': 'Question',
+        name: q,
+        acceptedAnswer: { '@type': 'Answer', text: a },
+      })),
+    };
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${baseUrl}/` },
+      { '@type': 'ListItem', position: 2, name: page.heading, item: `${baseUrl}${path}` },
+    ],
+  };
+}
+
 function replaceContent(html, pattern, replacement) {
   return html.replace(pattern, replacement);
 }
@@ -113,6 +163,12 @@ function pageHtml(template, path, page) {
       '  <meta name="robots" content="index, follow">\n</head>'
     );
   }
+
+  const schema = JSON.stringify(structuredData(path, page)).replaceAll('<', '\\u003c');
+  out = out.replace(
+    '</head>',
+    `  <script type="application/ld+json">${schema}</script>\n</head>`
+  );
 
   // Accurate no-JS fallback. This is not hidden text: it is the same page
   // summary and navigation, shown only when the SPA cannot run.

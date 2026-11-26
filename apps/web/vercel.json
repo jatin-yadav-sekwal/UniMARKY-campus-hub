@@ -4,26 +4,53 @@
             "source": "/api/:path*",
             "destination": "https://unimarky-campus-hub.onrender.com/api/:path*"
         },
-        {
-            "source": "/about",
-            "destination": "/about.html"
-        },
-        {
-            "source": "/contact",
-            "destination": "/contact.html"
-        },
-        {
-            "source": "/terms",
-            "destination": "/terms.html"
-        },
-        {
-            "source": "/privacy",
-            "destination": "/privacy.html"
-        },
-        {
-            "source": "/(.*)",
-            "destination": "/index.html"
-        }
+        { "source": "/about", "destination": "/about.html" },
+        { "source": "/contact", "destination": "/contact.html" },
+        { "source": "/terms", "destination": "/terms.html" },
+        { "source": "/privacy", "destination": "/privacy.html" },
+
+        { "source": "/", "destination": "/index.html" },
+        { "source": "/auth", "destination": "/index.html" },
+        { "source": "/forgot-password", "destination": "/index.html" },
+        { "source": "/reset-password", "destination": "/index.html" },
+        { "source": "/onboarding", "destination": "/index.html" },
+        { "source": "/dashboard", "destination": "/index.html" },
+        { "source": "/profile", "destination": "/index.html" },
+
+        { "source": "/marketplace/my-listings", "destination": "/index.html" },
+        { "source": "/marketplace/list", "destination": "/index.html" },
+        { "source": "/marketplace/edit/:id", "destination": "/index.html" },
+        { "source": "/marketplace", "destination": "/index.html" },
+        { "source": "/marketplace/:id", "destination": "/index.html" },
+
+        { "source": "/lost-found/my-listings", "destination": "/index.html" },
+        { "source": "/lost-found/report", "destination": "/index.html" },
+        { "source": "/lost-found/edit/:id", "destination": "/index.html" },
+        { "source": "/lost-found", "destination": "/index.html" },
+        { "source": "/lost-found/:id", "destination": "/index.html" },
+
+        { "source": "/food/menu/:id", "destination": "/index.html" },
+        { "source": "/food", "destination": "/index.html" },
+        { "source": "/food/:id", "destination": "/index.html" },
+
+        { "source": "/housing", "destination": "/index.html" },
+        { "source": "/housing/:id", "destination": "/index.html" },
+
+        { "source": "/study", "destination": "/index.html" },
+        { "source": "/communities/new", "destination": "/index.html" },
+        { "source": "/communities/:id/manage", "destination": "/index.html" },
+        { "source": "/communities", "destination": "/index.html" },
+        { "source": "/communities/:id", "destination": "/index.html" },
+
+        { "source": "/request-role", "destination": "/index.html" },
+        { "source": "/superuser/dashboard", "destination": "/index.html" },
+        { "source": "/superuser/add-restaurant", "destination": "/index.html" },
+        { "source": "/superuser/edit-restaurant/:id", "destination": "/index.html" },
+        { "source": "/superuser/add-menu/:restaurantId", "destination": "/index.html" },
+        { "source": "/superuser/add-accommodation", "destination": "/index.html" },
+        { "source": "/superuser/edit-accommodation/:id", "destination": "/index.html" },
+        { "source": "/superuser/add-study-material", "destination": "/index.html" },
+        { "source": "/admin/dashboard", "destination": "/index.html" }
     ],
     "headers": [
         {
@@ -38,6 +65,24 @@
                     "key": "Content-Security-Policy",
                     "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
                 }
+            ]
+        },
+        {
+            "source": "/assets/(.*)",
+            "headers": [
+                { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+            ]
+        },
+        {
+            "source": "/og-image.png",
+            "headers": [
+                { "key": "Cache-Control", "value": "public, max-age=604800" }
+            ]
+        },
+        {
+            "source": "/llms.txt",
+            "headers": [
+                { "key": "Cache-Control", "value": "public, max-age=86400" }
             ]
         }
     ]
