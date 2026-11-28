@@ -7,3 +7,7 @@ node_modules
 flutter-sdk/
 .idea
 dist
+
+# Removed apps (preserved outside the repo)
+apps/mobile
+apps/lynx-app

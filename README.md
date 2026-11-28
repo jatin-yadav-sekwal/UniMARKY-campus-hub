@@ -57,7 +57,7 @@
 ## 📁 Project Structure
 
 ```
-unmarky/
+unimarky/
 ├── apps/
 │   ├── api/                    # Backend API server
 │   │   ├── server/
@@ -74,25 +74,34 @@ unmarky/
 │   │   │   │   ├── study.ts        # Study materials
 │   │   │   │   ├── profiles.ts     # User profiles
 │   │   │   │   ├── dashboard.ts    # Dashboard stats
+│   │   │   │   ├── communities.ts  # Communities, members & posts
+│   │   │   │   ├── account.ts      # Account deletion
 │   │   │   │   └── roleRequests.ts # Role management
 │   │   │   ├── middleware/
 │   │   │   │   ├── auth.ts         # JWT auth + onboarding gate
 │   │   │   │   ├── policies.ts     # isAdmin / canModify / hasPermission
-│   │   │   │   └── permission.ts   # requireAdmin / requirePermission
+│   │   │   │   ├── permission.ts   # requireAdmin / requirePermission
+│   │   │   │   ├── rateLimit.ts    # request rate limiting
+│   │   │   │   └── requestLog.ts   # structured request logs
 │   │   │   └── index.ts       # Server entry point
 │   │   └── drizzle/            # Generated migrations
 │   │
 │   └── web/                    # Frontend SPA
 │       └── src/
 │           ├── components/
-│           │   ├── layout/     # Navbar, Footer, Sidebar, MainLayout
+│           │   ├── layout/     # MainLayout, Sidebar, ProtectedRoute, PageLoader
+│           │   ├── seo/        # per-route metadata
+│           │   ├── legal/      # cookie consent
 │           │   ├── ui/         # shadcn/ui primitives
 │           │   └── auth/       # Auth form components
 │           ├── features/
+│           │   ├── auth/       # Sign in, password reset
 │           │   ├── campus/     # Lost & Found (legacy feed is archived)
+│           │   ├── communities/ # Communities, members & posts
 │           │   ├── marketplace/ # Marketplace pages
 │           │   ├── lifestyle/  # Food & Housing pages
 │           │   ├── landing/    # Landing page
+│           │   ├── public/     # About, Contact, Terms, Privacy
 │           │   ├── dashboard/  # Dashboard
 │           │   ├── superuser/  # Superuser management pages
 │           │   ├── admin/      # Admin dashboard
@@ -102,6 +111,8 @@ unmarky/
 │           ├── hooks/          # Custom React hooks
 │           ├── lib/            # API client, Supabase config, utils
 │           └── App.tsx         # Routes & app entry
+├── docs/                       # Design, branding and migration notes
+├── project/                    # Original v0 design reference (not deployed)
 └── package.json
 ```
 
