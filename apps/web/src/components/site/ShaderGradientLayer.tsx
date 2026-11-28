@@ -1,9 +1,9 @@
 import { ShaderGradient, ShaderGradientCanvas } from "@shadergradient/react";
 
 /**
- * Lazy WebGL gradient in the brand's warm palette. `animate="off"` keeps it
- * still: the editorial layout is calm and a static shader avoids continuous
- * GPU work. The CSS atmosphere remains underneath as the fallback.
+ * Lazy WebGL gradient in the brand's warm palette. The animation is slow and
+ * the grain is light; the Atmosphere gate skips the whole shader for users who
+ * prefer reduced motion. The CSS atmosphere remains underneath as the fallback.
  */
 export default function ShaderGradientLayer() {
   return (
@@ -19,14 +19,14 @@ export default function ShaderGradientLayer() {
       <ShaderGradient
         control="props"
         type="plane"
-        animate="off"
+        animate="on"
         color1="#f6a02c"
         color2="#f472b6"
         color3="#8b5cf6"
         uAmplitude={0.75}
         uDensity={1.05}
         uFrequency={3.8}
-        uSpeed={0.05}
+        uSpeed={0.12}
         uStrength={1.8}
         brightness={1.05}
         cAzimuthAngle={180}
@@ -39,7 +39,8 @@ export default function ShaderGradientLayer() {
         rotationX={0}
         rotationY={0}
         rotationZ={16}
-        grain="off"
+        grain="on"
+        grainBlending={0.12}
         lightType="3d"
         envPreset="city"
         reflection={0.08}
