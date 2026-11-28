@@ -19,6 +19,7 @@ import {
   Users,
 } from "lucide-react";
 import brandMark from "@/assets/brand-mark.svg";
+import { Atmosphere } from "@/components/site/Atmosphere";
 import { useAuth } from "@/hooks/useAuth";
 import { SiteFooter } from "./SiteFooter";
 import { SiteNavigation } from "./SiteNavigation";
@@ -207,10 +208,7 @@ export function LandingPage() {
 
   return (
     <div className="um-landing">
-      <div className="atmosphere" aria-hidden="true">
-        <div className="atmosphere-diffusion" />
-        <div className="atmosphere-fade" />
-      </div>
+      <Atmosphere />
 
       <div className="um-landing-content">
         <SiteNavigation />
