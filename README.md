@@ -1,269 +1,122 @@
-<p align="center">
-  <h1 align="center">🎓 Unimarky — Campus Hub</h1>
-  <p align="center">
-    <strong>The all-in-one platform for Indian university students</strong><br/>
-    Social feed · Marketplace · Lost & Found · Food · Housing · Study Materials
-  </p>
-</p>
+# UniMARKY
 
-<p align="center">
-  <img src="https://img.shields.io/badge/React_19-61DAFB?style=flat-square&logo=react&logoColor=black" />
-  <img src="https://img.shields.io/badge/Vite_7-646CFF?style=flat-square&logo=vite&logoColor=white" />
-  <img src="https://img.shields.io/badge/Hono-E36002?style=flat-square&logo=hono&logoColor=white" />
-  <img src="https://img.shields.io/badge/Supabase-3FCF8E?style=flat-square&logo=supabase&logoColor=white" />
-  <img src="https://img.shields.io/badge/Drizzle_ORM-C5F74F?style=flat-square&logo=drizzle&logoColor=black" />
-  <img src="https://img.shields.io/badge/TailwindCSS_4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" />
-</p>
+**One student account for campus life.**
+
+UniMARKY is a campus platform for university students. It brings the useful parts of student life into one place — a marketplace, communities, study material, accommodation, food and lost & found — scoped to the student's university.
+
+Most campus activity is scattered across WhatsApp groups, notice boards, spreadsheets and random social posts. UniMARKY gives each campus one verified student account and one place to buy, sell, join, study, find a stay, eat and recover lost items.
 
 ---
 
-## ✨ Features
+## The problem
 
-| Module | Description |
-|--------|-------------|
-| **🛒 Marketplace** | Buy and sell items within your university — textbooks, electronics, furniture, and more. |
-| **🔍 Lost & Found** | Report and discover lost or found items on campus with image uploads and status tracking. |
-| **🍔 Food** | Browse nearby restaurants, view menus with prices, ratings, and dietary tags. |
-| **🏠 Housing** | Explore PGs, hostels, and hotels near campus — with amenities, pricing, and reviews. |
-| **📚 Study Materials** | Share and access notes, past papers, and resources for your courses. |
-| **👤 Profiles** | User profiles with university verification, role requests, and onboarding flow. |
+- Marketplace posts disappear in group chats; there is no search, no price history and no way to know who is real.
+- Clubs and batches live in unrelated groups, so new students miss them.
+- Notes and previous-year papers are passed around as blurry PDFs.
+- PGs and flats are found through brokers or word of mouth.
+- Campus food menus are photos on a wall.
+- Lost items are posted in five different groups.
 
-> The legacy Unimedia feed and Announcements page are retired. Their endpoints
-> now return `410 Gone` for writes and serve the old content read-only as an
-> archive.
+## The product
 
----
+| For students | What it does |
+|---|---|
+| **Marketplace** | Buy and sell textbooks, electronics, cycles and hostel gear with students at the same university. |
+| **Communities** | Join clubs, batches and campus events, post updates and talk in threads. |
+| **Study** | Find notes, previous-year papers and resources by department, year and subject. |
+| **Accommodation** | Compare PGs, hostels and flats near campus — rent, amenities, distance and contact. |
+| **Food** | Browse campus restaurants, menus, prices, ratings and student favourites. |
+| **Lost & Found** | Report a lost item or return something found, with photos and locations. |
+| **Profile & roles** | One account, university onboarding, role requests and account deletion. |
 
-## 🏗️ Tech Stack
+| For community leads | For campus admins |
+|---|---|
+| Create and manage a community, moderate posts and members, and publish updates. | Approve role requests, manage listings, review reports and keep the campus directory accurate. |
 
-### Frontend (`apps/web`)
-- **React 19** + **Vite 7** — blazing-fast SPA
-- **TailwindCSS v4** — utility-first styling with glassmorphism theme
-- **Framer Motion** — smooth animations and page transitions
-- **shadcn/ui** + **Radix UI** — accessible component primitives
-- **Supabase Auth** — Google OAuth + email/password authentication
-- **React Router v7** — client-side routing with lazy loading
+## How it works
 
-### Backend (`apps/api`)
-- **Hono** — ultra-fast web framework on Node (`@hono/node-server`, run with `tsx`)
-- **Drizzle ORM** — type-safe SQL with PostgreSQL
-- **Supabase** — hosted PostgreSQL database + Auth + Storage
-- **Zod** — request validation
-- **JWT** — Supabase JWKS-based authentication middleware
-- **Policy layer** — scoped permissions (`user_permissions`) + admin (`userX`) checks, with an `audit_log` trail
+1. **Create an account** with email or Google.
+2. **Pick your university** during onboarding — every listing, community and resource is scoped to it.
+3. **Use the six services** from one dashboard.
 
----
+Everyone on the platform is a signed-in student at a university. Listings and communities stay inside that campus.
 
-## 📁 Project Structure
+## Product tour
 
-```
-unimarky/
-├── apps/
-│   ├── api/                    # Backend API server
-│   │   ├── server/
-│   │   │   ├── db/
-│   │   │   │   ├── schema.ts   # Drizzle database schema
-│   │   │   │   ├── seed.ts     # Sample data seeder
-│   │   │   │   └── index.ts    # DB connection
-│   │   │   ├── routes/         # API route handlers
-│   │   │   │   ├── social.ts       # Unimedia feed & posts
-│   │   │   │   ├── marketplace.ts  # Buy/sell items
-│   │   │   │   ├── lostfound.ts    # Lost & found
-│   │   │   │   ├── food.ts         # Restaurants & menus
-│   │   │   │   ├── accommodation.ts # Housing
-│   │   │   │   ├── study.ts        # Study materials
-│   │   │   │   ├── profiles.ts     # User profiles
-│   │   │   │   ├── dashboard.ts    # Dashboard stats
-│   │   │   │   ├── communities.ts  # Communities, members & posts
-│   │   │   │   ├── account.ts      # Account deletion
-│   │   │   │   └── roleRequests.ts # Role management
-│   │   │   ├── middleware/
-│   │   │   │   ├── auth.ts         # JWT auth + onboarding gate
-│   │   │   │   ├── policies.ts     # isAdmin / canModify / hasPermission
-│   │   │   │   ├── permission.ts   # requireAdmin / requirePermission
-│   │   │   │   ├── rateLimit.ts    # request rate limiting
-│   │   │   │   └── requestLog.ts   # structured request logs
-│   │   │   └── index.ts       # Server entry point
-│   │   └── drizzle/            # Generated migrations
-│   │
-│   └── web/                    # Frontend SPA
-│       └── src/
-│           ├── components/
-│           │   ├── layout/     # MainLayout, Sidebar, ProtectedRoute, PageLoader
-│           │   ├── seo/        # per-route metadata
-│           │   ├── legal/      # cookie consent
-│           │   ├── ui/         # shadcn/ui primitives
-│           │   └── auth/       # Auth form components
-│           ├── features/
-│           │   ├── auth/       # Sign in, password reset
-│           │   ├── campus/     # Lost & Found (legacy feed is archived)
-│           │   ├── communities/ # Communities, members & posts
-│           │   ├── marketplace/ # Marketplace pages
-│           │   ├── lifestyle/  # Food & Housing pages
-│           │   ├── landing/    # Landing page
-│           │   ├── public/     # About, Contact, Terms, Privacy
-│           │   ├── dashboard/  # Dashboard
-│           │   ├── superuser/  # Superuser management pages
-│           │   ├── admin/      # Admin dashboard
-│           │   ├── profile/    # User profile page
-│           │   ├── study/      # Study materials
-│           │   └── onboarding/ # User onboarding flow
-│           ├── hooks/          # Custom React hooks
-│           ├── lib/            # API client, Supabase config, utils
-│           └── App.tsx         # Routes & app entry
-├── docs/                       # Design, branding and migration notes
-├── project/                    # Original v0 design reference (not deployed)
-└── package.json
-```
+- `/` — public landing page with the six services and FAQs.
+- `/auth` — sign in, sign up, password reset.
+- `/onboarding` — choose a university and complete the profile.
+- `/dashboard` — activity summary and shortcuts.
+- `/marketplace` — browse, list, edit and contact sellers.
+- `/communities` — discover, join, post and manage communities.
+- `/study`, `/housing`, `/food`, `/lost-found` — the other campus services.
+- `/profile` — account details, avatar and account deletion.
+- `/admin` / `/superuser` — role-specific management.
 
----
+Public pages (`/about`, `/contact`, `/terms`, `/privacy`, `/universities`) explain the product and are indexable; the workspace is private.
 
-## 🚀 Getting Started
+## Who it is for
 
-### Prerequisites
-- **Node.js** (v18+) and npm (the API is a Node service — there is no Flutter app)
-- **PostgreSQL** database (or a [Supabase](https://supabase.com) project)
+College and university students in India first, with support for multiple campuses (Central University of Haryana, MIT, BHU, IIT Bombay are configured). The model is deliberately campus-scoped: verified students, local inventory, local communities.
 
-### 1. Clone the repo
-```bash
-git clone https://github.com/jatin-yadav-sekwal/UniMARKY-campus-hub.git
-cd UniMARKY-campus-hub
-```
+## Status
 
-### 2. Install dependencies (from the repo root)
-This is an npm workspaces monorepo — one install covers both web and API.
+Working MVP with:
+
+- email/password + Google authentication, onboarding and role requests;
+- all six student services end-to-end;
+- community membership, posts and moderation;
+- superuser and admin dashboards;
+- account deletion, password reset and cookie consent;
+- automated API tests and CI.
+
+The product is under active development. See [docs/README.md](docs/README.md) for the full documentation set.
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Web | React 19, Vite 7, TypeScript, React Router 7 |
+| UI | Tailwind CSS 4, Radix/shadcn primitives, Motion |
+| API | Hono 4 on Node, TypeScript, Zod |
+| Data | PostgreSQL (Supabase), Drizzle ORM |
+| Auth & storage | Supabase Auth (email + Google), Supabase Storage |
+| Hosting | Vercel (web), Render (API), Supabase (data) |
+
+## Documentation
+
+| Document | What it covers |
+|---|---|
+| [SRS](docs/srs.md) | Scope, actors, functional and non-functional requirements |
+| [Architecture](docs/architecture.md) | System context, containers, flows and decisions |
+| [Database schema](docs/database-schema.md) | Tables, relationships, indexes and RLS |
+| [API guide](docs/api.md) | Endpoints, auth and examples |
+| [OpenAPI spec](docs/openapi.yaml) | Machine-readable API contract |
+| [Wireframes](docs/wireframes.md) | Screen layouts and design system |
+| [Deployment guide](docs/deployment.md) | Supabase, Render, Vercel and CI |
+| [Test plan](docs/test-plan.md) | Automated and manual test cases |
+| [Security](docs/security.md) | Controls, threat model and roadmap |
+| [User manual](docs/user-manual.md) | Step-by-step guide for students and admins |
+| [Design system](design.md) | Visual language and migration notes |
+
+## Local quick start
+
 ```bash
 npm install
-```
-
-### 3. Configure the backend (`apps/api/.env`)
-```bash
 cp apps/api/.env.example apps/api/.env
-# Fill in DATABASE_URL and SUPABASE_URL
-```
-- `DATABASE_URL` — Supabase Postgres. Runtime may use the pooled URL (port `6543`).
-- `SUPABASE_URL` — project URL; the API derives the JWKS endpoint from it.
-
-### 4. Run database migrations
-```bash
-# Point DATABASE_URL at the DIRECT connection (port 5432) first.
-# Collapse duplicate post_likes so the new unique index applies:
-psql "$DATABASE_URL" -f apps/api/scripts/pre-migrate.sql
-
-npm run db:generate
-npm run db:migrate
-# Lock down RLS + the auth trigger (idempotent):
-psql "$DATABASE_URL" -f apps/api/scripts/security-hardening.sql
-npm run db:seed --workspace api   # Optional: sample data
-```
-
-**Storage.** Community post images upload to the public `post-images` bucket.
-Create it in Supabase → Storage (public bucket, authenticated INSERT).
-
-### 5. Configure the frontend (`apps/web/.env`)
-```bash
 cp apps/web/.env.example apps/web/.env
-# VITE_API_URL=/api                       # same-origin; Vite proxies to :3000 in dev
-# VITE_SUPABASE_URL=your_supabase_url
-# VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-# VITE_WEB_URL=http://localhost:5173
+npm run dev:api      # http://localhost:3000
+npm run dev:web      # http://localhost:5173
 ```
 
-### 6. Start development servers
-```bash
-# Terminal 1 — Backend  → http://localhost:3000
-npm run dev:api
+Fill in the Supabase values first. Full setup, migrations and storage buckets are in the [deployment guide](docs/deployment.md).
 
-# Terminal 2 — Frontend → http://localhost:5173
-npm run dev:web
-```
+## Contact
 
----
+- Product: [unimarky.runs-on.dev](https://unimarky.runs-on.dev)
+- Instagram: [@unimarky](https://www.instagram.com/unimarky/)
+- Support: use the in-app Contact page or the email on the contact page.
 
-## 🔐 Environment Variables
+## License
 
-### Backend (`apps/api/.env`)
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | PostgreSQL connection string (pooled `6543` at runtime; direct `5432` for migrations) |
-| `SUPABASE_URL` | Supabase project URL — used to fetch the JWKS for token verification |
-| `PORT` | Server port (default: `3000`; Render sets this) |
-| `CORS_ORIGINS` | Comma-separated origins allowed to call the API directly (not needed for the same-origin `/api` rewrite) |
-| `CORS_ORIGIN_PATTERNS` | Optional wildcard origins for previews, e.g. `https://*.vercel.app` (`*` matches any characters) |
-| `WEB_URL` | Optional single trusted web origin (alias for one `CORS_ORIGINS` entry) |
-
-### Frontend (`apps/web/.env`)
-| Variable | Description |
-|----------|-------------|
-| `VITE_API_URL` | API base. Use `/api` (same-origin via the Vercel rewrite / Vite dev proxy) |
-| `VITE_SUPABASE_URL` | Supabase project URL |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous key |
-| `VITE_WEB_URL` | Optional canonical web origin (documentation only; auth redirects use the current origin) |
-
----
-
-## 👥 User Roles
-
-| Role | Access |
-|------|--------|
-| **Normal** | Access all features, create posts, buy/sell, report items |
-| **Superuser** | Add/edit restaurants, accommodations, study materials |
-| **UserX (Admin)** | Full admin dashboard, manage role requests, moderate content |
-
----
-
-## 🌐 Deployment
-
-| Layer | Platform |
-|-------|----------|
-| Frontend | [Vercel](https://vercel.com) — static SPA |
-| Backend | [Render](https://render.com) — Node web service |
-| Database | [Supabase](https://supabase.com) |
-
-**Frontend (Vercel).** `apps/web/vercel.json` rewrites `/api/:path*` to the
-Render API and falls back to `index.html` for the SPA. The browser therefore
-talks to a single origin and CORS is not exercised. Set the `VITE_*` variables
-in the Vercel project.
-
-**Backend (Render).** `render.yaml` at the repo root defines the service:
-root install, `npm run start --workspace api`, health check `/healthz`. Set
-`DATABASE_URL`, `SUPABASE_URL` and (optionally) `CORS_ORIGINS` in the Render
-dashboard.
-
-**Migrations.** Run `apps/api/scripts/pre-migrate.sql` once against the direct
-`DATABASE_URL`, then `npm run db:migrate` before deploying. Finally apply the
-idempotent `apps/api/scripts/security-hardening.sql` (RLS + auth trigger) and,
-optionally, `apps/api/scripts/optional-indexes.sql` (pg_trgm fuzzy search).
-
-**CI/CD (GitHub Actions).** `.github/workflows/ci.yml` runs on every pull
-request and push to `main`: `npm ci`, typecheck, tests and the web build.
-`.github/workflows/deploy.yml` runs once CI succeeds on `main` and smoke-tests
-the deployed API (`/healthz` plus an unauthenticated `401` on a protected
-route). Render and Vercel both build from Git:
-
-- **Render** uses `autoDeployTrigger: checksPass`, so the API only ships a
-  commit whose CI check is green, and `buildFilter` skips rebuilds when nothing
-  under `apps/api/**` changed.
-- **Vercel** deploys the SPA on push; a failing `vite build` blocks the deploy.
-
-Add branch protection on `main` (require the **CI / verify** check) to keep
-unverified commits out of production.
-
-**Auth branding (Google sign-in).** The account chooser currently shows the
-Supabase project ref (`bmoxstzvmzzvxbnuqntz.supabase.co`) because the project
-uses Supabase's shared Google OAuth client. Fix it by adding your own Google
-OAuth credentials and setting the consent-screen app name to **UniMARKY** —
-step-by-step in [`docs/auth-branding.md`](docs/auth-branding.md). That doc also
-covers the Site URL / redirect allow-list used by confirmation emails.
-
----
-
-## 📄 License
-
-This project is open-source and available under the [MIT License](LICENSE).
-
----
-
-<p align="center">
-  Built with ❤️ for Indian university students
-</p>
+Built as a minor project. Add the license you intend to use before distributing the code.

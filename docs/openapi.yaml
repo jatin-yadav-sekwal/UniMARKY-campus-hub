@@ -1,0 +1,1077 @@
+openapi: 3.0.3
+info:
+  title: UniMARKY API
+  version: 1.0.0
+  description: |
+    Campus platform API for UniMARKY. All /api routes require a Supabase access
+    token. Data is scoped to the signed-in user's university. Auth (sign-up,
+    sign-in, OAuth, password reset) is handled by the Supabase JS SDK.
+
+    This spec covers the core surface. See docs/api.md for the complete route list.
+  contact:
+    name: UniMARKY
+    url: https://unimarky.runs-on.dev
+servers:
+  - url: https://unimarky-campus-hub.onrender.com
+    description: Production
+  - url: http://localhost:3000
+    description: Local
+security:
+  - bearerAuth: []
+tags:
+  - name: Health
+  - name: Profiles
+  - name: Marketplace
+  - name: Lost & Found
+  - name: Food
+  - name: Accommodation
+  - name: Study
+  - name: Communities
+  - name: Dashboard
+  - name: Roles
+  - name: Account
+
+paths:
+  /healthz:
+    get:
+      tags: [Health]
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+
+  /api/profiles/me:
+    get:
+      tags: [Profiles]
+      summary: Current profile and onboarding state
+      responses:
+        "200":
+          description: Profile (always 200 for a valid token)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    patch:
+      tags: [Profiles]
+      summary: Update your profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/profiles/onboarding:
+    patch:
+      tags: [Profiles]
+      summary: Complete onboarding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [universityName, mobileNumber]
+              properties:
+                universityName:
+                  type: string
+                  example: Central University of Haryana
+                mobileNumber:
+                  type: string
+                  pattern: "^[0-9]{10}$"
+                  example: "9876543210"
+                fullName:
+                  type: string
+      responses:
+        "200":
+          description: Profile saved and marked onboarded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/marketplace:
+    get:
+      tags: [Marketplace]
+      summary: List marketplace items for your university
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [all, textbooks, electronics, dorm-decor, fashion, services, fitness]
+      responses:
+        "200":
+          description: Paginated listings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MarketplaceItem"
+                  hasMore:
+                    type: boolean
+                  total:
+                    type: integer
+    post:
+      tags: [Marketplace]
+      summary: Create a listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarketplaceItemInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketplaceItem"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/marketplace/my-listings:
+    get:
+      tags: [Marketplace]
+      summary: Your listings
+      responses:
+        "200":
+          description: Your listings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MarketplaceItem"
+
+  /api/marketplace/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Marketplace]
+      summary: Item detail
+      responses:
+        "200":
+          description: Item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketplaceItem"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      tags: [Marketplace]
+      summary: Edit your listing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarketplaceItemInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketplaceItem"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    delete:
+      tags: [Marketplace]
+      summary: Delete your listing
+      responses:
+        "200":
+          description: Deleted
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/lostfound:
+    get:
+      tags: [Lost & Found]
+      summary: List reports for your university
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [all, lost, found]
+        - name: q
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paginated reports
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LostFoundItem"
+                  hasMore:
+                    type: boolean
+                  total:
+                    type: integer
+    post:
+      tags: [Lost & Found]
+      summary: Report a lost or found item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LostFoundInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LostFoundItem"
+
+  /api/lostfound/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Lost & Found]
+      summary: Report detail
+      responses:
+        "200":
+          description: Report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LostFoundItem"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      tags: [Lost & Found]
+      summary: Edit or resolve your report
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LostFoundInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LostFoundItem"
+    delete:
+      tags: [Lost & Found]
+      summary: Delete your report
+      responses:
+        "200":
+          description: Deleted
+
+  /api/food:
+    get:
+      tags: [Food]
+      summary: List campus restaurants
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
+        - name: cuisine
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paginated restaurants
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/FoodListing"
+                  hasMore:
+                    type: boolean
+                  total:
+                    type: integer
+
+  /api/food/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Food]
+      summary: Restaurant detail with menu
+      responses:
+        "200":
+          description: Restaurant
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoodListing"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/accommodation:
+    get:
+      tags: [Accommodation]
+      summary: List campus stays
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [all, PG, Hostel, Apartment]
+      responses:
+        "200":
+          description: Paginated stays
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AccommodationListing"
+                  hasMore:
+                    type: boolean
+                  total:
+                    type: integer
+
+  /api/accommodation/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Accommodation]
+      summary: Stay detail
+      responses:
+        "200":
+          description: Stay
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccommodationListing"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/study:
+    get:
+      tags: [Study]
+      summary: List study resources
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
+        - name: department
+          in: query
+          schema:
+            type: string
+        - name: year
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paginated resources
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/StudyMaterial"
+                  hasMore:
+                    type: boolean
+                  total:
+                    type: integer
+
+  /api/communities:
+    get:
+      tags: [Communities]
+      summary: Discover communities
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paginated communities
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Community"
+                  hasMore:
+                    type: boolean
+                  total:
+                    type: integer
+    post:
+      tags: [Communities]
+      summary: Create a community (permission-gated)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                category:
+                  type: string
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Community"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/communities/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Communities]
+      summary: Community detail
+      responses:
+        "200":
+          description: Community with membership context
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Community"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/communities/{id}/join:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    post:
+      tags: [Communities]
+      summary: Join a community
+      responses:
+        "200":
+          description: Joined
+    delete:
+      tags: [Communities]
+      summary: Leave a community
+      responses:
+        "200":
+          description: Left
+
+  /api/communities/{id}/members:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Communities]
+      summary: Community members
+      responses:
+        "200":
+          description: Members
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/CommunityMember"
+
+  /api/communities/{id}/posts:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Communities]
+      summary: Community feed
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
+      responses:
+        "200":
+          description: Paginated posts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/CommunityPost"
+                  hasMore:
+                    type: boolean
+                  total:
+                    type: integer
+                  canPost:
+                    type: boolean
+    post:
+      tags: [Communities]
+      summary: Create a post (members only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+                imageUrl:
+                  type: string
+      responses:
+        "201":
+          description: Created post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityPost"
+
+  /api/dashboard/summary:
+    get:
+      tags: [Dashboard]
+      summary: Student dashboard activity
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  marketplace:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MarketplaceItem"
+                  lostFound:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LostFoundItem"
+
+  /api/role-requests:
+    get:
+      tags: [Roles]
+      summary: List role requests (admin)
+      responses:
+        "200":
+          description: Requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoleRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      tags: [Roles]
+      summary: Request the superuser role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+      responses:
+        "201":
+          description: Request submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleRequest"
+
+  /api/role-requests/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    patch:
+      tags: [Roles]
+      summary: Approve or reject a request (admin)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [approved, rejected]
+      responses:
+        "200":
+          description: Updated request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleRequest"
+
+  /api/account:
+    delete:
+      tags: [Account]
+      summary: Delete the signed-in account
+      description: Removes owned content, transfers or removes owned communities, deletes the profile and the auth identity.
+      responses:
+        "200":
+          description: Account deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+        "429":
+          description: Too many deletion attempts
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase access token
+
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 100
+    Offset:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    BadRequest:
+      description: Invalid input
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Missing or invalid token
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Forbidden:
+      description: Not allowed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Not found or not in your campus
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: Unauthorized
+
+    Profile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+          nullable: true
+        universityName:
+          type: string
+          nullable: true
+        department:
+          type: string
+          nullable: true
+        class:
+          type: string
+          nullable: true
+        role:
+          type: string
+          enum: [normal, superuser, userX]
+        isVerified:
+          type: boolean
+        onboardingCompleted:
+          type: boolean
+        profileExists:
+          type: boolean
+
+    ProfileUpdate:
+      type: object
+      properties:
+        fullName:
+          type: string
+        universityName:
+          type: string
+        department:
+          type: string
+        class:
+          type: string
+        mobileNumber:
+          type: string
+
+    MarketplaceItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sellerId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        price:
+          type: number
+        category:
+          type: string
+          nullable: true
+        condition:
+          type: string
+          nullable: true
+        isNegotiable:
+          type: boolean
+        imageUrl:
+          type: string
+          nullable: true
+        universityName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    MarketplaceItemInput:
+      type: object
+      required: [title, price]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        category:
+          type: string
+        condition:
+          type: string
+        isNegotiable:
+          type: boolean
+        imageUrl:
+          type: string
+
+    LostFoundItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        reporterId:
+          type: string
+          format: uuid
+        itemName:
+          type: string
+        type:
+          type: string
+          enum: [lost, found]
+        location:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [open, resolved]
+        universityName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    LostFoundInput:
+      type: object
+      required: [itemName, type]
+      properties:
+        itemName:
+          type: string
+        type:
+          type: string
+          enum: [lost, found]
+        location:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+        status:
+          type: string
+          enum: [open, resolved]
+
+    FoodListing:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        cuisine:
+          type: string
+          nullable: true
+        rating:
+          type: number
+        location:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        priceRange:
+          type: string
+          nullable: true
+        timing:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        universityName:
+          type: string
+
+    AccommodationListing:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum: [PG, Hostel, Apartment]
+        rentRange:
+          type: string
+          nullable: true
+        location:
+          type: string
+        description:
+          type: string
+          nullable: true
+        amenities:
+          type: string
+          nullable: true
+        images:
+          type: array
+          items:
+            type: string
+        minPrice:
+          type: number
+          nullable: true
+        maxPrice:
+          type: number
+          nullable: true
+        rating:
+          type: number
+        universityName:
+          type: string
+
+    StudyMaterial:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        department:
+          type: string
+        year:
+          type: string
+        subjectName:
+          type: string
+        category:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        fileUrl:
+          type: string
+          nullable: true
+        universityName:
+          type: string
+
+    Community:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        category:
+          type: string
+        universityName:
+          type: string
+        memberCount:
+          type: integer
+        postCount:
+          type: integer
+        isArchived:
+          type: boolean
+        myRole:
+          type: string
+          nullable: true
+          enum: [member, moderator]
+        canModerate:
+          type: boolean
+
+    CommunityMember:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+          nullable: true
+        role:
+          type: string
+          enum: [member, moderator]
+        joinedAt:
+          type: string
+          format: date-time
+
+    CommunityPost:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        content:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        authorId:
+          type: string
+          format: uuid
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        commentCount:
+          type: integer
+
+    RoleRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        requestedRole:
+          type: string
+        reason:
+          type: string
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        createdAt:
+          type: string
+          format: date-time
