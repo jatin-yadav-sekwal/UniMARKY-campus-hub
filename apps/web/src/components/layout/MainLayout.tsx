@@ -1,12 +1,14 @@
 import { Outlet } from 'react-router-dom';
-import { Atmosphere } from '@/components/site/Atmosphere';
 import { Sidebar } from './Sidebar';
 import '@/features/landing/landing.css';
 
 export function MainLayout() {
     return (
         <div className="um-landing um-app">
-            <Atmosphere withShader={false} />
+            <div className="atmosphere" aria-hidden="true">
+                <div className="atmosphere-diffusion" />
+                <div className="atmosphere-fade" />
+            </div>
 
             <div className="um-landing-content">
                 <Sidebar />

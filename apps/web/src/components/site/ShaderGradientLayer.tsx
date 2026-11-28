@@ -1,9 +1,8 @@
 import { ShaderGradient, ShaderGradientCanvas } from "@shadergradient/react";
 
 /**
- * Lazy WebGL gradient in the brand's warm palette. The animation is slow and
- * the grain is light; the Atmosphere gate skips the whole shader for users who
- * prefer reduced motion. The CSS atmosphere remains underneath as the fallback.
+ * The WebGL gradient. Loaded lazily so the first paint uses the CSS fallback.
+ * `animate="off"` keeps it still: the brief asks for no continuous motion.
  */
 export default function ShaderGradientLayer() {
   return (
@@ -19,31 +18,30 @@ export default function ShaderGradientLayer() {
       <ShaderGradient
         control="props"
         type="plane"
-        animate="on"
-        color1="#f6a02c"
-        color2="#f472b6"
-        color3="#8b5cf6"
-        uAmplitude={0.75}
+        animate="off"
+        color1="#a78bfa"
+        color2="#67e8f9"
+        color3="#fb7185"
+        uAmplitude={0.8}
         uDensity={1.05}
-        uFrequency={3.8}
-        uSpeed={0.12}
-        uStrength={1.8}
-        brightness={1.05}
+        uFrequency={4.2}
+        uSpeed={0.05}
+        uStrength={2.1}
+        brightness={1.12}
         cAzimuthAngle={180}
         cPolarAngle={90}
         cDistance={3.6}
         cameraZoom={1}
-        positionX={-0.6}
-        positionY={0.1}
+        positionX={-0.7}
+        positionY={0.15}
         positionZ={0}
         rotationX={0}
         rotationY={0}
-        rotationZ={16}
-        grain="on"
-        grainBlending={0.12}
+        rotationZ={18}
+        grain="off"
         lightType="3d"
         envPreset="city"
-        reflection={0.08}
+        reflection={0.1}
       />
     </ShaderGradientCanvas>
   );

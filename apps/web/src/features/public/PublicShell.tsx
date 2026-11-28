@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { Atmosphere } from "@/components/site/Atmosphere";
 import { SiteFooter } from "@/features/landing/SiteFooter";
 import { SiteNavigation } from "@/features/landing/SiteNavigation";
 import "@/features/landing/landing.css";
@@ -13,7 +12,10 @@ import "./public.css";
 export function PublicShell({ children }: { children: ReactNode }) {
   return (
     <div className="um-landing um-public">
-      <Atmosphere />
+      <div className="atmosphere" aria-hidden="true">
+        <div className="atmosphere-diffusion" />
+        <div className="atmosphere-fade" />
+      </div>
 
       <div className="um-landing-content">
         <SiteNavigation />
